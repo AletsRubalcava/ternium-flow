@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Ternium Login</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F37021",
+                        primary_hover: "#d65d1b",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#18181b",
+                    },
+                    fontFamily: {
+                        display: ["'Roboto Condensed'", "sans-serif"],
+                        body: ["'Roboto'", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .material-symbols-outlined {
+            font-size: 20px;
+        }
+    </style>
+
+<body class="h-screen w-full flex flex-col bg-background-light font-body text-gray-800 overflow-hidden">
+    <header class="top-0 left-0 w-full p-5 z-20 flex justify-between items-center bg-white">
+        <div class="flex items-center gap-2">
+            <img alt="Logo Ternium" class="h-10 ml-5"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
+        </div>
+    </header>
+    <main class="relative flex-grow flex items-center justify-start">
+        <div class="absolute inset-0 z-0">
+            <img alt="Fondo Ternium" class="w-full h-full object-cover"
+                src="https://cdn.forbes.com.mx/2017/10/Ternium.jpg">
+            <div class="absolute inset-0 bg-[#A26400]/30"></div>
+        </div>
+        <div
+            class="glass-panel relative z-10 w-full max-w-md mx-auto lg:ml-40 p-10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.05)]">
+            <div class="text-center mb-10">
+                <h1 class="font-display font-bold text-3xl tracking-tight text-gray-900 uppercase mb-2">
+                    Iniciar
+                    Sesión</h1>
+                <p class="text-gray-600 text-sm font-light">Bienvenido a Ternium Flow</p>
+            </div>
+            <form action="#" class="space-y-8" method="POST">
+                <div class="relative group">
+                    <input
+                        class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors duration-300"
+                        id="username" name="username" placeholder=" " required="" type="text">
+                    <label
+                        class="peer-focus:font-medium absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 uppercase font-display tracking-wider"
+                        for="username">
+                        Usuario
+                    </label>
+                    <span class="absolute right-0 top-2 text-gray-500">
+                        <span class="material-symbols-outlined">person</span>
+                    </span>
+                </div>
+                <div class="relative group">
+                    <input
+                        class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors duration-300"
+                        id="password" name="password" placeholder=" " required="" type="password">
+                    <label
+                        class="peer-focus:font-medium absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 uppercase font-display tracking-wider"
+                        for="password">
+                        Contraseña
+                    </label>
+                    <span class="absolute right-0 top-2 text-gray-500">
+                        <span class="material-symbols-outlined">lock</span>
+                    </span>
+                </div>
+                <div class="flex flex-col gap-6 pt-2">
+                    <div class="flex justify-end">
+                        <a class="text-xs font-semibold text-primary hover:text-primary_hover transition-colors duration-200 uppercase tracking-wide"
+                            href="#">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    <button
+                        class="w-full text-white bg-gradient-to-r from-primary to-orange-500 hover:from-orange-600 hover:to-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300/50 font-medium rounded-lg text-sm px-5 py-4 text-center transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-orange-500/20 uppercase tracking-wider font-display transform hover:-translate-y-0.5"
+                        type="submit">
+                        Ingresar
+                    </button>
+                </div>
+            </form>
+            <div class="mt-8 pt-6 border-t border-gray-300/50 text-center">
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest font-medium">
+                    © 2026 Ternium. Todos los derechos reservados.
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
