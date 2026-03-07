@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Ternium Login</title>
+    <title>Ternium Flow Login</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
@@ -20,7 +19,7 @@
                     colors: {
                         primary: "#F37021",
                         primary_hover: "#d65d1b",
-                        "background-light": "#f8fafc",
+                        "background-light": "#f8f7f5",
                         "background-dark": "#18181b",
                     },
                     fontFamily: {
@@ -48,13 +47,13 @@
     </style>
 
 <body class="h-screen w-full flex flex-col bg-background-light font-body text-gray-800 overflow-hidden">
-    <header class="top-0 left-0 w-full p-5 z-20 flex justify-between items-center bg-white">
+    <header class="top-0 left-0 w-full p-5 z-20 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-2">
             <img alt="Logo Ternium" class="h-10 ml-5"
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
         </div>
     </header>
-    <main class="relative flex-grow flex items-center justify-start">
+    <main class="relative flex-grow flex items-center justify-start"> 
         <div class="absolute inset-0 z-0">
             <img alt="Fondo Ternium" class="w-full h-full object-cover"
                 src="https://cdn.forbes.com.mx/2017/10/Ternium.jpg">
@@ -68,7 +67,7 @@
                     Sesión</h1>
                 <p class="text-gray-600 text-sm font-light">Bienvenido a Ternium Flow</p>
             </div>
-            <form action="#" class="space-y-8" method="POST">
+            <form action="#" class="space-y-8" method="POST" id="form">
                 <div class="relative group">
                     <input
                         class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors duration-300"
@@ -117,4 +116,5 @@
         </div>
     </main>
 </body>
+<script src="js/log_in.js"></script>
 </html>
