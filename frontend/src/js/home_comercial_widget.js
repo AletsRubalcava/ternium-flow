@@ -1,7 +1,14 @@
 let approvals = [
     { id: "REQ-9821", cliente: "Metalsa", tarima: "Tarima Personalizada", peso: 20, hace: 2 },
-    { id: "REQ-9822", cliente: "General Motros", tarima: "Preestablecido 17", peso: 35, hace: 5 },
+    { id: "REQ-9822", cliente: "General Motors", tarima: "Preestablecido 17", peso: 35, hace: 5 },
     { id: "REQ-9823", cliente: "Ford Motors", tarima: "Tarima Personalizada", peso: 15, hace: 1 },
+    { id: "REQ-9824", cliente: "Toyota", tarima: "Preestablecido 8", peso: 10, hace: 3 },
+    { id: "REQ-9825", cliente: "Volkswagen", tarima: "Preestablecido 5", peso: 40, hace: 4 },
+    { id: "REQ-9826", cliente: "Nissan", tarima: "Preestablecido 3", peso: 12.5, hace: 2 },
+    { id: "REQ-9827", cliente: "Honda", tarima: "Tarima Personalizada", peso: 25, hace: 1 },
+    { id: "REQ-9828", cliente: "Kia", tarima: "Preestablecido 12", peso: 28, hace: 6 },
+    { id: "REQ-9829", cliente: "Chevrolet", tarima: "Preestablecido 14", peso: 50, hace: 3 },
+    { id: "REQ-9830", cliente: "Mazda", tarima: "Tarima Personalizada", peso: 18, hace: 2 },
 ];
 
 renderComercialApprovals();
@@ -25,7 +32,7 @@ function renderEmptyList() {
     list.innerHTML = `
     <div class="w-full h-full flex items-center justify-center">
         <div class="flex flex-col justify-center items-center gap-2">
-            <div class="size-20 rounded-full bg-slate-50 flex items-center justify-center text-primary">
+            <div class="size-20 rounded-full bg-light-gray-slate flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined text-5xl text-slate-400">playlist_remove</span>
             </div>
             <p class="text-slate-400">Nada que aprobar</p>

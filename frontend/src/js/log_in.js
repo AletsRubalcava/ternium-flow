@@ -1,17 +1,32 @@
 const form = document.getElementById("form");
 
-const user = {
-    username: "admin",
-    password: "2026"
-}
+form.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-form.addEventListener("submit", function (submit) {
-    submit.preventDefault();
-
-    const email = document.getElementById("username").value;
+    const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    if (email == user.username && password == user.password) {
-        window.location.href = "home.html";
+    try {
+        const res = await fetch("http://localhost:3000/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            localStorage.setItem("token", data.token);
+            window.location.href = '/frontend/src/home.html';
+        } else {
+            const mensajes = data.detalles
+                ? data.detalles.join('\n')
+                : data.error;
+
+            alert(mensajes);
+        }
+
+    } catch (err) {
+        console.error("Error de red:", err);
     }
 });
