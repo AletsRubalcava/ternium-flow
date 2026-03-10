@@ -14,12 +14,10 @@ app.use(cors({
 }));
 
 const saltRounds = 12;
-const JWT_SECRET = 'clave_secreta_muy_larga_y_segura'; // en producción usa una variable de entorno
+const JWT_SECRET = 'clave_secreta_muy_larga_y_segura';
 
-// Usuarios de prueba
 const usuariosPlanos = {
     admin: "ContraseSegura2026!",
-    ana:   "OtraClaveSegura1!"
 };
 let usuarios = {};
 
@@ -27,19 +25,17 @@ async function inicializarUsuarios() {
     for (const [nombre, clave] of Object.entries(usuariosPlanos)) {
         usuarios[nombre] = { passwordHash: await bcrypt.hash(clave, saltRounds) };
     }
-    console.log('Usuarios inicializados con hash ✓');
+    console.log('Usuarios inicializados con hash');
 }
 
-// Brute-force protection
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,  // ventana de 15 minutos
-    max: 5,                     // máximo 5 intentos por IP
+    windowMs: 15 * 60 * 1000,
+    max: 5,
     message: { error: 'Demasiados intentos, espera 15 minutos' },
     standardHeaders: true,
     legacyHeaders: false
 });
 
-// Validadores
 const validarCredenciales = [
     body('username').trim().notEmpty().withMessage('El usuario es requerido').escape(),
     body('password')
@@ -51,10 +47,9 @@ const validarCredenciales = [
         .matches(/[!@#$%^&*(),.?":{}|<>]/).withMessage('Debe contener al menos un símbolo especial')
 ];
 
-// Middleware de autenticación JWT
 function verificarToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // formato: "Bearer <token>"
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
         return res.status(401).json({ error: 'Token requerido' });
@@ -67,7 +62,6 @@ function verificarToken(req, res, next) {
     });
 }
 
-// LOGIN — con brute-force protection y JWT
 app.post('/api/login', loginLimiter, validarCredenciales, async (req, res) => {
 
     const errors = validationResult(req);
@@ -89,7 +83,6 @@ app.post('/api/login', loginLimiter, validarCredenciales, async (req, res) => {
         return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Generar token JWT que dura 2 horas
     const token = jwt.sign(
         { username },
         JWT_SECRET,
@@ -99,7 +92,6 @@ app.post('/api/login', loginLimiter, validarCredenciales, async (req, res) => {
     return res.status(200).json({ mensaje: 'Login exitoso', token });
 });
 
-// Endpoint protegido requiere token válido
 app.get('/api/perfil', verificarToken, (req, res) => {
     return res.status(200).json({
         mensaje: 'Acceso autorizado',
@@ -107,7 +99,6 @@ app.get('/api/perfil', verificarToken, (req, res) => {
     });
 });
 
-// Arrancar
 inicializarUsuarios().then(() => {
     app.listen(3000, () => console.log('Servidor en puerto 3000'));
 });

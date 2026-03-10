@@ -44,14 +44,6 @@
     </style>
 </head>
 
-<!--
-    LAYOUT:
-    - body: flex flex-col h-screen  →  header | main(flex-1) | footer(shrink-0)
-    - main: overflow-y-auto         →  si el viewport es pequeño, main hace scroll
-    - card: flex flex-col           →  sin altura fija; crece con el contenido
-    - tabla: max-h + overflow-y-auto →  la tabla tiene su propio scroll interno
-    - paginación: siempre fuera del scroll de la tabla, siempre visible
--->
 <body class="bg-background-light h-screen flex flex-col font-display">
 
     <header class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
@@ -60,39 +52,34 @@
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
         </div>
         <nav class="hidden md:flex items-center justify-center gap-6">
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="/frontend/src/home.html">Inicio</a>
-            <a class="text-primary text-sm font-semibold border-b-2 border-primary py-5" href="#">Clientes</a>
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="#">Comercial</a>
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="#">Productos</a>
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="#">Paquetes</a>
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="#">Seguimiento</a>
-            <a class="text-slate-500 text-sm font-medium hover:text-primary transition-colors" href="#">Usuarios</a>
+            <a id="home" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/home.html?type=home">Inicio</a>
+            <a id="customers"class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=customers">Clientes</a>
+            <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
+            <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=products">Productos</a>
+            <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>
+            <a id="followUps" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Seguimiento</a>
+            <a id="users" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Usuarios</a>
         </nav>
         <button class="size-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100">
             <span class="material-symbols-outlined text-xl">notifications</span>
         </button>
     </header>
 
-    <!-- main hace scroll solo cuando el viewport es muy pequeño -->
     <main class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col h-full">
-
             <div class="mb-6 shrink-0">
-                <h1 class="text-4xl font-extrabold tracking-tight">CLIENTES</h1>
+                <h1 id="pageTitle" class="text-4xl font-extrabold tracking-tight">CLIENTES</h1>
             </div>
-
-            <!-- Card: flex-1 para ocupar el espacio restante, flex-col para apilar sus hijos -->
             <div class="bg-surface-light rounded-xl shadow-soft overflow-hidden flex flex-col flex-1 min-h-0">
-
-                <!-- Barra de búsqueda y botón: nunca se encoge -->
                 <div class="px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-border-light shrink-0">
                     <div class="w-full md:w-1/2 lg:w-1/3 relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span class="material-icons text-gray-400 text-lg">search</span>
                         </div>
                         <input
+                            id="search"
                             class="block w-full pl-10 pr-12 py-2.5 border-none rounded-lg bg-background-light text-text-primary-light placeholder-gray-400 focus:ring-2 focus:ring-primary focus:bg-white transition-all font-display uppercase tracking-wide text-sm"
-                            placeholder="Buscar cliente..." type="text" />
+                            type="text"/>
                         <button class="absolute inset-y-0 right-0 pr-2 flex items-center">
                             <div class="bg-primary hover:bg-primary-hover text-white rounded-md p-1 transition-colors">
                                 <span class="material-icons text-sm block">arrow_forward</span>
@@ -100,35 +87,23 @@
                         </button>
                     </div>
                     <button
+                        id="newButton"
                         class="w-full md:w-auto bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-sm px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group">
                         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-                        Nuevo Cliente
                     </button>
                 </div>
-
-                <!-- Zona tabla: flex-1 + overflow-y-auto → la tabla scrollea aquí -->
                 <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto custom-scrollbar bg-gray-50 px-6 py-3">
                     <div class="w-full bg-white rounded-lg border">
-                        <table class="min-w-full">
-                            <thead class="bg-gray-50 top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">Razón Social</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">RFC</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">Contacto</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">Estado</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">Acciones</th>
-                                </tr>
+                        <table class="table-auto w-full">
+                            <thead class="bg-gray-100 top-0 z-10">
+                                <tr id="listViewThead"></tr>
                             </thead>
                             <tbody id="listViewBody" class="bg-white divide-y divide-border-light"></tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- Paginación: shrink-0 → siempre visible, nunca dentro del scroll de la tabla -->
                 <div class="shrink-0 py-2 px-6 bg-gray-50 border-t border-border-light flex items-center justify-center gap-2"></div>
-
-            </div><!-- fin card -->
+            </div>
         </div>
     </main>
 
@@ -137,5 +112,5 @@
     </footer>
 
 </body>
-<script src="js/list_view_body.js"></script>
+<script type="module" src="js/page_directory.js"></script>
 </html>
