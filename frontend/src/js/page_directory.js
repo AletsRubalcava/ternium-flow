@@ -1,5 +1,7 @@
 import { loadClientes } from "./customers_list_view_content.js";
+import { loadConsignees } from "./consignee_list_view.js";
 import { loadProductos } from "./products_list_view_content.js";
+import { loadPlatforms } from "./customer_platform_list_view.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -7,10 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (type === "home") {
         setActiveNav("home");
-    }
-    else if (type === "customers") {
+    } else if (type === "customers") {
         loadClientes();
         setActiveNav("customers");
+    } else if (type === "consignees"){
+        loadConsignees();
+        setActiveNav("customers");
+    } else if (type === "platforms"){
+      loadPlatforms();
+      setActiveNav("customers");
     } else if (type === "products") {
         loadProductos();
         setActiveNav("products");

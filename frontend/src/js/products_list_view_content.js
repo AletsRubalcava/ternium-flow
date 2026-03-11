@@ -9,11 +9,60 @@ const attributes = [
 
 const products = [
     {
-        sku: null,
-        producto: null,
-        tipo: null,
-        unidad: null,
-        peso: null,
+        sku: "PRD-1001",
+        producto: "Lámina Rolada en Caliente",
+        tipo: "Acero",
+        unidad: "Toneladas",
+        peso: 1200,
+    },
+    {
+        sku: "PRD-1002",
+        producto: "Lámina Galvanizada",
+        tipo: "Acero",
+        unidad: "Toneladas",
+        peso: 950,
+    },
+    {
+        sku: "PRD-1003",
+        producto: "Placa Estructural",
+        tipo: "Acero",
+        unidad: "Toneladas",
+        peso: 1500,
+    },
+    {
+        sku: "PRD-1004",
+        producto: "Perfil HSS",
+        tipo: "Perfil",
+        unidad: "Piezas",
+        peso: 320,
+    },
+    {
+        sku: "PRD-1005",
+        producto: "Viga IPR",
+        tipo: "Perfil",
+        unidad: "Piezas",
+        peso: 780,
+    },
+    {
+        sku: "PRD-1006",
+        producto: "Bobina de Acero",
+        tipo: "Acero",
+        unidad: "Toneladas",
+        peso: 2000,
+    },
+    {
+        sku: "PRD-1007",
+        producto: "Lámina Pintada",
+        tipo: "Acero",
+        unidad: "Toneladas",
+        peso: 670,
+    },
+    {
+        sku: "PRD-1008",
+        producto: "Tubo Estructural",
+        tipo: "Perfil",
+        unidad: "Piezas",
+        peso: 410,
     }
 ];
 

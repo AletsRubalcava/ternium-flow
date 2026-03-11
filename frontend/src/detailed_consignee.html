@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#F05323",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#231a0f",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <title>Panel de Consignatario</title>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+    <div class="relative flex h-screen w-full flex-col overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- Top Navigation Bar -->
+            <header class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
+        <div class="flex items-center gap-2">
+            <img alt="Logo Ternium" class="h-8 ml-5"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
+        </div>
+        <nav class="hidden md:flex items-center justify-center gap-6">
+            <a id="home" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/home.html?type=home">Inicio</a>
+            <a id="customers"class="text-sm font-medium hover:text-primary transition-colors py-5 font-semibold border-b-2 border-primary text-primary"" href="/frontend/src/list_view.html?type=customers">Clientes</a>
+            <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
+            <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=products">Productos</a>
+            <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>
+            <a id="followUps" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Seguimiento</a>
+            <a id="users" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Usuarios</a>
+        </nav>
+        <button class="size-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100">
+            <span class="material-symbols-outlined text-xl">notifications</span>
+        </button>
+    </header>
+            <!-- Main Content Wrapper -->
+            <main class="flex-1 overflow-y-auto p-6 md:p-10">
+                <div class="max-w-6xl mx-auto space-y-8">
+                    <!-- Breadcrumbs & Header -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                            <a class="hover:text-primary" href="#">Clientes</a>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            <span class="text-slate-900 dark:text-slate-100">Consignatarios</span>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                    Panel de Consignatario</h1>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    class="px-5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Cancelar</button>
+                                <button
+                                    class="px-5 py-2.5 rounded-lg bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">Guardar
+                                    Cambios</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Left Column: Client Info -->
+                        <div class="lg:col-span-1 space-y-6">
+                            <div
+                                class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+                                <h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Información
+                                    del Cliente</h3>
+                                <div class="space-y-5">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">CLAVE</span>
+                                        <span
+                                            id="consigneeID"
+                                            class="text-base font-bold text-slate-800 dark:text-slate-200"></span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">CLIENTE</span>
+                                        <span id="consigneeCustomer" class="text-base font-bold text-slate-800 dark:text-slate-200"></span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">CONSIGNATARIO</span>
+                                        <span id="consigneeName" class="text-base font-bold text-slate-800 dark:text-slate-200"></span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">DIRECCIÓN
+                                            DE ENVÍO</span>
+                                        <div class="flex gap-2 mt-1">
+                                            <span
+                                                class="material-symbols-outlined text-primary text-lg shrink-0">location_on</span>
+                                            <span
+                                                id="consigneeAddress" class="text-sm font-medium text-slate-600 dark:text-slate-400 leading-snug"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Map Preview Card -->
+                            <div
+                                class="rounded-xl overflow-hidden h-48 border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="w-full h-full bg-slate-200 dark:bg-slate-800 bg-cover bg-center"
+                                    data-alt="Satellite map view of industrial plant" data-location="Monterrey, Mexico"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAgufovCtAsxAMWcL9qDZ8IiNRNkiqnZnZor6oCAa6BWpEbXQIzRY9DNA1RgESEbWQdJ6YWYxKb4Maiq_zgEAilu7jGgCwXhG3Wkgw09rCZR2Psi-I6Hd8NI_BmmeeryooJAhF_LJol3du1IHJ2zYiOQ-NVt5f70xqchqmnzxaLUSQbtcbg4jP7m554SF2oE3bOino3JKT5fsRFSlO0xHPf1F_E7d2ytenNbBUPodiKuOJPz7OWLDzTjOuAoOVhmoQP7M7wMSv5aslt')">
+                                    <div class="w-full h-full bg-slate-900/10 flex items-center justify-center">
+                                        <div
+                                            class="bg-white/90 dark:bg-slate-900/90 p-2 rounded-lg shadow-xl flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-primary">pin_drop</span>
+                                            <span class="text-[10px] font-bold">VER EN MAPA</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Column: Technical Specifications -->
+                        <div class="lg:col-span-2">
+                            <div
+                                class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+                                <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                                    <h3
+                                        class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary">settings_suggest</span>
+                                        ESPECIFICACIONES TÉCNICAS
+                                    </h3>
+                                    <p class="text-sm text-slate-500 mt-1">Defina los parámetros de carga para este
+                                        destino específico.</p>
+                                </div>
+                                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    <!-- Field 1 -->
+                                    <div class="space-y-2">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-tight">Carga
+                                            Máxima (Toneladas)</label>
+                                        <div class="relative">
+                                            <input
+                                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white"
+                                                type="number" value="32.5" />
+                                            <span
+                                                class="absolute right-4 top-3.5 text-slate-400 font-bold text-sm">T</span>
+                                        </div>
+                                    </div>
+                                    <!-- Field 2 -->
+                                    <div class="space-y-2">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-tight">Carga
+                                            Mínima (Toneladas)</label>
+                                        <div class="relative">
+                                            <input
+                                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white"
+                                                type="number" value="5.0" />
+                                            <span
+                                                class="absolute right-4 top-3.5 text-slate-400 font-bold text-sm">T</span>
+                                        </div>
+                                    </div>
+                                    <!-- Field 3 -->
+                                    <div class="space-y-2">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-tight">Número
+                                            Máximo de Piezas</label>
+                                        <div class="relative">
+                                            <input
+                                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white"
+                                                type="number" value="12" />
+                                            <span
+                                                class="absolute right-4 top-3.5 text-slate-400 font-bold text-sm">PCS</span>
+                                        </div>
+                                    </div>
+                                    <!-- Field 4 -->
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-tight">Embalaje
+                                            Preferido</label>
+                                        <select
+                                            class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white">
+                                            <option>Tarima Industrial Reforzada</option>
+                                            <option selected="">Huacal de Madera Exportación</option>
+                                            <option>Slingas de Nylon</option>
+                                            <option>Sin Embalaje (A Granel)</option>
+                                        </select>
+                                    </div>
+                                    <!-- Dimensions Sub-section -->
+                                    <div class="md:col-span-2 pt-4">
+                                        <div class="flex items-center gap-4 mb-4">
+                                            <div class="h-px bg-slate-200 dark:bg-slate-800 grow"></div>
+                                            <span
+                                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dimensiones
+                                                Máximas Permitidas</span>
+                                            <div class="h-px bg-slate-200 dark:bg-slate-800 grow"></div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-6">
+                                            <div class="space-y-2">
+                                                <label
+                                                    class="text-xs font-bold text-slate-500 uppercase tracking-tight">Ancho
+                                                    Máximo (m)</label>
+                                                <div class="relative">
+                                                    <input
+                                                        class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white"
+                                                        step="0.01" type="number" value="2.40" />
+                                                    <span
+                                                        class="absolute right-4 top-3.5 text-slate-400 font-bold text-sm">M</span>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label
+                                                    class="text-xs font-bold text-slate-500 uppercase tracking-tight">Altura
+                                                    Máxima (m)</label>
+                                                <div class="relative">
+                                                    <input
+                                                        class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary font-bold text-slate-900 dark:text-white"
+                                                        step="0.01" type="number" value="3.10" />
+                                                    <span
+                                                        class="absolute right-4 top-3.5 text-slate-400 font-bold text-sm">M</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Field 7: Additional Notes -->
+                                    <div class="md:col-span-2 space-y-2">
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-tight">Instrucciones
+                                            Adicionales de Carga</label>
+                                        <textarea
+                                            class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary text-sm font-medium"
+                                            placeholder="Ingrese requerimientos especiales para el transportista..."
+                                            rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="h-8 shrink-0 bg-white border-t border-slate-200 px-6 flex items-center justify-between z-50">
+                <p class="text-[10px] text-slate-400">© 2026 Ternium Flow</p>
+            </footer>
+        </div>
+    </div>
+</body>
+<script type="module" src="./js/detailed_consignee.js"></script>
+</html>

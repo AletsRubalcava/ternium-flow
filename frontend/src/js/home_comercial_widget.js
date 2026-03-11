@@ -37,8 +37,7 @@ function renderEmptyList() {
             </div>
             <p class="text-slate-400">Nada que aprobar</p>
         </div>
-    </div>
-    `;
+    </div>`;
 }
 
 function renderPendingApprovals() {
