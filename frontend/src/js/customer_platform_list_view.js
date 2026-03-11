@@ -38,4 +38,11 @@ tbody.innerHTML = platformCustomer.map(p => `
         </td>
     </tr>
 `).join("");
+
+    document.querySelectorAll(".customer-row").forEach(row => {
+        row.addEventListener("click", () => {
+            const id = row.dataset.id;
+            window.location.href = `/frontend/src/detailed_platform.html?id=${id}`;
+        });
+    });
 }
