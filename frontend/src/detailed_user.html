@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Ternium Clientes Management</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=notifications" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F05323",
+                        "primary-hover": "#D94418",
+                        "background-light": "#F4F6F8",
+                        "background-dark": "#1a1c23",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#252830",
+                        "text-primary-light": "#333333",
+                        "text-primary-dark": "#E2E8F0",
+                        "text-secondary-light": "#64748B",
+                        "text-secondary-dark": "#94A3B8",
+                        "border-light": "#E2E8F0",
+                        "border-dark": "#374151",
+                    },
+                    fontFamily: { "display": ["Manrope"] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-200 rounded-full; }
+        }
+    </style>
+</head>
+
+<body class="bg-background-light h-screen flex flex-col font-display">
+
+    <header id="headerWidget" class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
+    </header>
+
+    <main class="flex-grow overflow-y-auto custom-scrollbar max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+
+        <!-- Breadcrumb + Título + Acciones -->
+        <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-text-secondary-light text-xs font-bold uppercase tracking-widest">
+                    <a class="hover:text-primary" href="/frontend/src/list_view.html?type=users">Usuarios</a>
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span id="upperUserId"></span>
+                </div>
+                <h1 class="text-4xl font-display font-bold text-text-primary-light tracking-tight uppercase">
+                    Panel de Usuario
+                </h1>
+            </div>
+            <div class="flex space-x-3">
+                <button class="bg-white border border-primary text-primary hover:bg-orange-50 font-display font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">edit</span> Editar
+                </button>
+                <button class="bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">delete</span> Eliminar
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid principal: izquierda 8 col + derecha 4 col -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+            <!-- ── COLUMNA IZQUIERDA (8/12) ── -->
+            <div class="xl:col-span-8 space-y-6">
+
+                <!-- Información General -->
+                <div class="bg-surface-light rounded-xl shadow-soft p-6 border border-border-light">
+                    <div class="flex items-center gap-2 mb-6 border-b border-border-light pb-4">
+                        <span class="material-symbols-outlined text-primary">info</span>
+                        <h3 class="text-lg font-display font-bold text-text-primary-light uppercase">
+                            Información General
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Clave</label>
+                            <div id="idUser" class="text-text-primary-light font-bold text-lg"></div>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Nombre Completo</label>
+                            <div id="userName" class="text-text-primary-light font-bold text-lg"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Rol</label>
+                            <div id="userRole" class="text-text-primary-light font-bold text-lg"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Correo</label>
+                            <div id="userMail" class="text-text-primary-light font-bold text-sm"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Contraseña</label>
+                            <div id="userPassword" class="text-text-primary-light font-bold text-sm"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Tipo</label>
+                            <div id="userType" class="text-text-primary-light font-bold text-sm"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Estado</label>
+                            <div id="userStatus" class="text-text-primary-light font-bold text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asignación de Roles -->
+                <div class="bg-surface-light rounded-xl shadow-soft p-6 border border-border-light">
+                    <div class="mb-4">
+                        <h2 class="text-lg font-display font-bold text-text-primary-light uppercase">
+                            Asignación de Roles
+                        </h2>
+                        <p class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider">
+                            Seleccione el perfil operativo para el nuevo usuario.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="flex items-center gap-4 p-4 rounded-xl border-2 border-primary bg-orange-50 text-left transition-all">
+                            <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
+                            <div>
+                                <p class="font-bold text-text-primary-light text-sm uppercase">Administrador</p>
+                                <p class="text-[10px] text-text-secondary-light uppercase">Acceso total al sistema</p>
+                            </div>
+                        </button>
+                        <button class="flex items-center gap-4 p-4 rounded-xl border border-border-light bg-white text-left hover:border-primary transition-all">
+                            <span class="material-symbols-outlined text-gray-400 text-3xl">local_shipping</span>
+                            <div>
+                                <p class="font-bold text-text-primary-light text-sm uppercase">Operador Logístico</p>
+                                <p class="text-[10px] text-text-secondary-light uppercase">Gestión de envíos y paquetes</p>
+                            </div>
+                        </button>
+                        <button class="flex items-center gap-4 p-4 rounded-xl border border-border-light bg-white text-left hover:border-primary transition-all">
+                            <span class="material-symbols-outlined text-gray-400 text-3xl">monitoring</span>
+                            <div>
+                                <p class="font-bold text-text-primary-light text-sm uppercase">Analista Comercial</p>
+                                <p class="text-[10px] text-text-secondary-light uppercase">Visualización de reportes</p>
+                            </div>
+                        </button>
+                        <button class="flex items-center gap-4 p-4 rounded-xl border border-border-light bg-white text-left hover:border-primary transition-all">
+                            <span class="material-symbols-outlined text-gray-400 text-3xl">support_agent</span>
+                            <div>
+                                <p class="font-bold text-text-primary-light text-sm uppercase">Soporte Cliente</p>
+                                <p class="text-[10px] text-text-secondary-light uppercase">Gestión limitada de clientes</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <!-- ── FIN COLUMNA IZQUIERDA ── -->
+
+            <!-- ── COLUMNA DERECHA (4/12) — Historial de Pedidos ── -->
+            <div class="xl:col-span-4 flex flex-col">
+                <div class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col flex-1">
+                    <div class="p-4 border-b border-border-light flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">history</span>
+                        <h3 class="text-lg font-display font-bold text-text-primary-light uppercase">
+                            Historial de Actividad
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead id="followUpsThead" class="bg-gray-50 text-[10px] uppercase font-bold text-text-secondary-light">
+                                <tr>
+                                    <th class="px-4 py-3">Clave</th>
+                                    <th class="px-4 py-3">Acción</th>
+                                    <th class="px-4 py-3">Fecha</th>
+                                    <th class="px-4 py-3">Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody id="followUpsBody" class="divide-y divide-border-light"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- ── FIN COLUMNA DERECHA ── -->
+
+        </div>
+    </main>
+
+    <footer class="h-8 shrink-0 bg-white border-t border-slate-200 px-6 flex items-center justify-between z-50">
+        <p class="text-[10px] text-slate-400">© 2026 Ternium Flow</p>
+    </footer>
+
+</body>
+<script src="js/header.js"></script>
+<script type="module" src="js/detailed_user.js"></script>
+
+</html>

@@ -1,4 +1,7 @@
 import {customers, consignees, platforms, followUps} from "./db.js";
+import { setActiveNav } from "./page_directory.js";
+
+setActiveNav("customers");
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
@@ -22,7 +25,7 @@ customerName.textContent = customer.name;
 customerRFC.textContent = customer.rfc;
 customerAddress.textContent = customer.address;
 clientStatus.innerHTML = `
-    <div id="clientStatus" class="${customer.status == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} inline-flex items-start px-2 py-0.5 rounded text-[10px] font-bold uppercase">${customer.status == 1 ? "Activo" : "Inactivo"}</div>`
+    <div id="clientStatus" class="${customer.status == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} inline-flex items-start px-2 py-0.5 rounded text-[10px] font-bold uppercase">${customer.status == 1 ? "Activo" : "Inactivo"}</div>`;
 
 //Consignees
 const consigneeWidget = document.getElementById("consigneeWidget");

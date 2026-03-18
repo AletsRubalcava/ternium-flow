@@ -40,4 +40,17 @@ const products = [
     { sku: "PRD-1008", producto: "Tubo Estructural", tipo: "Perfil", unidad: "Piezas", peso: 410 }
 ];
 
-export {customers, consignees, platforms, followUps, products};
+const users = [
+    {id: 1, idRol: 1, vistaCliente: false, nombre: "Juan", apellidoP: "Perez", apellidoM: "Ramírez", correo: "juanperez@gmail.com", contraseña: "juan123", estado: true },
+    {id: 2, idRol: 2, vistaCliente: true, nombre: "María", apellidoP: "González", apellidoM: "López", correo: "maria.gonzalez@gmail.com", contraseña: "maria123", estado: true },
+    {id: 3, idRol: 1, vistaCliente: false, nombre: "Carlos", apellidoP: "Hernández", apellidoM: "Soto", correo: "carlos.hdz@gmail.com", contraseña: "carlos123", estado: true },
+    {id: 4, idRol: 3, vistaCliente: true, nombre: "Ana", apellidoP: "Martínez", apellidoM: "Ruiz", correo: "ana.mtz@gmail.com", contraseña: "ana123", estado: false },
+    {id: 5, idRol: 2, vistaCliente: true, nombre: "Luis", apellidoP: "Torres", apellidoM: "Vega", correo: "luis.torres@gmail.com", contraseña: "luis123", estado: true },
+    {id: 6, idRol: 1, vistaCliente: false, nombre: "Sofía", apellidoP: "Ramírez", apellidoM: "Cruz", correo: "sofia.ramirez@gmail.com", contraseña: "sofia123", estado: true },
+    {id: 7, idRol: 3, vistaCliente: true, nombre: "Diego", apellidoP: "Flores", apellidoM: "Morales", correo: "diego.flores@gmail.com", contraseña: "diego123", estado: false },
+    {id: 8, idRol: 2, vistaCliente: true, nombre: "Valeria", apellidoP: "Ortega", apellidoM: "Navarro", correo: "valeria.ortega@gmail.com", contraseña: "vale123", estado: true },
+    {id: 9, idRol: 1, vistaCliente: false, nombre: "Jorge", apellidoP: "Castro", apellidoM: "Mendoza", correo: "jorge.castro@gmail.com", contraseña: "jorge123", estado: true },
+    {id: 10, idRol: 3, vistaCliente: true, nombre: "Fernanda", apellidoP: "Silva", apellidoM: "Rojas", correo: "fernanda.silva@gmail.com", contraseña: "fer123", estado: true },
+];
+
+export {customers, consignees, platforms, followUps, products, users};

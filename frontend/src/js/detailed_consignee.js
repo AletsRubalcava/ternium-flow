@@ -1,4 +1,7 @@
 import {customers, consignees} from './db.js'
+import { setActiveNav } from './page_directory.js';
+
+setActiveNav("customers");
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");

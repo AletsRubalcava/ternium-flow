@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
         rel="stylesheet" />
-    <link
+    <link 
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <script id="tailwind-config">
@@ -58,25 +58,7 @@
     <!-- Zona scrollable: ocupa todo el espacio entre header y footer -->
     <div id="scroll-root" class="flex-1 min-h-0 overflow-hidden flex flex-col">
 
-        <header class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
-            <div class="flex items-center gap-2">
-                <img alt="Logo Ternium" class="h-8 ml-5"
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
-            </div>
-            <nav class="hidden md:flex items-center justify-center gap-6">
-                <a id="home" class="text-sm font-medium hover:text-primary transition-colors py-5 font-semibold border-b-2 border-primary text-primary" href="/frontend/src/home.html?type=home">Inicio</a>
-                <a id="customers"class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=customers">Clientes</a>
-                <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
-                <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=products">Productos</a>
-                <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>
-                <a id="followUps" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Seguimiento</a>
-                <a id="users" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Usuarios</a>
-            </nav>
-            <button class="size-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100">
-                <span class="material-symbols-outlined text-xl">notifications</span>
-            </button>
-        </header>
-
+        <header id="headerWidget" class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
         <!-- Fila aside + main: min-h-0 para que respeten el límite del padre -->
         <div class="flex flex-1 min-h-0">
             <!-- Aside: altura completa del espacio disponible, scroll interno propio -->
@@ -184,6 +166,7 @@
     </footer>
 
 </body>
+<script src="js/header.js"></script>
 <script src="js/home_comercial_widget.js"></script>
 <script src="js/home_presets_widget.js"></script>
 <script type="module" src="./js/page_directory.js"></script>

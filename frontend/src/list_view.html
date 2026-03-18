@@ -46,24 +46,7 @@
 
 <body class="bg-background-light h-screen flex flex-col font-display">
 
-    <header class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
-        <div class="flex items-center gap-2">
-            <img alt="Logo Ternium" class="h-8 ml-5"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Ternium_Logo.svg/1280px-Ternium_Logo.svg.png">
-        </div>
-        <nav class="hidden md:flex items-center justify-center gap-6">
-            <a id="home" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/home.html?type=home">Inicio</a>
-            <a id="customers"class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=customers">Clientes</a>
-            <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
-            <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/list_view.html?type=products">Productos</a>
-            <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>
-            <a id="followUps" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Seguimiento</a>
-            <a id="users" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Usuarios</a>
-        </nav>
-        <button class="size-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100">
-            <span class="material-symbols-outlined text-xl">notifications</span>
-        </button>
-    </header>
+    <header id="headerWidget" class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
 
     <main class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col h-full">
@@ -112,5 +95,6 @@
     </footer>
 
 </body>
+<script src="js/header.js"></script>
 <script type="module" src="js/page_directory.js"></script>
 </html>
