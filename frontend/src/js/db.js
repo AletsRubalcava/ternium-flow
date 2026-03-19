@@ -40,6 +40,13 @@ const products = [
     { sku: "PRD-1008", producto: "Tubo Estructural", tipo: "Perfil", unidad: "Piezas", peso: 410 }
 ];
 
+const roles = [
+    {id: 1, rol: "Administrador"},
+    {id: 2, rol: "Operador Logístico"},
+    {id: 3, rol: "Gestión de Clientes"},
+    {id: 4, rol: "Personalizado"},
+]
+
 const users = [
     {id: 1, idRol: 1, vistaCliente: false, nombre: "Juan", apellidoP: "Perez", apellidoM: "Ramírez", correo: "juanperez@gmail.com", contraseña: "juan123", estado: true },
     {id: 2, idRol: 2, vistaCliente: true, nombre: "María", apellidoP: "González", apellidoM: "López", correo: "maria.gonzalez@gmail.com", contraseña: "maria123", estado: true },
@@ -53,4 +60,35 @@ const users = [
     {id: 10, idRol: 3, vistaCliente: true, nombre: "Fernanda", apellidoP: "Silva", apellidoM: "Rojas", correo: "fernanda.silva@gmail.com", contraseña: "fer123", estado: true },
 ];
 
-export {customers, consignees, platforms, followUps, products, users};
+const entities = [
+    {id: 1, name: "Cliente"},
+    {id: 2, name: "Consignatario"},
+    {id: 3, name: "Tarimas Aprovadas"},
+    {id: 4, name: "Tarimas Rechazadas"},
+    {id: 5, name: "Tarimas"},
+    {id: 6, name: "Carga Tarima"},
+    {id: 7, name: "Seguimiento Tarima"},
+    {id: 8, name: "Productos"},
+    {id: 9, name: "Usuarios"},
+    {id: 10, name: "Permisos Usuario"},
+]
+
+const changes = [
+    {
+        id: 1,
+        idEntityCatalog: 9,
+        idEntity: 1,
+        idUser: 1,
+        originalValues: {
+        "nombre": "Juan",
+        "correo": "juan@mail.com",
+        },
+        changedValues: {
+        "nombre": "Juan Carlos",
+        "correo": "jcarlos@mail.com"
+        },
+        timeStamp:"2026-03-09T11:29:58Z"
+    }
+]
+
+export {customers, consignees, platforms, followUps, products, users, changes, entities};
