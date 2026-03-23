@@ -41,7 +41,7 @@ export function loadConsignees() {
     document.querySelectorAll(".customer-row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;
-            window.location.href = `/frontend/src/detailed_consignee.html?id=${id}`;
+            window.location.href = `/frontend/src/consignees/detailed_consignee.html?id=${id}`;
         });
     });
 }

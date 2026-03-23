@@ -57,7 +57,7 @@ export function loadClientes(){
     document.querySelectorAll(".customer-row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;
-            window.location.href = `/frontend/src/detailed_customer.html?id=${id}`;
+            window.location.href = `/frontend/src/customers/detailed_customer.html?id=${id}`;
         });
     });
 }

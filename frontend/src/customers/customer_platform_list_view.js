@@ -42,7 +42,7 @@ tbody.innerHTML = platformCustomer.map(p => `
     document.querySelectorAll(".customer-row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;
-            window.location.href = `/frontend/src/detailed_platform.html?id=${id}`;
+            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${id}`;
         });
     });
 }

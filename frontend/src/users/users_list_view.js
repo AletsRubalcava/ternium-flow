@@ -1,4 +1,4 @@
-import {users} from "../js/db.js"
+import {users} from "../shared/db.js"
 
 const attributes = [
     "Clave",
@@ -14,7 +14,7 @@ export function loadUsers(){
 
     const newButton = document.getElementById("newButton");
     const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-    newButton.onclick = () => window.location.href = `/frontend/src/detailed_user.html?create=true&id=${newId}`;
+    newButton.onclick = () => window.location.href = `/frontend/src/users/detailed_user.html?create=true&id=${newId}`;
 
     document.getElementById("search").placeholder = "Buscar Usuarios...";
 
@@ -51,7 +51,7 @@ export function loadUsers(){
     document.querySelectorAll(".row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;
-            window.location.href = `/frontend/src/detailed_user.html?id=${id}`;
+            window.location.href = `/frontend/src/users/detailed_user.html?id=${id}`;
         });
     });
 }

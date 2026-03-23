@@ -57,7 +57,7 @@ if(consignee.length == 0){
     `).join("");
 }
 
-viewAllConsignees.onclick = () => window.location.href = `/frontend/src/list_view.html?type=consignees&id=${id}`;
+viewAllConsignees.onclick = () => window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${id}`;
 
 //Platforms
 const activePlaforms = document.getElementById("activePlatforms");
@@ -126,7 +126,7 @@ if(followUp.length == 0){
     `).join("");
 }
 
-viewAllPlatforms.onclick = () => window.location.href = `/frontend/src/list_view.html?type=platforms&id=${id}`;
+viewAllPlatforms.onclick = () => window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${id}`;
 
 `    <div class="group cursor-pointer p-3 rounded-lg border border-orange-200 bg-orange-50 dark:bg-primary/10 dark:border-primary/30 flex justify-between items-center">
         <div>
