@@ -1,8 +1,8 @@
 import { loadClientes } from "./customers_list_view_content.js";
-import { loadConsignees } from "./consignee_list_view.js";
-import { loadProductos } from "./products_list_view_content.js";
+import { loadConsignees } from "../consignees/consignee_list_view.js";
+import { loadProductos } from "../products/products_list_view_content.js";
 import { loadPlatforms } from "./customer_platform_list_view.js";
-import { loadUsers } from "./users_list_view.js";
+import { loadUsers } from "../users/users_list_view.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);

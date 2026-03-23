@@ -1,4 +1,4 @@
-import { consignees, customers, platforms } from "./db.js";
+import { consignees, customers, platforms } from "../shared/db.js";
 
 const attributes = ["Clave", "Nombre", "Consignatario", "Descripción", "Peso" , "Acciones"];
 

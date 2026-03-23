@@ -1,4 +1,4 @@
-import {users} from "./db.js"
+import {users} from "../js/db.js"
 
 const attributes = [
     "Clave",

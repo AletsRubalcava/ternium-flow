@@ -1,5 +1,5 @@
-import {customers, consignees, platforms, followUps} from "./db.js";
-import { setActiveNav } from "./page_directory.js";
+import {customers, consignees, platforms, followUps} from "../shared/db.js";
+import { setActiveNav } from "../shared/page_directory.js";
 
 setActiveNav("customers");
 

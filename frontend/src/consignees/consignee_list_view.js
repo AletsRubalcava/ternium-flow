@@ -1,4 +1,4 @@
-import { consignees, customers } from "./db.js";
+import { consignees, customers } from "../shared/db.js";
 
 const attributes = ["Clave", "Consignatario", "Cliente", "Dirección", "Acciones"];
 

@@ -1,4 +1,4 @@
-import {customers} from "./db.js"
+import {customers} from "../shared/db.js"
 
 const attributes = [
     "ID",

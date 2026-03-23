@@ -1,5 +1,5 @@
-import { users, changes, entities } from './db.js';
-import { setActiveNav } from "./page_directory.js";
+import { users, changes, entities } from '../shared/db.js';
+import { setActiveNav } from "../shared/page_directory.js";
 
 setActiveNav("users");
 

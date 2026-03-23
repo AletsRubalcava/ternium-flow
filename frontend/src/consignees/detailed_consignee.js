@@ -1,5 +1,5 @@
-import {customers, consignees} from './db.js'
-import { setActiveNav } from './page_directory.js';
+import {customers, consignees} from '../shared/db.js'
+import { setActiveNav } from '../shared/page_directory.js';
 
 setActiveNav("customers");
 
