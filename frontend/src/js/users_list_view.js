@@ -12,6 +12,10 @@ const attributes = [
 export function loadUsers(){
     document.getElementById("pageTitle").innerHTML = "USUARIOS";
 
+    const newButton = document.getElementById("newButton");
+    const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+    newButton.onclick = () => window.location.href = `/frontend/src/detailed_user.html?create=true&id=${newId}`;
+
     document.getElementById("search").placeholder = "Buscar Usuarios...";
 
     document.getElementById("newButton").innerHTML = `

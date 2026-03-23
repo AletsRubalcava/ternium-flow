@@ -5,6 +5,7 @@ setActiveNav("customers");
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
+const create = params.get("create") == true;
 
 const customer = customers.find(c => c.id === id);
 const consignee = consignees.filter(c => c.idCustomer == customer.id);

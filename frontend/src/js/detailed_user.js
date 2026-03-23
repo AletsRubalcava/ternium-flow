@@ -4,12 +4,17 @@ import { setActiveNav } from "./page_directory.js";
 setActiveNav("users");
 
 // --- Datos ---
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-const user = users.find(u => u.id == id);
-const userChanges = changes.filter(c => c.idUser == user.id);
+const params     = new URLSearchParams(window.location.search);
+const id         = params.get("id");
+const createMode = params.get("create") === "true";
+const user       = createMode ? {} : users.find(u => u.id == id);
+const userChanges = createMode ? [] : changes.filter(c => c.idUser == user.id);
 
 const editButton = document.getElementById("editButton");
+const deleteBtn = document.getElementById("deleteButton");
+const modal = document.getElementById("deleteModal");
+const cancelBtn = document.getElementById("cancelDelete");
+const confirmBtn = document.getElementById("confirmDelete");
 let editMode = false;
 
 // --- Badges ---
@@ -36,24 +41,31 @@ const roleMap = {
 };
 
 function renderCampos() {
-    const fields = {
-        upperUserId:  id,
-        idUser:       user.id,
-        userName:     `${user.nombre} ${user.apellidoP} ${user.apellidoM}`,
-        userMail:     user.correo,
-        userPassword: user.contraseña,
-    };
+    if (!createMode) {
+        const fields = {
+            upperUserId:  id,
+            idUser:       user.id,
+            userName:     `${user.nombre} ${user.apellidoP} ${user.apellidoM}`,
+            userMail:     user.correo,
+            userPassword: user.contraseña,
+        };
 
-    for (const [id, value] of Object.entries(fields)) {
-        document.getElementById(id).textContent = value;
+        for (const [fieldId, value] of Object.entries(fields)) {
+            document.getElementById(fieldId).textContent = value;
+        }
+
+        document.getElementById("userType").innerHTML   = badges.tipo(user.vistaCliente);
+        document.getElementById("userStatus").innerHTML = badges.estado(user.estado);
+
+        const rolBtn = document.getElementById(roleMap[user.idRol] ?? "customerRoleButton");
+        rolBtn.classList.add("border-2", "border-primary", "bg-orange-50");
+        rolBtn.querySelector("span").classList.add("text-primary");
+    } else {
+        document.getElementById("upperUserId").textContent = "Nuevo";
+        document.getElementById("idUser").textContent      = id; // ← usa el id de la URL
+        document.getElementById("userType").innerHTML      = badges.tipo(false);
+        document.getElementById("userStatus").innerHTML    = badges.estado(false);
     }
-
-    document.getElementById("userType").innerHTML = badges.tipo(user.vistaCliente);
-    document.getElementById("userStatus").innerHTML = badges.estado(user.estado);
-
-    const rolBtn = document.getElementById(roleMap[user.idRol] ?? "customerRoleButton");
-    rolBtn.classList.add("border-2", "border-primary", "bg-orange-50");
-    rolBtn.querySelector("span").classList.add("text-primary");
 }
 
 // --- Role buttons ---
@@ -68,6 +80,40 @@ function handleRoleClick(e) {
     const btn = e.currentTarget;
     btn.classList.add("border-2", "border-primary", "bg-orange-50");
     btn.querySelector("span").classList.replace("text-gray-400", "text-primary");
+}
+
+function validarCampos() {
+    let valido = true;
+
+    // Campos de texto
+    const campos = [
+        "userName-edit",
+        "userMail-edit",
+        "userPassword-edit",
+    ];
+
+    campos.forEach(id => {
+        const input = document.getElementById(id);
+        if (input.value.trim() === "") {
+            input.classList.add("border-red-400");
+            valido = false;
+        }
+    });
+
+    // Selects — siempre tienen valor, no necesitan validación
+    // pero si quisieras forzar una selección explícita, agrega una opción vacía:
+    // <option value="">-- Selecciona --</option>
+    // y validas que no sea ""
+
+    // Rol — verificar que haya uno seleccionado
+    const rolSeleccionado = document.querySelector(".roleButton.border-primary");
+    if (!rolSeleccionado) {
+        document.querySelector(".roleButton").closest(".grid")
+            .classList.add("ring-2", "ring-red-400", "rounded-xl");
+        valido = false;
+    }
+
+    return valido;
 }
 
 // --- Toggle edit ---
@@ -95,6 +141,13 @@ function toggleEdit(active) {
         btn.classList.toggle("cursor-default", !active);
     });
 
+    document.querySelectorAll(".roleButton").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelector(".roleButton").closest(".grid")
+            .classList.remove("ring-2", "ring-red-400", "rounded-xl");
+    });
+});
+
     // Selects
     const selects = [
         { view: "userStatus", select: "userStatus-edit", key: "estado",       render: badges.estado },
@@ -108,13 +161,28 @@ function toggleEdit(active) {
         if (active) {
             selectEl.value = user[key] ? "1" : "0";
         } else {
-            user[key]          = selectEl.value === "1";
-            viewEl.innerHTML   = render(user[key]);
+            user[key]        = selectEl.value === "1";
+            viewEl.innerHTML = render(user[key]);
         }
 
         viewEl.classList.toggle("hidden", active);
         selectEl.classList.toggle("hidden", !active);
     });
+
+    // Guardar si es createMode y se está cerrando el modo edición
+    if (!active && (createMode || editMode)) {
+    if (!validarCampos()) {
+        // revertir el toggle si hay errores
+        editMode = true;
+        toggleEdit(true);
+        return;
+    }
+    if (createMode) {
+        const nuevo = guardarUsuario();
+        document.getElementById("idUser").textContent      = nuevo.id;
+        document.getElementById("upperUserId").textContent = nuevo.id;
+    }
+}
 }
 
 // --- Historial ---
@@ -148,6 +216,56 @@ document.querySelectorAll(".roleButton").forEach(btn => {
     btn.addEventListener("click", handleRoleClick);
 });
 
+// --- Guardar nuevo usuario ---
+function guardarUsuario() {
+    const nuevoUsuario = {
+        id:           Number(id), // ← viene de la URL, ya calculado en list_view
+        nombre:       document.getElementById("userName-edit").value.trim(),
+        correo:       document.getElementById("userMail-edit").value.trim(),
+        contraseña:   document.getElementById("userPassword-edit").value.trim(),
+        estado:       document.getElementById("userStatus-edit").value === "1",
+        vistaCliente: document.getElementById("userType-edit").value === "1",
+        idRol:        Number(document.querySelector(".roleButton.border-primary")?.id.replace("RoleButton", "") ?? 4),
+    };
+
+    users.push(nuevoUsuario);
+    window.history.replaceState({}, "", `?id=${nuevoUsuario.id}`);
+    deleteBtn.classList.remove("hidden");
+    return nuevoUsuario;
+}
+
 // --- Init ---
 renderCampos();
 renderHistorial();
+document.querySelectorAll(".edit").forEach(input => {
+    input.addEventListener("input", () => {
+        input.classList.remove("border-red-400", "focus:border-red-400");
+    });
+});
+
+if (createMode) {
+    editMode = true;
+    toggleEdit(true);
+}else{
+    deleteBtn.classList.remove("hidden");
+}
+
+function eliminarUsuario() {
+    const index = users.findIndex(u => u.id == user.id);
+    if (index !== -1) {
+        users.splice(index, 1);
+    }
+}
+
+deleteBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+});
+
+cancelBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+});
+
+confirmBtn.addEventListener("click", () => {
+    eliminarUsuario();
+    window.location.href = "/frontend/src/list_view.html?type=users";
+});

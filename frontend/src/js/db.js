@@ -91,4 +91,4 @@ const changes = [
     }
 ]
 
-export {customers, consignees, platforms, followUps, products, users, changes, entities};
+export {customers, consignees, platforms, followUps, products, users, changes, entities, roles};
