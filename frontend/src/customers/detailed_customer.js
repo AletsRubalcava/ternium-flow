@@ -336,7 +336,6 @@ cancelContactBtn.addEventListener("click", () => {
 // --- Render Contacts
 function renderContacts() {
     const container = document.querySelector(".contactsContainer");
-
     const customerContacts = contacts.filter(c => c.idCustomer == id);
 
     if (customerContacts.length === 0) {
@@ -345,63 +344,48 @@ function renderContacts() {
     }
 
     container.innerHTML = customerContacts.map(c => `
-        <div class="contactWidget flex gap-4 p-3 rounded-lg bg-gray-50 border border-border-light relative">
-
+        <div class="contactWidget flex gap-4 p-3 rounded-lg bg-gray-50 border border-border-light">
             <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
                 ${c.name[0] ?? "?"}
             </div>
-
             <div class="flex-grow">
                 <div class="text-md font-bold">${c.name}</div>
                 <div class="text-[12px] text-gray-500 mb-1">${c.workstation ?? ""}</div>
-
-                ${c.email ? `
-                    <div class="text-xs flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">mail</span>
-                        ${c.email}
-                    </div>` : ""}
-
-                ${c.phone ? `
-                    <div class="text-xs flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">call</span>
-                        ${c.phone}
-                    </div>` : ""}
+                ${c.email ? `<div class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">mail</span>${c.email}</div>` : ""}
+                ${c.phone ? `<div class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">call</span>${c.phone}</div>` : ""}
             </div>
-
-            <div class="flex flex-col gap-1 mt-auto mb-auto">
-                <button onclick="editContact(${c.id})"class="editContactBtn ${editMode ? "" : "hidden"} text-xs text-primary">
+            <div class="flex flex-col gap-1 my-auto">
+                <button data-id="${c.id}" class="editContactBtn ${editMode ? "" : "hidden"} text-primary">
                     <span class="material-symbols-outlined text-sm">edit</span>
                 </button>
-                <button onclick="deleteContact(${c.id})"class="deleteContactBtn ${editMode ? "" : "hidden"} text-xs text-primary">
+                <button data-id="${c.id}" class="deleteContactBtn ${editMode ? "" : "hidden"} text-primary">
                     <span class="material-symbols-outlined text-sm">delete</span>
                 </button>
             </div>
-        </div>
-    `).join("");
+        </div>`).join("");
+
+    // Listeners después de renderizar
+    document.querySelectorAll(".editContactBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const c = contacts.find(c => c.id == btn.dataset.id);
+            if (!c) return;
+            editingContact = c;
+            $("contactName").value        = c.name;
+            $("contactWorkstation").value = c.workstation || "";
+            $("contactEmail").value       = c.email || "";
+            $("contactPhone").value       = c.phone || "";
+            contactModal.classList.remove("hidden");
+        });
+    });
+
+    document.querySelectorAll(".deleteContactBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const idx = contacts.findIndex(c => c.id == btn.dataset.id);
+            if (idx !== -1) contacts.splice(idx, 1);
+            renderContacts();
+        });
+    });
 }
-
-// --- Edit contact
-window.editContact = (contactId) => {
-    const c = contacts.find(c => c.id == contactId);
-    if (!c) return;
-
-    editingContact = c;
-
-    $("contactName").value = c.name;
-    $("contactWorkstation").value = c.workstation || "";
-    $("contactEmail").value = c.email || "";
-    $("contactPhone").value = c.phone || "";
-
-    contactModal.classList.remove("hidden");
-};
-
-// --- Delete Contact
-window.deleteContact = (contactId) => {
-    const idx = contacts.findIndex(c => c.id == contactId);
-    if (idx !== -1) contacts.splice(idx, 1);
-
-    renderContacts();
-};
 
 function renderSpecs() {
     const content  = $("specsContent");

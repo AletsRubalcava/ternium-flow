@@ -3,119 +3,140 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Customer Overview Dashboard - Ternium</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@300;400;700&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
+        rel="stylesheet"/>
+    <link 
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-
     <script>
         tailwind.config = {
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
                         primary: "#F05323",
                         "primary-hover": "#D94418",
                         "background-light": "#F4F6F8",
+                        "background-dark": "#111827",
                         "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
                         "text-primary-light": "#1F2937",
+                        "text-primary-dark": "#F9FAFB",
                         "text-secondary-light": "#6B7280",
+                        "text-secondary-dark": "#9CA3AF",
                         "border-light": "#E5E7EB",
+                        "border-dark": "#374151",
                     },
-                    borderRadius: { DEFAULT: "0.5rem", xl: "1rem", "2xl": "1.5rem" },
-                    boxShadow: { soft: "0 2px 15px -3px rgba(0,0,0,0.07),0 4px 6px -2px rgba(0,0,0,0.05)" }
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    }
                 },
             },
         };
     </script>
-
     <style type="text/tailwindcss">
-        body { font-family: 'Roboto', sans-serif; }
-        h1,h2,h3,.font-display { font-family: 'Roboto Condensed', sans-serif; }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4B5563;
+        }
         @layer components {
-            .field-label { @apply block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1; }
-            .field-value { @apply text-text-primary-light font-bold text-sm; }
-            .field-input { @apply border border-border-light rounded-lg px-2 py-1 text-sm w-full; }
-
-            .card { @apply bg-surface-light rounded-xl shadow-soft border border-border-light flex flex-col overflow-hidden; }
-            .card-header { @apply p-4 border-b border-border-light flex justify-between items-center; }
-            .card-body { @apply p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar; }
-            .card-actions { @apply p-4 flex justify-end gap-3; }
-
-            .btn { @apply font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2; }
-            .btn-primary { @apply bg-primary text-white; }
-            .btn-primary:hover { @apply bg-primary-hover; }
-            .btn-edit { @apply bg-white border border-primary text-primary; }
-            .btn-edit:hover { @apply bg-orange-50; }
+            .field-label  { @apply block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1; }
+            .field-value  { @apply text-text-primary-light font-bold text-sm; }
+            .field-input  { @apply border border-border-light rounded-lg px-2 py-1 text-sm w-full; }
         }
     </style>
 </head>
 
 <body class="bg-background-light min-h-screen flex flex-col transition-colors duration-300 custom-scrollbar">
-
-    <header id="headerWidget"
-        class="sticky top-0 z-50 font-[Manrope] bg-white w-full px-5 flex justify-between items-center shadow-lg shrink-0">
+    <header 
+    id="headerWidget" 
+    class="sticky top-0 z-50 font-[Manrope] bg-white w-full px-5 flex justify-between items-center shadow-lg shrink-0">
     </header>
 
     <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
-
-        <!-- Breadcrumb y título -->
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <div
-                    class="flex items-center gap-2 text-text-secondary-light text-xs font-bold uppercase tracking-widest">
+                    class="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark text-xs font-bold uppercase tracking-widest">
                     <a class="hover:text-primary" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                     <span id="upperClientId"></span>
                 </div>
-                <h1 class="text-4xl font-display font-bold text-text-primary-light tracking-tight uppercase">Panel de
-                    Cliente</h1>
+                <h1
+                    class="text-4xl font-display font-bold text-text-primary-light dark:text-text-primary-dark tracking-tight uppercase">
+                    Panel de Cliente</h1>
             </div>
             <div class="flex space-x-3">
-                <button id="editButton" class="btn btn-edit"><span class="material-symbols-outlined text-sm">edit</span>
-                    Editar</button>
-                <button id="deleteButton" class="btn btn-primary hidden"><span
-                        class="material-symbols-outlined text-sm">delete</span> Eliminar</button>
+                <button
+                id="editButton"
+                    class="editButton bg-white border border-primary text-primary hover:bg-orange-50 font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">edit</span> Editar
+                </button>
+                <button
+                id="deleteButton"
+                    class="hidden bg-primary hover:bg-primary-hover text-white font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">delete</span> Eliminar
+                </button>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-6">
-
             <div class="xl:col-span-8 space-y-6">
-                <!-- Información general -->
-                <div class="card p-6">
+                <div
+                    class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft p-6 border border-border-light dark:border-border-dark">
                     <div class="flex items-center gap-2 mb-6 border-b border-border-light pb-4">
                         <span class="material-symbols-outlined text-primary">info</span>
-                        <h3 class="text-lg font-display font-bold text-text-primary-light uppercase">Información General
-                        </h3>
+                        <h3
+                            class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                            Información General</h3>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
-                            <label class="field-label">Clave de Cliente</label>
-                            <div id="idCustomer" class="view field-value text-lg"></div>
+                            <label
+                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Clave
+                                de Cliente</label>
+                            <div id="idCustomer" class="view text-text-primary-light font-bold text-lg"></div>
                         </div>
                         <div class="editable sm:col-span-2">
                             <label class="field-label">Nombre</label>
                             <div id="customerName" class="view field-value"></div>
-                            <input id="customerName-edit" class="edit hidden field-input" autocomplete="off" />
+                            <input id="customerName-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
                         </div>
                         <div class="editable">
                             <label class="field-label">RFC</label>
                             <div id="customerRFC" class="view field-value"></div>
-                            <input id="customerRFC-edit" class="edit hidden field-input" autocomplete="off" />
+                            <input id="customerRFC-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
                         </div>
                         <div class="editable lg:col-span-3">
                             <label class="field-label">Dirección Fiscal</label>
                             <div id="customerAddress" class="view field-value"></div>
-                            <input id="customerAddress-edit" class="edit hidden field-input" autocomplete="off" />
+                            <input id="customerAddress-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
                         </div>
                         <div>
                             <label class="field-label">Estado</label>
@@ -127,60 +148,65 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Consignatarios y Tarimas -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card">
-                        <div class="card-header bg-gray-50/50">
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft flex flex-col border border-border-light dark:border-border-dark overflow-hidden">
+                        <div
+                            class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-xl">location_on</span>
-                                <h3 class="text-md font-display font-bold text-text-primary-light uppercase">
-                                    Consignatarios
-                                    <span id="activeConsignees"
-                                        class="ml-2 text-xs font-normal text-text-secondary-light"></span>
-                                </h3>
+                                <h3
+                                    class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                                    Consignatarios <span id="activeConsignees" class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
-                            <button id="viewAllConsignees"
-                                class="text-primary hover:text-primary-hover text-[10px] font-bold uppercase tracking-wider">Ver
+                            <button
+                                id="viewAllConsignees"
+                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
                                 Todos</button>
                         </div>
-                        <div class="card-body" id="consigneeWidget"></div>
+                        <div class="p-4 max-h-[280px] overflow-y-auto custom-scrollbar">
+                            <div id="consigneeWidget" class="space-y-3"></div>
+                        </div>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header bg-gray-50/50">
+                    <div
+                        class="bg-surface-light rounded-xl shadow-soft flex flex-col border border-border-light overflow-hidden">
+                        <div
+                            class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-gray-50/50">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-xl">inventory_2</span>
-                                <h3 class="text-md font-display font-bold text-text-primary-light uppercase">Tarimas
-                                    Autorizadas
-                                    <span id="activePlatforms"
-                                        class="ml-2 text-xs font-normal text-text-secondary-light"></span>
-                                </h3>
+                                <h3
+                                    class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                                    Tarimas Autorizadas <span id="activePlatforms" class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
-                            <button id="viewAllPlatforms"
-                                class="text-primary hover:text-primary-hover text-[10px] font-bold uppercase tracking-wider">Ver
-                                Todos</button>
+                            <button
+                                id="viewAllPlatforms"
+                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                            </button>
                         </div>
-                        <div class="card-body" id="platformWidget"></div>
+                        <div id="platformWidget" class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar"></div>
                     </div>
                 </div>
-
-                <!-- Historial de pedidos -->
-                <div class="card max-h-[325px] flex flex-col">
-                    <div class="card-header">
+                <div
+                    class="bg-surface-light rounded-xl shadow-soft border border-border-light max-h-[325px] flex flex-col">
+                    <div
+                        class="p-4 border-b border-border-light flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">history</span>
-                            <h3 class="text-lg font-display font-bold text-text-primary-light uppercase">Historial de
-                                Pedidos</h3>
+                            <h3
+                                class="text-lg font-display font-bold text-text-primary-light uppercase">
+                                Historial de Pedidos
+                            </h3>
                         </div>
-                        <button id="viewAllFollowUps"
-                            class="text-primary hover:text-primary-hover text-[10px] font-bold uppercase tracking-wider">Ver
-                            Todos</button>
+                        <button
+                                id="viewAllFollowUps"
+                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                        </button>
                     </div>
                     <div class="overflow-auto flex-1 custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead id="followUpsThead"
-                                class="bg-gray-50 text-[10px] uppercase font-bold text-text-secondary-light">
+                            <thead
+                                id="followUpsThead"
+                                class="bg-gray-50 dark:bg-gray-800/50 text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
                                 <tr>
                                     <th class="px-6 py-3">Referencia</th>
                                     <th class="px-6 py-3">Fecha</th>
@@ -189,91 +215,113 @@
                                     <th class="px-6 py-3 text-right">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody id="followUpsBody" class="divide-y divide-border-light"></tbody>
+                            <tbody id="followUpsBody" class="divide-y divide-border-light dark:divide-border-dark"></tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
-
-            <!-- Contactos y Especificaciones -->
             <div class="xl:col-span-4 space-y-6">
-                <div class="card">
-                    <div class="card-header bg-gray-50/50">
+                <div
+                    class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark flex flex-col overflow-hidden">
+                    <div
+                        class="p-4 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-xl">contact_phone</span>
-                            <h3 class="text-md font-display font-bold text-text-primary-light uppercase">Contactos Clave
-                            </h3>
+                            <h3
+                                class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                                Contactos Clave</h3>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="contactsContainer space-y-4"></div>
-                        <div id="addContactBtn" class="hidden">
+                    <div>
+                        <div class="contactsContainer p-4 space-y-4"></div>
+                        <div id="addContactBtn" class="px-4 pb-4 hidden">
                             <button
-                                class="w-full py-2 border border-dashed border-border-light rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
+                                class="w-full py-2 border border-dashed border-border-light dark:border-border-dark rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-sm">add</span> AGREGAR CONTACTO
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div class="card flex flex-col">
-                    <div class="card-header p-5 border-b border-border-light flex flex-col items-start">
-                        <div class="flex items-center gap-2">
+                <div class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-border-light">
+                        <div class="flex flex-row items-center gap-2">
                             <span class="material-symbols-outlined text-primary">dataset</span>
-                            <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">
-                                Especificaciones</h2>
+                            <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">Especificaciones</h2>
                         </div>
-                        <p id="specsSubtitle"
-                            class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
+                        <p id="specsSubtitle" class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
                     </div>
                     <div id="specsContent" class="p-6 space-y-5"></div>
                 </div>
             </div>
-
         </div>
     </main>
-
     <footer class="h-8 shrink-0 bg-white border-t border-slate-200 px-6 flex items-center justify-between z-50">
         <p class="text-[10px] text-slate-400">© 2026 Ternium Flow</p>
     </footer>
 
-    <!-- Modales -->
     <div id="deleteModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
-            <h2 class="text-lg font-semibold mb-4">¿Seguro que quieres eliminar este usuario?</h2>
-            <p class="text-sm text-gray-500 mb-6">Esta acción no se puede deshacer.</p>
-            <div class="card-actions">
-                <button id="cancelDelete"
-                    class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">Cancelar</button>
-                <button id="confirmDelete"
-                    class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">Eliminar</button>
+            
+            <h2 class="text-lg font-semibold mb-4">
+            ¿Seguro que quieres eliminar este usuario?
+            </h2>
+
+            <p class="text-sm text-gray-500 mb-6">
+            Esta acción no se puede deshacer.
+            </p>
+
+            <div class="flex justify-end gap-3">
+            <button id="cancelDelete" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                Cancelar
+            </button>
+            <button id="confirmDelete" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
+                Eliminar
+            </button>
             </div>
         </div>
     </div>
 
     <div id="contactModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
-            <h2 class="text-lg font-semibold mb-4">Nuevo contacto</h2>
-            <div class="space-y-3">
-                <input id="contactName" placeholder="Nombre" autocomplete="off"
-                    class="w-full border rounded px-3 py-2 text-sm" />
-                <input id="contactWorkstation" placeholder="Puesto (opcional)"
-                    class="w-full border rounded px-3 py-2 text-sm" />
-                <input id="contactEmail" placeholder="Correo" class="w-full border rounded px-3 py-2 text-sm" />
-                <input id="contactPhone" placeholder="Teléfono" class="w-full border rounded px-3 py-2 text-sm" />
-            </div>
-            <p id="nameError" class="text-red-500 text-xs mt-2 hidden">Debes ingresar el nombre del contacto</p>
-            <p id="contactError" class="text-red-500 text-xs mt-2 hidden">Debes ingresar al menos correo o teléfono</p>
-            <div class="card-actions mt-6">
-                <button id="cancelContact" class="px-4 py-2 rounded bg-gray-100">Cancelar</button>
-                <button id="saveContact" class="px-4 py-2 rounded bg-primary text-white">Guardar</button>
-            </div>
+    <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+        
+        <h2 class="text-lg font-semibold mb-4">
+            Nuevo contacto
+        </h2>
+
+        <div class="space-y-3">
+            <input id="contactName" placeholder="Nombre" autocomplete="off" name="none"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactWorkstation" placeholder="Puesto (opcional)" name="none"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactEmail" placeholder="Correo"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactPhone" placeholder="Teléfono"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+        </div>
+
+        <p id="nameError" class="text-red-500 text-xs mt-2 hidden">
+            Debes ingresar el nombre del contacto
+        </p>
+
+        <p id="contactError" class="text-red-500 text-xs mt-2 hidden">
+            Debes ingresar al menos correo o teléfono
+        </p>
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="cancelContact" class="px-4 py-2 rounded bg-gray-100">
+                Cancelar
+            </button>
+            <button id="saveContact" class="px-4 py-2 rounded bg-primary text-white">
+                Guardar
+            </button>
         </div>
     </div>
+</div>
 
-    <script src="../shared/header.js"></script>
-    <script type="module" src="./detailed_customer.js"></script>
 </body>
-
+<script src="../shared/header.js"></script>
+<script type="module" src="./detailed_customer.js"></script>
 </html>
