@@ -1,6 +1,6 @@
 import { consignees, customers } from "../shared/db.js";
 
-const attributes = ["Clave", "Consignatario", "Cliente", "Dirección", "Acciones"];
+const attributes = ["Clave", "Consignatario", "Cliente", "Dirección"];
 
 export function loadConsignees() {
     const params = new URLSearchParams(window.location.search);
@@ -34,10 +34,6 @@ export function loadConsignees() {
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${c.name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${customers.find(cu => cu.id == c.idCustomer).name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${c.address}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-text-secondary-light hover:text-primary mx-2"><span class="material-icons text-lg">edit</span></button>
-                <button class="text-text-secondary-light hover:text-red-600 mx-2"><span class="material-icons text-lg">delete</span></button>
-            </td>
         </tr>
     `).join("");
 

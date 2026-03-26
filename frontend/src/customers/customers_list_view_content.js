@@ -7,7 +7,6 @@ const attributes = [
     "RFC",
     "CONTACTO",
     "ESTADO",
-    "ACCIONES"
 ];
 
 // Loads customers information to the table
@@ -53,14 +52,6 @@ export function loadClientes(){
         <td class="px-6 py-4 whitespace-nowrap">
             <span
                 class=" ${c.status == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status == 1 ? "Activo" : "Inactivo"}</span>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <button
-                class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary mx-2"><span
-                    class="material-icons text-lg">edit</span></button>
-            <button
-                class="text-text-secondary-light dark:text-text-secondary-dark hover:text-red-600 dark:hover:text-red-400 mx-2"><span
-                    class="material-icons text-lg">delete</span></button>
         </td>
     </tr>
     `).join("");
