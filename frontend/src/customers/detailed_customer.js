@@ -129,6 +129,9 @@ function toggleEdit(active) {
             const nuevo = guardarCustomer();
             $("idCustomer").textContent = $("upperClientId").textContent = nuevo.id;
             deleteBtn.classList.remove("hidden");
+            document.querySelectorAll(".viewAll").forEach(b => {
+                b.classList.remove("hidden");
+            });
             window.history.replaceState({}, "", `?id=${nuevo.id}`);
         }
     }
@@ -505,4 +508,7 @@ if (createMode) {
     toggleEdit(true);
 } else {
     deleteBtn.classList.remove("hidden");
+    document.querySelectorAll(".viewAll").forEach(b => {
+        b.classList.remove("hidden");
+    });
 }

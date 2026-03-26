@@ -16,12 +16,13 @@ const id         = params.get("id");
 const idCus      = params.get("idCus");
 const createMode = params.get("create") === "true";
 
-const consignee = createMode ? {} : consignees.find(c => c.id == id);
+let consignee = createMode ? {} : consignees.find(c => c.id == id);
 const customer  = idCus
     ? customers.find(c => c.id == idCus)
     : customers.find(c => c.id == consignee?.idCustomer);
 
 let editMode = false;
+let isCreateMode = createMode;
 
 // Mapa de campos de especificaciones: id -> propiedad en consignee
 const specFields = [
@@ -202,11 +203,22 @@ function toggleEdit(active) {
         if(!active) renderMap();
     });
 
-    if (!active && (createMode || editMode)) {
-        if (!validarCampos()) { editMode = true; toggleEdit(true); return; }
-        if (createMode) {
+    if (!active && (isCreateMode || editMode)) {
+        if (!validarCampos()) { 
+            editMode = true; 
+            toggleEdit(true); 
+            return; 
+        }
+
+        if (isCreateMode) {
             const nuevo = guardarConsignee();
-            $("consigneeID").textContent = $("upperConsigneeId").textContent = nuevo.id;
+
+            consignee = nuevo;
+            isCreateMode = false;
+
+            $("consigneeID").textContent = nuevo.id;
+            $("upperConsigneeId").textContent = nuevo.id;
+
             deleteBtn.classList.remove("hidden");
             window.history.replaceState({}, "", `?id=${nuevo.id}&idCus=${customer.id}`);
         }
@@ -219,7 +231,7 @@ function guardarConsignee() {
         id:         Number(id),
         idCustomer: customer.id,
         name:       $("consigneeName-edit").value.trim(),
-        address:    $("consigneeAddres-edit").value.trim(),
+        address:    $("consigneeAddress-edit").value.trim(),
         status:     $("consigneeStatus-edit").value === "1",
     };
 
