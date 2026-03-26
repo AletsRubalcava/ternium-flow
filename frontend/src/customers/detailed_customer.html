@@ -75,7 +75,10 @@
 </head>
 
 <body class="bg-background-light min-h-screen flex flex-col transition-colors duration-300 custom-scrollbar">
-    <header id="headerWidget" class="font-[Manrope] bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
+    <header 
+    id="headerWidget" 
+    class="sticky top-0 z-50 font-[Manrope] bg-white w-full px-5 flex justify-between items-center shadow-lg shrink-0">
+    </header>
 
     <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -239,94 +242,15 @@
                         </div>
                     </div>
                 </div>
-                <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden flex flex-col">
-                    <div
-                        class="p-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-surface-dark border-b border-border-light dark:border-border-dark">
-                        <h2
-                            class="text-xl font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
-                            Especificaciones</h2>
-                        <p class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest mt-1">
-                            Configuración de Despacho</p>
+                <div class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-border-light">
+                        <div class="flex flex-row items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">dataset</span>
+                            <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">Especificaciones</h2>
+                        </div>
+                        <p id="specsSubtitle" class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
                     </div>
-                    <div class="p-6 space-y-5">
-                        <div class="flex justify-between items-end gap-4">
-                            <div class="flex-grow">
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Peso
-                                    Estimado (kg)</label>
-                                <input
-                                    class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded text-sm font-medium focus:ring-primary h-10 px-3"
-                                    readonly="" type="text" value="1200" />
-                            </div>
-                            <div class="w-24">
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Piezas</label>
-                                <input
-                                    class="w-full bg-orange-100 dark:bg-primary/20 text-primary-hover dark:text-primary font-bold border-none rounded text-sm h-10 px-3"
-                                    readonly="" type="text" value="24" />
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Altura
-                                    Máx (cm)</label>
-                                <input
-                                    class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded text-sm font-medium h-9 px-3"
-                                    readonly="" type="text" value="150" />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Ancho
-                                    (cm)</label>
-                                <input
-                                    class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded text-sm font-medium h-9 px-3"
-                                    readonly="" type="text" value="100" />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Ø
-                                    Interno (cm)</label>
-                                <input
-                                    class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded text-sm font-medium h-9 px-3"
-                                    readonly="" type="text" value="50" />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Ø
-                                    Externo (cm)</label>
-                                <input
-                                    class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded text-sm font-medium h-9 px-3"
-                                    readonly="" type="text" value="120" />
-                            </div>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Embalaje
-                                Sugerido</label>
-                            <div
-                                class="w-full bg-orange-100 dark:bg-primary/20 border border-orange-200 dark:border-primary/30 rounded px-3 py-2 text-primary-dark dark:text-white font-bold text-sm flex items-center gap-2">
-                                <span class="material-symbols-outlined text-sm">layers</span>
-                                Plástico Retráctil + Esquineros
-                            </div>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Observaciones
-                                Especiales</label>
-                            <p class="text-xs text-text-secondary-light leading-relaxed italic">"Carga delicada. No
-                                estibar más de dos niveles. Requiere rampa hidráulica para descarga."</p>
-                        </div>
-                        <div class="pt-4">
-                            <button
-                                class="w-full bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-sm px-6 py-4 rounded shadow-sm hover:shadow-lg transition-all flex items-center justify-center gap-3 group">
-                                Ver Detalles de Tarima
-                                <span
-                                    class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </button>
-                        </div>
-                    </div>
+                    <div id="specsContent" class="p-6 space-y-5"></div>
                 </div>
             </div>
         </div>

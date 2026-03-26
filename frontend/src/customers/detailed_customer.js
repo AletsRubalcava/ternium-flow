@@ -26,8 +26,8 @@ const nameErrorMsg = $("nameError");
 const contactErrorMsg = $("contactError");
 
 let editingContact = null;
-
 let editMode = false;
+let selectedItem = null; // { type: 'consignee' | 'platform', data: {...} }
 
 // --- Badges ---
 const badges = {
@@ -154,13 +154,21 @@ function renderConsignees() {
     $("consigneeWidget").innerHTML = consignee.length === 0
         ? emptyWidget("Sin consignatarios")
         : consignee.map(c => `
-            <div class="consigneeTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center">
-                <div>
+            <div class="consigneeTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${c.id}"><div>
                     <div class="text-sm font-medium text-text-primary-light">${c.name}</div>
                     <div class="text-[10px] text-text-secondary-light">${c.address}</div>
                 </div>
                 <span data-id="${c.id}" class="redirectConsignee text-[20px] material-symbols-outlined text-gray-300 group-hover:text-primary">open_in_new</span>
             </div>`).join("");
+
+    document.querySelectorAll(".consigneeTuple").forEach(el => {
+        const cData = consignee.find(c => c.id == el.dataset.id);
+        el.addEventListener("click", (e) => {
+            // Evitar que el click en el botón de redirect active la selección
+            if (e.target.classList.contains("redirectConsignee")) return;
+            selectItem("consignee", cData, el);
+        });
+    });
 
     document.querySelectorAll(".redirectConsignee").forEach(c => {
         c.addEventListener("click", () => {
@@ -176,8 +184,7 @@ function renderPlatforms() {
     $("platformWidget").innerHTML = platformCustomer.length === 0
         ? emptyWidget("Sin tarimas")
         : platformCustomer.map(p => `
-            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center">
-                <div class="flex items-center gap-3">
+            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${p.id}"><div class="flex items-center gap-3">
                     <div>
                         <div class="text-sm font-medium text-text-primary-light">${p.name}</div>
                         <div class="text-[10px] text-text-secondary-light">${p.description}, ${p.weight}kg</div>
@@ -185,6 +192,14 @@ function renderPlatforms() {
                 </div>
                 <span data-id="${p.id}" class="redirectPlatform text-[20px] material-symbols-outlined text-gray-300 group-hover:text-primary">open_in_new</span>
             </div>`).join("");
+
+    document.querySelectorAll(".platformTuple").forEach(el => {
+        const pData = platformCustomer.find(p => p.id == el.dataset.id);
+        el.addEventListener("click", (e) => {
+            if (e.target.classList.contains("redirectPlatform")) return;
+            selectItem("platform", pData, el);
+        });
+    });
 
     document.querySelectorAll(".redirectPlatform").forEach(p => {
         p.addEventListener("click", () => {
@@ -388,12 +403,118 @@ window.deleteContact = (contactId) => {
     renderContacts();
 };
 
+function renderSpecs() {
+    const content  = $("specsContent");
+    const subtitle = $("specsSubtitle");
+
+    if (!selectedItem) {
+        content.innerHTML = emptyWidget("Selecciona un consignatario o tarima");
+        subtitle.textContent = "";
+        return;
+    }
+
+    const { type, data } = selectedItem;
+
+    const field = (label, value) => `
+        <div>
+            <label class="field-label">${label}</label>
+            <div class="field-value">${value ?? "—"}</div>
+        </div>`;
+
+    if (type === "consignee") {
+        subtitle.textContent = "Configuración de Consignatario";
+        content.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                ${field("Carga Máxima (kg)", data.maxLoad)}
+                ${field("Carga Mínima (kg)", data.minLoad)}
+                ${field("Máx. Piezas", data.maxPieces)}
+                ${field("Embalaje Preferido", data.prefDispatchPackaging)}
+                ${field("Ancho Máx (cm)", data.maxWidth)}
+                ${field("Altura Máx (cm)", data.maxHeight)}
+                ${field("Ø Interno (cm)", data.internalDiameter)}
+                ${field("Ø Externo (cm)", data.externalDiameter)}
+            </div>
+            <div>
+                <label class="field-label">Instrucciones Adicionales</label>
+                <p class="text-xs text-text-secondary-light leading-relaxed italic">
+                    ${data.instructions ?? "Sin instrucciones especiales."}
+                </p>
+            </div>
+            <div class="pt-4">
+                <button id="specsNavBtn"
+                    class="w-full bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-sm px-6 py-4 rounded shadow-sm hover:shadow-lg transition-all flex items-center justify-center gap-3 group">
+                    Ver Detalles de Consignatario
+                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </button>
+            </div>`;
+
+    } else if (type === "platform") {
+        subtitle.textContent = "Configuración de Tarima";
+        content.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                ${field("Peso Estimado (kg)", data.weight)}
+                ${field("Piezas", data.piecesNumber)}
+                ${field("Altura (cm)", data.height)}
+                ${field("Ancho (cm)", data.width)}
+                ${field("Ø Interno (cm)", data.internalDiameter)}
+                ${field("Ø Externo (cm)", data.externalDiameter)}
+                <div class="col-span-2">
+                    ${field("Embalaje de Despacho", data.dispatchPackaging)}
+                </div>
+            </div>
+            <div>
+                <label class="field-label">Descripción</label>
+                <p class="text-xs text-text-secondary-light leading-relaxed italic">
+                    ${data.description ?? "Sin descripción."}
+                </p>
+            </div>
+            <div class="pt-4">
+                <button id="specsNavBtn"
+                    class="w-full bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-sm px-6 py-4 rounded shadow-sm hover:shadow-lg transition-all flex items-center justify-center gap-3 group">
+                    Ver Detalles de Tarima
+                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </button>
+            </div>`;
+    }
+
+    // Listener del botón de navegación
+    $("specsNavBtn").addEventListener("click", () => {
+        const base = type === "consignee"
+            ? "/frontend/src/consignees/detailed_consignee.html"
+            : "/frontend/src/platforms/detailed_platform.html";
+        window.location.href = `${base}?id=${data.id}`;
+    });
+}
+
+function selectItem(type, data, element) {
+    // Quitar selección visual anterior
+    document.querySelectorAll(".consigneeTuple, .platformTuple").forEach(el => {
+        el.classList.remove("border-primary", "bg-orange-50");
+        el.classList.add("border-border-light");
+    });
+
+    // Si ya estaba seleccionado el mismo, deseleccionar
+    if (selectedItem?.data?.id === data.id && selectedItem?.type === type) {
+        selectedItem = null;
+        renderSpecs();
+        return;
+    }
+
+    // Aplicar selección visual al nuevo
+    element.classList.add("border-primary", "bg-orange-50");
+    element.classList.remove("border-border-light");
+
+    selectedItem = { type, data };
+    renderSpecs();
+}
+
 // --- Init ---
 renderCampos();
 renderConsignees();
 renderPlatforms();
 renderFollowUps();
 renderContacts();
+renderSpecs(); // estado vacío inicial
 
 if (createMode) {
     editMode = true;
