@@ -1,5 +1,6 @@
 import {customers} from "../shared/db.js"
 
+// Table attributes
 const attributes = [
     "ID",
     "Razón Social",
@@ -9,25 +10,35 @@ const attributes = [
     "ACCIONES"
 ];
 
+// Loads customers information to the table
 export function loadClientes(){
-    const title = document.getElementById("pageTitle");
-    const search = document.getElementById("search");
-    const newButton = document.getElementById("newButton");
-    const thead = document.getElementById("listViewThead");
-    const tbody = document.getElementById("listViewBody");
+    // Get components
+    const $ = id => document.getElementById(id);
+    const title = $("pageTitle");
+    const search = $("search");
+    const newButton = $("newButton");
+    const thead = $("listViewThead");
+    const tbody = $("listViewBody");
 
+    // Main title
     title.innerHTML = "CLIENTES";
 
+    // Search bar placeholder
     search.placeholder = "Buscar Clientes...";
 
+    // New Button
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nuevo Cliente`;
+    const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
+    newButton.onclick = () => window.location.href = `/frontend/src/customers/detailed_customer.html?create=true&id=${newId}`;
 
+    //Writes the attributes (thead) into the table
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
 
+    // Writes the custome data into the table
     tbody.innerHTML = customers.map(c => `
         <tr data-id="${c.id}"
         class="customer-row bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors">
@@ -54,6 +65,7 @@ export function loadClientes(){
     </tr>
     `).join("");
 
+    // For each row, adds a button which redirects to its detailed view
     document.querySelectorAll(".customer-row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;

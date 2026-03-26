@@ -5,7 +5,7 @@ const attributes = ["Clave", "Consignatario", "Cliente", "Dirección", "Acciones
 export function loadConsignees() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-    const customer = customers.find(c => c.id === id);
+    const customer = customers.find(c => c.id == id);
 
     const consignee = consignees.filter(c => c.idCustomer == customer.id);
 

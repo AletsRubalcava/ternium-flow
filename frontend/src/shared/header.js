@@ -5,7 +5,7 @@ document.getElementById("headerWidget").innerHTML = `
     </div>
     <nav class="hidden md:flex items-center justify-center gap-6">
         <a id="home" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/home/home.html?type=home">Inicio</a>
-        <a id="customers"class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5 font-semibold" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
+        <a id="customers" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5 font-semibold" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
         <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
         <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=products">Productos</a>
         <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>

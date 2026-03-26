@@ -8,7 +8,10 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
-        rel="stylesheet" />
+        rel="stylesheet"/>
+    <link 
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
@@ -30,9 +33,6 @@
                         "text-secondary-dark": "#9CA3AF",
                         "border-light": "#E5E7EB",
                         "border-dark": "#374151",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope"],
                     },
                     borderRadius: {
                         DEFAULT: "0.5rem",
@@ -66,18 +66,23 @@
         .dark .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #4B5563;
         }
+        @layer components {
+            .field-label  { @apply block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1; }
+            .field-value  { @apply text-text-primary-light font-bold text-sm; }
+            .field-input  { @apply border border-border-light rounded-lg px-2 py-1 text-sm w-full; }
+        }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col transition-colors duration-300">
-    <header id="headerWidget" class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
+<body class="bg-background-light min-h-screen flex flex-col transition-colors duration-300 custom-scrollbar">
+    <header id="headerWidget" class="font-[Manrope] bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
 
     <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <div
                     class="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark text-xs font-bold uppercase tracking-widest">
-                    <a class="hover:text-primary" href="#">Clientes</a>
+                    <a class="hover:text-primary" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                     <span id="upperClientId"></span>
                 </div>
@@ -87,11 +92,13 @@
             </div>
             <div class="flex space-x-3">
                 <button
-                    class="bg-white dark:bg-surface-dark border border-primary text-primary hover:bg-orange-50 dark:hover:bg-primary/10 font-display font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                id="editButton"
+                    class="editButton bg-white border border-primary text-primary hover:bg-orange-50 font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">edit</span> Editar
                 </button>
                 <button
-                    class="bg-primary hover:bg-primary-hover text-white font-display font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
+                id="deleteButton"
+                    class="hidden bg-primary hover:bg-primary-hover text-white font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span> Eliminar
                 </button>
             </div>
@@ -111,27 +118,30 @@
                             <label
                                 class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Clave
                                 de Cliente</label>
-                            <div id="idCustomer" class="text-text-primary-light font-bold text-lg"></div>
+                            <div id="idCustomer" class="view text-text-primary-light font-bold text-lg"></div>
                         </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Nombre</label>
-                            <div id="customerName" class="text-text-primary-light dark:text-text-primary-dark font-bold text-lg"></div>
+                        <div class="editable sm:col-span-2">
+                            <label class="field-label">Nombre</label>
+                            <div id="customerName" class="view field-value"></div>
+                            <input id="customerName-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
+                        </div>
+                        <div class="editable">
+                            <label class="field-label">RFC</label>
+                            <div id="customerRFC" class="view field-value"></div>
+                            <input id="customerRFC-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
+                        </div>
+                        <div class="editable lg:col-span-3">
+                            <label class="field-label">Dirección Fiscal</label>
+                            <div id="customerAddress" class="view field-value"></div>
+                            <input id="customerAddress-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
                         </div>
                         <div>
-                            <label
-                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">RFC
-                                / Identificación Fiscal</label>
-                            <div id="customerRFC" class="text-text-primary-light dark:text-text-primary-dark font-medium"></div>
-                        </div>
-                        <div class="lg:col-span-3">
-                            <label
-                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Dirección
-                                Fiscal</label>
-                            <div id="customerAddress" class="text-text-primary-light dark:text-text-primary-dark text-sm"></div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Estado</label>
-                            <div id="clientStatus"></div>
+                            <label class="field-label">Estado</label>
+                            <div id="customerStatus" class="field-value"></div>
+                            <select id="customerStatus-edit" class="hidden field-input">
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -167,23 +177,29 @@
                             </div>
                             <button
                                 id="viewAllPlatforms"
-                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Catálogo</button>
+                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                            </button>
                         </div>
                         <div id="platformWidget" class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar"></div>
                     </div>
                 </div>
                 <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden">
+                    class="bg-surface-light rounded-xl shadow-soft border border-border-light max-h-[325px] flex flex-col">
                     <div
-                        class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+                        class="p-4 border-b border-border-light flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">history</span>
                             <h3
-                                class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
-                                Historial de Pedidos</h3>
+                                class="text-lg font-display font-bold text-text-primary-light uppercase">
+                                Historial de Pedidos
+                            </h3>
                         </div>
+                        <button
+                                id="viewAllFollowUps"
+                                class="text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                        </button>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-auto flex-1 custom-scrollbar">
                         <table class="w-full text-left">
                             <thead
                                 id="followUpsThead"
@@ -213,59 +229,14 @@
                                 Contactos Clave</h3>
                         </div>
                     </div>
-                    <div class="p-4 space-y-4">
-                        <div
-                            class="flex gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-border-light dark:border-border-dark">
-                            <div
-                                class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                                RM</div>
-                            <div class="flex-grow">
-                                <div class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark">
-                                    Ricardo Morales</div>
-                                <div
-                                    class="text-[10px] text-text-secondary-light dark:text-text-secondary-dark uppercase mb-2">
-                                    Gerente de Compras</div>
-                                <div class="space-y-1">
-                                    <div
-                                        class="flex items-center gap-2 text-xs text-text-primary-light dark:text-text-primary-dark">
-                                        <span class="material-symbols-outlined text-[14px]">mail</span>
-                                        r.morales@acerosind.com
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-2 text-xs text-text-primary-light dark:text-text-primary-dark">
-                                        <span class="material-symbols-outlined text-[14px]">call</span> +52 81 8822 4433
-                                    </div>
-                                </div>
-                            </div>
+                    <div>
+                        <div class="contactsContainer p-4 space-y-4"></div>
+                        <div id="addContactBtn" class="px-4 pb-4 hidden">
+                            <button
+                                class="w-full py-2 border border-dashed border-border-light dark:border-border-dark rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">add</span> AGREGAR CONTACTO
+                            </button>
                         </div>
-                        <div
-                            class="flex gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-border-light dark:border-border-dark">
-                            <div
-                                class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 flex items-center justify-center font-bold">
-                                SG</div>
-                            <div class="flex-grow">
-                                <div class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark">Sofía
-                                    García</div>
-                                <div
-                                    class="text-[10px] text-text-secondary-light dark:text-text-secondary-dark uppercase mb-2">
-                                    Coordinadora Logística</div>
-                                <div class="space-y-1">
-                                    <div
-                                        class="flex items-center gap-2 text-xs text-text-primary-light dark:text-text-primary-dark">
-                                        <span class="material-symbols-outlined text-[14px]">mail</span>
-                                        s.garcia@acerosind.com
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-2 text-xs text-text-primary-light dark:text-text-primary-dark">
-                                        <span class="material-symbols-outlined text-[14px]">call</span> +52 81 8822 4434
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button
-                            class="w-full py-2 border border-dashed border-border-light dark:border-border-dark rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-sm">add</span> AGREGAR CONTACTO
-                        </button>
                     </div>
                 </div>
                 <div
@@ -363,6 +334,68 @@
     <footer class="h-8 shrink-0 bg-white border-t border-slate-200 px-6 flex items-center justify-between z-50">
         <p class="text-[10px] text-slate-400">© 2026 Ternium Flow</p>
     </footer>
+
+    <div id="deleteModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+            
+            <h2 class="text-lg font-semibold mb-4">
+            ¿Seguro que quieres eliminar este usuario?
+            </h2>
+
+            <p class="text-sm text-gray-500 mb-6">
+            Esta acción no se puede deshacer.
+            </p>
+
+            <div class="flex justify-end gap-3">
+            <button id="cancelDelete" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                Cancelar
+            </button>
+            <button id="confirmDelete" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
+                Eliminar
+            </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+        
+        <h2 class="text-lg font-semibold mb-4">
+            Nuevo contacto
+        </h2>
+
+        <div class="space-y-3">
+            <input id="contactName" placeholder="Nombre" autocomplete="off" name="none"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactWorkstation" placeholder="Puesto (opcional)" name="none"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactEmail" placeholder="Correo"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+
+            <input id="contactPhone" placeholder="Teléfono"
+                class="w-full border rounded px-3 py-2 text-sm"/>
+        </div>
+
+        <p id="nameError" class="text-red-500 text-xs mt-2 hidden">
+            Debes ingresar el nombre del contacto
+        </p>
+
+        <p id="contactError" class="text-red-500 text-xs mt-2 hidden">
+            Debes ingresar al menos correo o teléfono
+        </p>
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="cancelContact" class="px-4 py-2 rounded bg-gray-100">
+                Cancelar
+            </button>
+            <button id="saveContact" class="px-4 py-2 rounded bg-primary text-white">
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
 
 </body>
 <script src="../shared/header.js"></script>

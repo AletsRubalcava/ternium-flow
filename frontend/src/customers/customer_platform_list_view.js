@@ -5,7 +5,7 @@ const attributes = ["Clave", "Nombre", "Consignatario", "Descripción", "Peso" ,
 export function loadPlatforms() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-    const customer = customers.find(c => c.id === id);
+    const customer = customers.find(c => c.id == id);
     const consignee = consignees.filter(c => c.idCustomer == customer.id);
     const platformCustomer = platforms.filter(p => consignee.some(c => c.id == p.idConsignee));
 

@@ -37,7 +37,6 @@ function renderCampos() {
         $("userStatus").innerHTML = badges.estado(false);
     } else {
         const fields = {
-            idUser: id,
             userName: `${user.nombre} ${user.apellidoP} ${user.apellidoM}`,
             userMail: user.correo,
             userPassword: user.contraseña
@@ -168,7 +167,7 @@ deleteBtn.addEventListener("click", () => modal.classList.remove("hidden"));
 cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", () => {
     eliminarUsuario();
-    window.location.href = "/frontend/src/shared/list_view.html?type=users";
+    window.location.href = "/frontend/src/list_view.html?type=users";
 });
 
 // --- Init ---
