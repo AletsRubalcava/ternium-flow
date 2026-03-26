@@ -1,5 +1,6 @@
 import { customers, consignees, dispatchPackaging } from '../shared/db.js';
 import { setActiveNav } from '../shared/page_directory.js';
+import { apiKey } from '../shared/keys.js';
 
 setActiveNav("customers");
 
@@ -19,6 +20,8 @@ const consignee = createMode ? {} : consignees.find(c => c.id == id);
 const customer  = idCus
     ? customers.find(c => c.id == idCus)
     : customers.find(c => c.id == consignee?.idCustomer);
+
+const consigneeAddress = encodeURIComponent(consignee.address);
 
 let editMode = false;
 
@@ -191,6 +194,8 @@ confirmBtn.addEventListener("click", () => {
     deleteConsignee();
     window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
 });
+
+$("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${consigneeAddress}`;
 
 // --- Init ---
 renderCampos();

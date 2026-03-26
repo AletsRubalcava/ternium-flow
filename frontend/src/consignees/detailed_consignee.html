@@ -153,18 +153,13 @@
                                 </div>
                             </div>
                             <!-- Map Preview Card -->
-                            <div class="rounded-xl overflow-hidden flex-1 border border-slate-200 shadow-sm">
-                                <div class="w-full h-full bg-slate-200 dark:bg-slate-800 bg-cover bg-center"
-                                    data-alt="Satellite map view of industrial plant" data-location="Monterrey, Mexico"
-                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAgufovCtAsxAMWcL9qDZ8IiNRNkiqnZnZor6oCAa6BWpEbXQIzRY9DNA1RgESEbWQdJ6YWYxKb4Maiq_zgEAilu7jGgCwXhG3Wkgw09rCZR2Psi-I6Hd8NI_BmmeeryooJAhF_LJol3du1IHJ2zYiOQ-NVt5f70xqchqmnzxaLUSQbtcbg4jP7m554SF2oE3bOino3JKT5fsRFSlO0xHPf1F_E7d2ytenNbBUPodiKuOJPz7OWLDzTjOuAoOVhmoQP7M7wMSv5aslt')">
-                                    <div class="w-full h-full bg-slate-900/10 flex items-center justify-center">
-                                        <div
-                                            class="bg-white/90 dark:bg-slate-900/90 p-2 rounded-lg shadow-xl flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary">pin_drop</span>
-                                            <span class="text-[10px] font-bold">VER EN MAPA</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="rounded-xl overflow-hidden flex-1 border border-slate-200 shadow-sm relative w-full h-full">
+                                <iframe
+                                    id="consigneeMap"
+                                    class="absolute top-0 left-0 w-full h-full border-0"
+                                    loading="lazy"
+                                    allowfullscreen>
+                                </iframe>
                             </div>
                         </div>
                         <!-- Right Column: Technical Specifications -->
