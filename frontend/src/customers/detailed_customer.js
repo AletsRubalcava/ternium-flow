@@ -227,7 +227,7 @@ function renderFollowUps() {
     };
 
     tbody.innerHTML = followUp.map(f => `
-        <tr data-id="${f.id}" class="followUpTuple hover:bg-gray-50 transition-colors">
+        <tr data-id="${f.id}" class="followUpTuple hover:bg-gray-200 transition-colors">
             <td class="px-6 py-4 text-sm font-bold text-text-primary-light">${f.id}</td>
             <td class="px-6 py-4 text-xs text-text-secondary-light">${f.date}</td>
             <td class="px-6 py-4 text-sm font-medium">${f.weight} kg</td>

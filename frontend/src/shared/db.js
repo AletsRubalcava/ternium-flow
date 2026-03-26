@@ -22,6 +22,7 @@ const consignees = [
         maxHeight: 1.80,
         internalDiameter: 0.75,
         externalDiameter: 1.10,
+        instructions: "",
         createdAt: "2024-01-15T08:30:00Z",
         updatedAt: "2024-03-20T10:00:00Z",
         status: true
@@ -39,6 +40,7 @@ const consignees = [
         maxHeight: 2.20,
         internalDiameter: 1.00,
         externalDiameter: 2.40,
+        instructions: "",
         createdAt: "2024-02-10T09:15:00Z",
         updatedAt: "2024-02-10T09:15:00Z",
         status: true
@@ -56,6 +58,7 @@ const consignees = [
         maxHeight: 0.80,
         internalDiameter: 0.00,
         externalDiameter: 0.00,
+        instructions: "",
         createdAt: "2024-03-01T14:20:00Z",
         updatedAt: "2024-03-25T11:45:00Z",
         status: false
@@ -73,6 +76,7 @@ const consignees = [
         maxHeight: 1.50,
         internalDiameter: 0.50,
         externalDiameter: 0.90,
+        instructions: "",
         createdAt: "2024-03-05T10:00:00Z",
         updatedAt: "2024-03-05T10:00:00Z",
         status: true
@@ -90,6 +94,7 @@ const consignees = [
         maxHeight: 1.50,
         internalDiameter: 0.50,
         externalDiameter: 0.90,
+        instructions: "",
         createdAt: "2024-03-12T16:40:00Z",
         updatedAt: "2024-03-20T09:00:00Z",
         status: false

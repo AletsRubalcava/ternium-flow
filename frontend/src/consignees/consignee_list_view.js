@@ -17,9 +17,12 @@ export function loadConsignees() {
 
     title.textContent = "CONSIGNATARIOS";
     search.placeholder = "Buscar Consignatarios";
+
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-        Nuevo Consignatario`;
+            Nuevo Consignatario`;
+    const newId = consignee.length > 0 ? Math.max(...consignee.map(c => c.id)) + 1 : 1;
+    newButton.onclick = () => window.location.href = `/frontend/src/consignees/detailed_consignee.html?create=true&id=${newId}&idCus=${customer.id}`;
 
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
