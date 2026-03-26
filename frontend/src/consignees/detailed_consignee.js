@@ -1,4 +1,4 @@
-import { customers, consignees } from '../shared/db.js';
+import { customers, consignees, dispatchPackaging } from '../shared/db.js';
 import { setActiveNav } from '../shared/page_directory.js';
 
 setActiveNav("customers");
@@ -24,15 +24,15 @@ let editMode = false;
 
 // Mapa de campos de especificaciones: id -> propiedad en consignee
 const specFields = [
-    { view: "maxLoad-view",     edit: "maxLoad-edit",     key: "maxLoad",                type: "number" },
-    { view: "minLoad-view",     edit: "minLoad-edit",     key: "minLoad",                type: "number" },
-    { view: "maxPieces-view",   edit: "maxPieces-edit",   key: "maxPieces",              type: "number" },
-    { view: "packaging-view",   edit: "packaging-edit",   key: "prefDispatchPackaging",  type: "select" },
-    { view: "maxWidth-view",    edit: "maxWidth-edit",    key: "maxWidth",               type: "number" },
-    { view: "maxHeight-view",   edit: "maxHeight-edit",   key: "maxHeight",              type: "number" },
-    { view: "intDiameter-view", edit: "intDiameter-edit", key: "internalDiameter",       type: "number" },
-    { view: "extDiameter-view", edit: "extDiameter-edit", key: "externalDiameter",       type: "number" },
-    { view: "instructions-view",edit: "instructions-edit",key: "instructions",           type: "textarea" },
+    { view: "maxLoad-view",      edit: "maxLoad-edit",      key: "maxLoad",                  type: "number" },
+    { view: "minLoad-view",      edit: "minLoad-edit",      key: "minLoad",                  type: "number" },
+    { view: "maxPieces-view",    edit: "maxPieces-edit",    key: "maxPieces",                type: "number" },
+    { view: "packaging-view",    edit: "packaging-edit",    key: "prefDispatchPackagingID",  type: "select" },
+    { view: "maxWidth-view",     edit: "maxWidth-edit",     key: "maxWidth",                 type: "number" },
+    { view: "maxHeight-view",    edit: "maxHeight-edit",    key: "maxHeight",                type: "number" },
+    { view: "intDiameter-view",  edit: "intDiameter-edit",  key: "internalDiameter",         type: "number" },
+    { view: "extDiameter-view",  edit: "extDiameter-edit",  key: "externalDiameter",         type: "number" },
+    { view: "instructions-view", edit: "instructions-edit", key: "instructions",             type: "textarea" },
 ];
 
 const badges = {
@@ -59,12 +59,23 @@ function renderCampos() {
     }
 }
 
+// --- Fill Dispatch Options
+$("packaging-edit").innerHTML = dispatchPackaging.map(c => `
+    <option value="${c.id}">${c.name}</option>
+    `).join("");
+
 // --- Render Specs (vista) ---
 function renderSpecs() {
     specFields.forEach(({ view, key }) => {
         const el = $(view);
         if (!el) return;
-        el.textContent = consignee[key] ?? "—";
+
+        if (key === "prefDispatchPackagingID") {
+            const packaging = dispatchPackaging.find(d => d.id == consignee[key]);
+            el.textContent = packaging?.name ?? "—";
+        } else {
+            el.textContent = consignee[key] ?? "—";
+        }
     });
 }
 
@@ -122,6 +133,8 @@ function toggleEdit(active) {
 
         viewEl.classList.toggle("hidden", active);
         editEl.classList.toggle("hidden", !active);
+
+        renderSpecs();
     });
 
     if (!active && (createMode || editMode)) {
@@ -148,7 +161,11 @@ function guardarConsignee() {
     specFields.forEach(({ edit, key }) => {
         const el = $(edit);
         if (!el) return;
-        nuevo[key] = el.type === "number" ? Number(el.value) : el.value;
+        nuevo[key] = key === "prefDispatchPackagingID"
+        ? Number(el.value)
+        : el.type === "number"
+            ? Number(el.value)
+            : el.value;
     });
 
     consignees.push(nuevo);

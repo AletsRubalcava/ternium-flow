@@ -8,6 +8,15 @@ const customers = [
     { id: 7, name: "Grupo Constructor Alpha", rfc: "GCA909090GH4", contact: "Luis Torres", status: true, address: "Av. Gonzalitos 2200, Col. Vista Hermosa, Monterrey, NL, CP 64620" }
 ];
 
+const dispatchPackaging = [
+    { id: 1, name: "Tarima Industrial Reforzada" },
+    { id: 2, name: "Huacal de Madera Exportación" },
+    { id: 3, name: "Slingas de Nylon" },
+    { id: 4, name: "Sin Embalaje (A Granel)" },
+    { id: 5, name: "Pallet Madera" },
+    { id: 6, name: "Rack Metálico" },
+]
+
 const consignees = [
     {
         id: 1,
@@ -17,7 +26,7 @@ const consignees = [
         maxLoad: 1500.50,
         minLoad: 100.00,
         maxPieces: 50,
-        prefDispatchPackaging: "Pallet Madera",
+        prefDispatchPackagingID: 5,
         maxWidth: 1.20,
         maxHeight: 1.80,
         internalDiameter: 0.75,
@@ -35,7 +44,7 @@ const consignees = [
         maxLoad: 3000.00,
         minLoad: 500.00,
         maxPieces: 20,
-        prefDispatchPackaging: "Rack Metálico",
+        prefDispatchPackagingID: 6,
         maxWidth: 2.50,
         maxHeight: 2.20,
         internalDiameter: 1.00,
@@ -53,7 +62,7 @@ const consignees = [
         maxLoad: 800.00,
         minLoad: 50.00,
         maxPieces: 100,
-        prefDispatchPackaging: "Caja Cartón Reforzada",
+        prefDispatchPackagingID: 1,
         maxWidth: 0.80,
         maxHeight: 0.80,
         internalDiameter: 0.00,
@@ -71,7 +80,7 @@ const consignees = [
         maxLoad: 1200.00,
         minLoad: 200.00,
         maxPieces: 30,
-        prefDispatchPackaging: "Pallet Plástico",
+        prefDispatchPackagingID: 2,
         maxWidth: 1.10,
         maxHeight: 1.50,
         internalDiameter: 0.50,
@@ -89,7 +98,7 @@ const consignees = [
         maxLoad: 1200.00,
         minLoad: 200.00,
         maxPieces: 30,
-        prefDispatchPackaging: "Pallet Plástico",
+        prefDispatchPackagingID: 2,
         maxWidth: 1.10,
         maxHeight: 1.50,
         internalDiameter: 0.50,
@@ -253,4 +262,4 @@ const changes = [
     }
 ]
 
-export {customers, consignees, platforms, followUps, products, users, changes, entities, roles, contacts};
+export {customers, consignees, platforms, followUps, products, users, changes, entities, roles, contacts, dispatchPackaging};
