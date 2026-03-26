@@ -21,8 +21,6 @@ const customer  = idCus
     ? customers.find(c => c.id == idCus)
     : customers.find(c => c.id == consignee?.idCustomer);
 
-const consigneeAddress = encodeURIComponent(consignee.address);
-
 let editMode = false;
 
 // Mapa de campos de especificaciones: id -> propiedad en consignee
@@ -42,13 +40,16 @@ const badges = {
     status: v => `<span class="${v ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v ? "Activo" : "Inactivo"}</span>`
 };
 
-$("returnListView").href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
+if (customer) {
+    $("returnListView").href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
+}
 
 // --- Render Campos ---
 function renderCampos() {
     if (createMode) {
         $("upperConsigneeId").textContent = "Nuevo";
         $("consigneeID").textContent      = id;
+        $("consigneeCustomer").textContent = customer.name;
         $("consigneeStatus").innerHTML    = badges.status(false);
     } else {
         Object.entries({
@@ -85,14 +86,60 @@ function renderSpecs() {
 // --- Validar Campos ---
 function validarCampos() {
     let valido = true;
-    ["consigneeName-edit", "consigneeAddres-edit"].forEach(fieldId => {
+
+    // Campos de info general
+    ["consigneeName-edit", "consigneeAddress-edit"].forEach(fieldId => {
         const input = $(fieldId);
-        if (input && !input.value.trim()) {
+        if (!input.value.trim()) {
             input.classList.add("border-red-400");
             valido = false;
         }
     });
+
+    // Campos de especificaciones
+    specFields
+        .filter(f => f.key !== "instructions")
+        .forEach(({ edit, type }) => {
+            const input = $(edit);
+            if (!input) return;
+
+            let invalido = false;
+
+            if (input.tagName === "SELECT") {
+                invalido = !input.value;
+            } 
+            else if (type === "number") {
+                const value = input.value;
+
+                if (value === "") {
+                    invalido = true; // vacío
+                } else {
+                    const num = Number(value);
+                    invalido = num <= 0 || isNaN(num); // 👈 clave
+                }
+            } 
+            else {
+                invalido = !input.value.trim();
+            }
+
+            if (invalido) {
+                input.classList.add("border-red-400");
+                valido = false;
+            }
+        });
+
     return valido;
+}
+
+document.querySelectorAll(".edit, .spec-edit").forEach(el =>
+    el.addEventListener("input", () => el.classList.remove("border-red-400"))
+);
+
+function renderMap(){
+    if (consignee?.address) {
+        const encoded = encodeURIComponent(consignee.address);
+        $("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encoded}`;
+    }
 }
 
 // --- Toggle Edit ---
@@ -104,7 +151,21 @@ function toggleEdit(active) {
     document.querySelectorAll(".editable").forEach(f => {
         const view  = f.querySelector(".view");
         const input = f.querySelector(".edit");
-        if (active) input.value = view.textContent.trim(); else view.textContent = input.value;
+
+        if (active) {
+            input.value = view.textContent.trim();
+        } else {
+            view.textContent = input.value;
+
+            // 👇 AQUÍ está la magia
+            if (input.id === "consigneeName-edit") {
+                consignee.name = input.value;
+            }
+            if (input.id === "consigneeAddress-edit") {
+                consignee.address = input.value;
+            }
+        }
+
         view.classList.toggle("hidden", active);
         input.classList.toggle("hidden", !active);
     });
@@ -138,6 +199,7 @@ function toggleEdit(active) {
         editEl.classList.toggle("hidden", !active);
 
         renderSpecs();
+        if(!active) renderMap();
     });
 
     if (!active && (createMode || editMode)) {
@@ -195,11 +257,10 @@ confirmBtn.addEventListener("click", () => {
     window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
 });
 
-$("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${consigneeAddress}`;
-
 // --- Init ---
 renderCampos();
 renderSpecs();
+renderMap();
 
 if (createMode) {
     editMode = true;
