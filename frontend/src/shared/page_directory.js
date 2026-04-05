@@ -1,8 +1,9 @@
 import { loadClientes } from "../customers/customers_list_view_content.js";
 import { loadConsignees } from "../consignees/consignee_list_view.js";
-import { loadProductos } from "../products/products_list_view_content.js";
-import { loadPlatforms } from "../customers/customer_platform_list_view.js";
+import { loadProductos } from "../products/products_list_view.js";
+import { loadPlatforms } from "../platforms/platform_list_view.js";
 import { loadUsers } from "../users/users_list_view.js";
+import { loadPresets } from "../platforms/preset_list_view.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -17,12 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
         loadConsignees();
         setActiveNav("customers");
     } else if (type === "platforms"){
-      loadPlatforms();
-      setActiveNav("customers");
+        loadPlatforms();
+        setActiveNav("customers");
     } else if (type === "products") {
         loadProductos();
         setActiveNav("products");
-    }else if (type === "users"){
+    } else if (type === "presets") {
+        loadPresets();
+        setActiveNav("presets")  
+    } else if (type === "users"){
         loadUsers();
         setActiveNav("users");
     }

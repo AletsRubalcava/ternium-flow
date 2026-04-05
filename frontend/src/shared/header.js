@@ -8,7 +8,7 @@ document.getElementById("headerWidget").innerHTML = `
         <a id="customers" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5 font-semibold" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
         <a id="commercial" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Comercial</a>
         <a id="products" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=products">Productos</a>
-        <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Paquetes</a>
+        <a id="presets" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=presets">Paquetes</a>
         <a id="followUps" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="#">Seguimiento</a>
         <a id="users" class="text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src//shared/list_view.html?type=users">Usuarios</a>
     </nav>
