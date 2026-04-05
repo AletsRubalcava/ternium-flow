@@ -22,7 +22,6 @@ const customer = idCus
     ? customers.find(c => c.id == idCus)
     : customers.find(c => c.id == consignee?.idCustomer);
 
-// Working copy of product load rows for this platform
 let currentProductLoad = createMode
     ? []
     : productLoad.filter(pl => pl.idPlatform == platform?.id).map(pl => ({ ...pl }));
@@ -30,7 +29,7 @@ let currentProductLoad = createMode
 let editMode     = false;
 let isCreateMode = createMode;
 
-// ── Spec fields (sidebar — all read-only, auto-calculated) ───────────────────
+// ── Spec fields ──────────────────────────────────────────────────────────────
 const specFields = [
     { view: "spec-pieces-view",  key: "piecesNumber",      label: "Número de Piezas"     },
     { view: "spec-weight-view",  key: "weight",            label: "Peso Estimado (kg)"   },
@@ -45,7 +44,7 @@ const badges = {
 
 // ── Navigation ───────────────────────────────────────────────────────────────
 if (customer) {
-    if (type == "preset"){
+    if (type == "preset") {
         $("returnListView").innerText = "PAQUETES";
         $("returnListView").href = `/frontend/src/shared/list_view.html?type=presets`;
     } else {
@@ -66,10 +65,10 @@ $("platformConsignee-edit").innerHTML = consignees
 
 $("addProductSKU").innerHTML = `<option value="">— Selecciona un producto —</option>` +
     products.map(p =>
-        `<option value="${p.sku}">${p.sku} · ${p.producto} (${p.tipo})</option>`
+        `<option value="${p.id}">${p.id} · ${p.producto} (${p.tipo})</option>`
     ).join("");
 
-// ── Auto-calculate specs from currentProductLoad ─────────────────────────────
+// ── Auto-calculate specs ─────────────────────────────────────────────────────
 function calcSpecs() {
     if (currentProductLoad.length === 0) {
         platform.piecesNumber = 0;
@@ -85,10 +84,10 @@ function calcSpecs() {
     let maxHeight   = 0;
 
     currentProductLoad.forEach(row => {
-        const product = products.find(p => p.sku == row.idProduct);
+        const product = products.find(p => p.id == row.idProduct);
         if (!product) return;
         totalPieces += row.quantity ?? 0;
-        totalWeight += (product.peso ?? 0) * (row.quantity ?? 0);
+        totalWeight += (product.pesoUnitario ?? 0) * (row.quantity ?? 0);
         if ((product.width  ?? 0) > maxWidth)  maxWidth  = product.width  ?? 0;
         if ((product.height ?? 0) > maxHeight) maxHeight = product.height ?? 0;
     });
@@ -155,7 +154,7 @@ function renderProductTable() {
             return `
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group" data-idx="${idx}">
                 <td class="px-6 py-4 text-sm font-bold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">
-                    ${product?.id ?? row.idProduct}
+                    ${product?.numeroDeParte ?? row.idProduct}
                 </td>
                 <td class="px-6 py-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                     <div class="font-medium">${product?.producto ?? "Desconocido"}</div>
@@ -181,6 +180,7 @@ function renderProductTable() {
         }).join("");
     }
 
+    // Botón "Agregar producto" solo visible en edit mode
     footer.innerHTML = `
         <tr>
             <td colspan="${editMode ? 5 : 4}" class="px-6 py-3">
@@ -276,21 +276,23 @@ document.querySelectorAll(".edit").forEach(el =>
 
 // ── Toggle edit mode ─────────────────────────────────────────────────────────
 function toggleEdit(active) {
-    // Si se está intentando guardar, validar antes de continuar
+    // Si se intenta guardar, validar antes de continuar
     if (!active) {
         if (!validarCampos()) {
-            // Revertir estado — permanecemos en edit mode
+            // Validación falló — mantenemos edit mode visualmente y en estado
             editMode = true;
             editButton.querySelector("span").textContent = "save";
             editButton.childNodes[2].textContent         = " Guardar";
             return;
         }
+        // Validación OK — confirmar salida de edit mode
+        editMode = false;
     }
 
     editButton.querySelector("span").textContent = active ? "save" : "edit";
     editButton.childNodes[2].textContent         = active ? " Guardar" : " Editar";
 
-    // General text fields
+    // Campos de texto
     const textFields = [
         { viewId: "platformName",        editId: "platformName-edit",        key: "name"        },
         { viewId: "platformDescription", editId: "platformDescription-edit", key: "description" },
@@ -333,7 +335,7 @@ function toggleEdit(active) {
     consView.classList.toggle("hidden", active);
     consSel.classList.toggle("hidden", !active);
 
-    // Dispatch packaging select
+    // Dispatch packaging
     const packView = $("spec-pack-view");
     const packSel  = $("spec-pack-edit");
     if (active) {
@@ -346,7 +348,7 @@ function toggleEdit(active) {
 
     if (!active) renderSpecs();
 
-    // Commit cambios al guardar
+    // Commit al guardar
     if (!active) {
         if (isCreateMode) {
             const nuevo = savePlatform();
@@ -356,7 +358,7 @@ function toggleEdit(active) {
             $("platformID").textContent = nuevo.id;
             $("upperId").textContent    = nuevo.id;
             deleteBtn.classList.remove("hidden");
-            window.history.replaceState({}, "", `?id=${nuevo.id}&idCus=${customer.id}`);
+            window.history.replaceState({}, "", `?id=${nuevo.id}&idCus=${customer?.id}`);
 
             currentProductLoad.forEach(row => {
                 row.idPlatform = nuevo.id;
@@ -415,7 +417,7 @@ function deletePlatform() {
 // ── Event listeners ──────────────────────────────────────────────────────────
 editButton.addEventListener("click", () => {
     if (editMode) {
-        // Intentando guardar — toggleEdit valida y decide si salir
+        // Intentando guardar — toggleEdit decide si puede salir
         toggleEdit(false);
     } else {
         // Entrando a editar
@@ -428,7 +430,7 @@ deleteBtn.addEventListener("click",  () => modal.classList.remove("hidden"));
 cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", () => {
     deletePlatform();
-    window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer.id}`;
+    window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id}`;
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
