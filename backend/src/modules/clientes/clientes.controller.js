@@ -6,9 +6,11 @@ export async function createClienteHandler(req, res) {
 
 
     //Safery checks
-    if (!data.nombre || !data.rfc || !data.direccion_fiscal || !data.estado) {
+    if (!data.nombre || data.estado == null) {
+        console.log("falta")
         return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
+
 
     try {
         const cliente = await createCliente(req.body);
