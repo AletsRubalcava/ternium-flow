@@ -1,5 +1,6 @@
 import {DataTypes} from "sequelize";
 import {sequelize} from "../../config/database.js";
+import Cliente from "../clientes/clientes.model.js";
 
 const Consignatario = sequelize.define("Consignatario", {
   id: {
@@ -7,7 +8,15 @@ const Consignatario = sequelize.define("Consignatario", {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
+  cliente_id: {
+    type: DataTypes.UUID,
+    allowNull: false
+  },
   nombre: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  direccion: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -40,7 +49,14 @@ const Consignatario = sequelize.define("Consignatario", {
   embalaje_despacho: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  estado: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
   }
 });
+
+Consignatario.belongsTo(Cliente, { foreignKey: "clienteId", allowNull: false, onDelete: "CASCADE" });
 
 export default Consignatario;
