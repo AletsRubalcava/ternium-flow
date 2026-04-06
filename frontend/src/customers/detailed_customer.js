@@ -1,4 +1,4 @@
-import { customers, consignees, platforms, followUps, contacts} from "../shared/db.js";
+import { consignees, platforms, followUps, contacts} from "../shared/db.js";
 import { setActiveNav } from "../shared/page_directory.js";
 
 setActiveNav("customers");
@@ -14,7 +14,11 @@ const confirmBtn  = $("confirmDelete");
 const params     = new URLSearchParams(window.location.search);
 const id         = params.get("id");
 const createMode = params.get("create") === "true";
-const customer   = createMode ? {} : customers.find(c => c.id == id);
+
+const response = await axios.get("http://10.22.177.228:3000/api/clientes");
+const customers = response.data;
+console.log(customers);
+
 const consignee  = createMode ? [] : consignees.filter(c => c.idCustomer == customer.id);
 const platformCustomer = createMode ? [] : platforms.filter(p => consignee.some(c => c.id == p.idConsignee));
 const followUp   = createMode ? [] : followUps.filter(f => consignee.some(c => c.id == f.idConsignee));
@@ -93,7 +97,7 @@ function toggleEdit(active) {
         view.classList.toggle("hidden", active);
         input.classList.toggle("hidden", !active);
     });
-
+/*
     // Status select
     const statusView   = $("customerStatus");
     const statusSelect = $("customerStatus-edit");
@@ -107,7 +111,7 @@ function toggleEdit(active) {
         statusView.classList.remove("hidden");
         statusSelect.classList.add("hidden");
     }
-
+*/
     document.querySelectorAll(".contactWidget").forEach(c => {
         if(active){
             c.querySelector(".editContactBtn").classList.remove("hidden");
@@ -126,6 +130,7 @@ function toggleEdit(active) {
     if (!active && (createMode || editMode)) {
         if (!validarCampos()) { editMode = true; toggleEdit(true); return; }
         if (createMode) {
+            console.log("Guardado");
             const nuevo = guardarCustomer();
             $("idCustomer").textContent = $("upperClientId").textContent = nuevo.id;
             deleteBtn.classList.remove("hidden");
@@ -138,14 +143,25 @@ function toggleEdit(active) {
 }
 
 // --- Guardar Customer ---
-function guardarCustomer() {
+async function guardarCustomer() {
     const nuevoCustomer = {
-        id:      Number(id),
-        name:    $("customerName-edit").value.trim(),
-        rfc:     $("customerRFC-edit").value.trim(),
-        address: $("customerAddress-edit").value.trim(),
-        status:  $("customerStatus-edit").value === "1",
+        nombre:    $("customerName-edit").value.trim(),
+        rfc:     $("customerRFC-edit").value.trim() || null,
+        direccion_fiscal: $("customerAddress-edit").value.trim() || null,
+        estado:  $("customerStatus-edit").value === "1",
     };
+
+    try {
+        const res = await axios.post(
+            'http://10.22.177.228:3000/api/clientes', // cambia endpoint real
+            nuevoCustomer
+        );
+
+        console.log(res.data);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+    }
+
     customers.push(nuevoCustomer);
     return nuevoCustomer;
 }

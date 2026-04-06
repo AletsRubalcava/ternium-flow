@@ -22,6 +22,8 @@ export function loadUsers(){
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
         Nuevo Usuario`;
 
+    newButton.classList.remove("hidden");
+
     document.getElementById("listViewThead").innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");

@@ -17,6 +17,10 @@ export function loadPresets() {
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nuevo Paquete`;
+
+    
+    newButton.classList.remove("hidden");
+
     const newId = platforms.length > 0 ? Math.max(...platform.map(p => p.id)) + 1 : 1;
     newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&id=${newId}&idCus=${customer.id}&type=preset`;
 

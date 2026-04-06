@@ -1,6 +1,5 @@
-import {customers} from "../shared/db.js"
+import { customers } from "../shared/db.js";
 
-// Table attributes
 const attributes = [
     "ID",
     "Razón Social",
@@ -10,7 +9,7 @@ const attributes = [
 ];
 
 // Loads customers information to the table
-export function loadClientes(){
+export async function loadClientes(){
     // Get components
     const $ = id => document.getElementById(id);
     const title = $("pageTitle");
@@ -29,6 +28,12 @@ export function loadClientes(){
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nuevo Cliente`;
+
+    newButton.classList.remove("hidden");
+
+    /*const response = await axios.get("http://10.22.177.228:3000/api/clientes");
+    const customers = response.data;*/
+
     const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
     newButton.onclick = () => window.location.href = `/frontend/src/customers/detailed_customer.html?create=true&id=${newId}`;
 
@@ -44,14 +49,14 @@ export function loadClientes(){
         <td
             class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light dark:text-text-primary-dark">${c.id}</td>
         <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-primary-light dark:text-text-primary-dark font-medium">${c.name}</td>
+            class="px-6 py-4 whitespace-nowrap text-sm text-text-primary-light dark:text-text-primary-dark font-medium">${c.nombre}</td>
         <td
             class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.rfc}</td>
         <td
             class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.contact}</td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span
-                class=" ${c.status == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status == 1 ? "Activo" : "Inactivo"}</span>
+                class=" ${c.estado == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status == 1 ? "Activo" : "Inactivo"}</span>
         </td>
     </tr>
     `).join("");

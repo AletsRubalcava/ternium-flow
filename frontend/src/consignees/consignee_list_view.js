@@ -21,6 +21,9 @@ export function loadConsignees() {
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nuevo Consignatario`;
+
+    newButton.classList.remove("hidden");
+
     const newId = consignee.length > 0 ? Math.max(...consignee.map(c => c.id)) + 1 : 1;
     newButton.onclick = () => window.location.href = `/frontend/src/consignees/detailed_consignee.html?create=true&id=${newId}&idCus=${customer.id}`;
 

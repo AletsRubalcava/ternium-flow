@@ -19,6 +19,8 @@ export function loadProductos() {
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
         Nuevo Producto`;
 
+    newButton.classList.remove("hidden");
+
     newButton.onclick = () => {
         window.location.href = `/frontend/src/products/detailed_product.html?create=true&id=${newId}`;
     };
