@@ -4,6 +4,7 @@ import { loadProductos } from "../products/products_list_view.js";
 import { loadPlatforms } from "../platforms/platform_list_view.js";
 import { loadUsers } from "../users/users_list_view.js";
 import { loadPresets } from "../platforms/preset_list_view.js";
+import { loadComercial } from "../comercial/comercial_list_view.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -17,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (type === "consignees"){
         loadConsignees();
         setActiveNav("customers");
+    } else if (type === "commercial"){
+        loadComercial();
+        setActiveNav("commercial");
     } else if (type === "platforms"){
         loadPlatforms();
         setActiveNav("customers");

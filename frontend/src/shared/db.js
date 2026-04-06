@@ -115,6 +115,12 @@ const platformType = {
     custom: "custom"
 };
 
+const platformRequestStatus = {
+    approved: "approved",
+    rejected: "rejected",
+    pending: "pending"
+}
+
 const platforms = [
     {
         id: 1,
@@ -129,7 +135,8 @@ const platforms = [
         piecesNumber: 1,
         createdAt: "2024-01-20T10:00:00Z",
         updatedAt: "2024-01-20T10:00:00Z",
-        status: true
+        status: true,
+        approvalStatus: platformRequestStatus.approved
     },
     {
         id: 2,
@@ -144,7 +151,8 @@ const platforms = [
         piecesNumber: 5,
         createdAt: "2024-02-15T11:30:00Z",
         updatedAt: "2024-02-18T09:00:00Z",
-        status: true
+        status: true,
+        approvalStatus: platformRequestStatus.approved
     },
     {
         id: 3,
@@ -159,7 +167,8 @@ const platforms = [
         piecesNumber: 12,
         createdAt: "2024-03-05T08:00:00Z",
         updatedAt: "2024-03-05T08:00:00Z",
-        status: false
+        status: false,
+        approvalStatus: platformRequestStatus.approved
     },
     {
         id: 4,
@@ -174,7 +183,40 @@ const platforms = [
         piecesNumber: 8,
         createdAt: "2024-03-10T14:20:00Z",
         updatedAt: "2024-03-12T16:45:00Z",
-        status: true
+        status: true,
+        approvalStatus: platformRequestStatus.approved
+    },
+    {
+        id: 5,
+        idConsignee: 4,
+        type: platformType.preset,
+        name: "Preestablecido 8",
+        description: "Rollos de aceros asegurados",
+        weight: 1300,
+        dispatchPackaging: 5,
+        width: 1.10,
+        height: 0.18,
+        piecesNumber: 8,
+        createdAt: "2024-03-10T14:20:00Z",
+        updatedAt: "2024-03-12T16:45:00Z",
+        status: true,
+        approvalStatus: platformRequestStatus.pending
+    },
+    {
+        id: 6,
+        idConsignee: 3,
+        type: platformType.preset,
+        name: "Plástico Higiénica",
+        description: "HDPE, Grado alimenticio, Azul",
+        weight: 1700,
+        dispatchPackaging: 3,
+        width: 1.00,
+        height: 0.12,
+        piecesNumber: 12,
+        createdAt: "2024-03-05T08:00:00Z",
+        updatedAt: "2024-03-05T08:00:00Z",
+        status: false,
+        approvalStatus: platformRequestStatus.pending
     },
 ];
 
@@ -443,4 +485,9 @@ const productLoad = [
     { id: 6, idPlatform: 4, idProduct: 6, quantity: 8 },
 ];
 
-export {customers, consignees, platforms, followUps, products, users, changes, entities, roles, contacts, dispatchPackaging, productLoad, platformType};
+const platformRequest = [
+    { id: 1, idPlatform: 5, idConsignee: 4, status: platformRequestStatus.pending, comments: "", createDate: "2026-03-09T11:29:58Z", resolutionDate: "" },
+    { id: 1, idPlatform: 6, idConsignee: 3, status: platformRequestStatus.pending, comments: "", createDate: "2026-03-09T11:29:58Z", resolutionDate: "" },
+]
+
+export {customers, consignees, platforms, followUps, products, users, changes, entities, roles, contacts, dispatchPackaging, productLoad, platformType, platformRequest};
