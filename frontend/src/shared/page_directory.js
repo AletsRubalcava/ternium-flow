@@ -1,4 +1,4 @@
-import { loadClientes } from "../customers/customers_list_view_content.js";
+import { loadClientes } from "../customers/customers_list_view.js";
 import { loadConsignees } from "../consignees/consignee_list_view.js";
 import { loadProductos } from "../products/products_list_view.js";
 import { loadPlatforms } from "../platforms/platform_list_view.js";

@@ -1,12 +1,12 @@
 import {Router} from 'express';
-import { createConsignatarioHandler, getAllConsignatariosHandler, getConsignatarioByIdHandler, updateConsignatarioHandler, deleteConsignatarioHandler } from './consignatarios.controller.js';
+import { createConsigneeHandler, getAllConsignatariosHandler, getConsignatarioByIdHandler, updateConsigneeHandler, deleteConsigneeHandler } from './consignatarios.controller.js';
 
 const router = Router();
 
-router.post('/', createConsignatarioHandler);
+router.post('/', createConsigneeHandler);
 router.get('/', getAllConsignatariosHandler);
 router.get('/:id', getConsignatarioByIdHandler);
-router.put('/:id', updateConsignatarioHandler);
-router.delete('/:id', deleteConsignatarioHandler);
+router.put('/:id', updateConsigneeHandler);
+router.delete('/:id', deleteConsigneeHandler);
 
 export default router;

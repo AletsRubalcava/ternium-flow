@@ -1,65 +1,69 @@
-import { createCliente, getAllClientes, getClienteById, updateCliente, deleteCliente } from './clientes.service.js';
+import { createCustomer, getAllCustomers, getCustomerById, updateCustomer, deleteCustomer } from './clientes.service.js';
 
-export async function createClienteHandler(req, res) {
-    console.log(req.body);
-    const data = req.body;
+export async function createCustomerHandler(req, res) {
+    const { id_customer, name, rfc, tax_address, status } = req.body;
+    const errors = [];
 
+    // Validations
+    if (!id_customer?.trim()) errors.push("id");
+    if (!name?.trim()) errors.push("name");
+    if (typeof status !== "boolean") errors.push("status");
 
-    //Safery checks
-    if (!data.nombre || data.estado == null) {
-        console.log("falta")
-        return res.status(400).json({ message: "Faltan campos obligatorios" });
+    // If errors, return them
+    if (errors.length > 0) {
+        return res.status(400).json({
+            message: "Faltan campos o son inválidos",
+            fields: errors
+        });
     }
 
-
     try {
-        const cliente = await createCliente(req.body);
-        res.status(201).json(cliente);
+        const customer = await createCustomer({ id_customer, name, rfc, tax_address, status });
+        res.status(201).json(customer);
     } catch (error) {
-        res.status(500).json({ message: "Error al crear el cliente" });
         console.error(error);
+        res.status(500).json({ message: "Error al crear el cliente" });
     }
 }
 
-export async function getAllClientesHandler(req, res) {
+export async function getAllCustomersHandler(req, res) {
     try {
-        const clientes = await getAllClientes();
-        res.status(200).json(clientes);
+        const customers = await getAllCustomers();
+        res.status(200).json(customers);
     } catch (error) {
         res.status(500).json({ message: "Error al obtener los clientes" });
         console.error(error);
     }
 }
 
-export async function getClienteByIdHandler(req, res) {
+export async function getCustomerByIdHandler(req, res) {
     const { id } = req.params;
 
     try {
-        const cliente = await getClienteById(id);
-        if (!cliente) {
+        const customer = await getCustomerById(id);
+        if (!customer) {
             return res.status(404).json({ message: "Cliente no encontrado" });
         } 
-        res.status(200).json(cliente);
+        res.status(200).json(customer);
     } catch (error) {
         res.status(500).json({ message: "Error al obtener el cliente" });
         console.error(error);
     }
 }
 
-export async function updateClienteHandler(req, res) {
+export async function updateCustomerHandler(req, res) {
     const { id } = req.params;
-    const data = req.body;
+    const { id_customer, name, rfc, tax_address, status } = req.body;
+    const errors = [];
 
-    //Safery checks
-    if (!data.nombre || !data.rfc || !data.direccion_fiscal || !data.estado) {
-        return res.status(400).json({ message: "Faltan campos obligatorios" });
-    }
-
+    // Validations
+    if (!id_customer?.trim()) errors.push("id");
+    if (!name?.trim()) errors.push("name");
+    if (typeof status !== "boolean") errors.push("status");
 
     try {
-        const cliente = await updateCliente(id, data);
-        res.status(200).json(cliente);
-
+        const customer = await updateCustomer(id, { id_customer, name, rfc, tax_address, status });
+        res.status(200).json(customer);
     } catch (error) {
         if (error.message === "Cliente no encontrado") {
             return res.status(404).json({ message: error.message });
@@ -69,11 +73,11 @@ export async function updateClienteHandler(req, res) {
     }
 }
 
-export async function deleteClienteHandler(req, res) {
+export async function deleteCustomerHandler(req, res) {
     const { id } = req.params;
     
     try {
-        await deleteCliente(id);
+        await deleteCustomer(id);
         res.status(204).send();
     } catch (error) {
         if (error.message === "Cliente no encontrado") {

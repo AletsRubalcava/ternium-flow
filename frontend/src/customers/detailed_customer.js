@@ -1,4 +1,4 @@
-import { consignees, platforms, followUps, contacts} from "../shared/db.js";
+import { followUps } from "../shared/db.js";
 import { setActiveNav } from "../shared/page_directory.js";
 
 setActiveNav("customers");
@@ -7,31 +7,57 @@ setActiveNav("customers");
 const $ = id => document.getElementById(id);
 const editButton  = $("editButton");
 const deleteBtn   = $("deleteButton");
+
 const modal       = $("deleteModal");
 const cancelBtn   = $("cancelDelete");
 const confirmBtn  = $("confirmDelete");
+
+const deleteContactModal  = $("deleteContactModal");
+const confirmContactModal = $("confirmContactDelete");
+const cancelContactModal  = $("cancelContactDelete");
 
 const params     = new URLSearchParams(window.location.search);
 const id         = params.get("id");
 const createMode = params.get("create") === "true";
 
-const response = await axios.get("http://10.22.177.228:3000/api/clientes");
-const customers = response.data;
-console.log(customers);
+let customer;
+let consignees;
 
-const consignee  = createMode ? [] : consignees.filter(c => c.idCustomer == customer.id);
-const platformCustomer = createMode ? [] : platforms.filter(p => consignee.some(c => c.id == p.idConsignee));
-const followUp   = createMode ? [] : followUps.filter(f => consignee.some(c => c.id == f.idConsignee));
+if (id) {
+    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${id}`);
+    customer = resCustomers.data;
 
-const contactModal = $("contactModal");
-const saveContactBtn = $("saveContact");
+    const resConsignees = await axios.get("http://localhost:3000/api/consignees");
+    consignees = resConsignees.data.filter(c => c.id_customer == id);
+} else {
+    customer  = { status: false };
+    consignees = [];
+}
+
+const resPlatforms        = await axios.get("http://localhost:3000/api/platforms");
+const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+
+const platformRequests = resPlatformRequests.data.filter(pr =>
+    consignees.some(c => c.id === pr.id_consignee)
+);
+
+const platforms = resPlatforms.data.filter(p =>
+    platformRequests.some(pr => pr.id_platform === p.id && pr.status === "Aceptada")
+);
+
+const followUp = createMode ? [] : followUps.filter(f => consignees.some(c => c.id == f.idConsignee));
+
+const contactModal     = $("contactModal");
+const saveContactBtn   = $("saveContact");
 const cancelContactBtn = $("cancelContact");
-const nameErrorMsg = $("nameError");
-const contactErrorMsg = $("contactError");
+const contactErrorMsg  = $("contactError");
 
-let editingContact = null;
-let editMode = false;
-let selectedItem = null; // { type: 'consignee' | 'platform', data: {...} }
+let editingContact    = null;
+let editMode          = false;
+let selectedItem      = null;
+let selectedContactId = null;
+let localContacts     = [];
+let originalContacts  = [];
 
 // --- Badges ---
 const badges = {
@@ -51,42 +77,79 @@ function emptyWidget(mensaje) {
         </div>`;
 }
 
+// --- Fetch contacts ---
+async function fetchContacts() {
+    const { data } = await axios.get("http://localhost:3000/api/contacts");
+    return data.filter(c => c.id_customer == customer.id);
+}
+
 // --- Render Campos ---
 function renderCampos() {
     if (createMode) {
-        $("upperClientId").textContent  = "Nuevo";
-        $("idCustomer").textContent     = id;
-        $("customerStatus").innerHTML   = badges.status(false);
+        $("upperClientId").textContent = "Nuevo";
+        $("customerStatus").innerHTML  = badges.status(false);
     } else {
         const fields = {
-            upperClientId:   id,
-            idCustomer:      customer.id,
+            upperClientId:   customer.name,
+            idCustomer:      customer.id_customer,
             customerName:    customer.name,
             customerRFC:     customer.rfc,
-            customerAddress: customer.address,
+            customerAddress: customer.tax_address,
         };
         Object.entries(fields).forEach(([k, v]) => $(k).textContent = v);
         $("customerStatus").innerHTML = badges.status(customer.status);
     }
 
-    $("activeConsignees").textContent = `(${consignee.length} activos)`;
+    $("activeConsignees").textContent = `(${consignees.length} activos)`;
 }
 
 // --- Validar Campos ---
 function validarCampos() {
-    let valido = true;
-    ["customerName-edit", "customerRFC-edit", "customerAddress-edit"].forEach(fieldId => {
+    let valid = true;
+    ["idCustomer-edit", "customerName-edit"].forEach(fieldId => {
         const input = $(fieldId);
         if (!input.value.trim()) {
             input.classList.add("border-red-400");
-            valido = false;
+            valid = false;
         }
     });
-    return valido;
+    return valid;
+}
+
+// --- Sync contacts to API ---
+async function syncContacts() {
+    const { data } = await axios.get("http://localhost:3000/api/contacts");
+    const remoteContacts = data.filter(c => c.id_customer == customer.id);
+
+    // Borrar los que ya no están en localContacts
+    const toDelete = remoteContacts.filter(r => !localContacts.some(l => l.id === r.id && !l._new));
+    await Promise.all(toDelete.map(c => axios.delete(`http://localhost:3000/api/contacts/${c.id}`)));
+
+    // Crear los nuevos
+    const toCreate = localContacts.filter(c => c._new);
+    await Promise.all(toCreate.map(c => {
+        const { _new, id, ...payload } = c;
+        return axios.post("http://localhost:3000/api/contacts", payload);
+    }));
+
+    // Actualizar los editados
+    const toUpdate = localContacts.filter(c => !c._new && c._edited);
+    await Promise.all(toUpdate.map(c => {
+        const { _edited, ...payload } = c;
+        return axios.put(`http://localhost:3000/api/contacts/${c.id}`, payload);
+    }));
+
+    // Recargar localContacts limpio
+    localContacts = await fetchContacts();
 }
 
 // --- Toggle Edit ---
-function toggleEdit(active) {
+async function toggleEdit(active) {
+    if (active) {
+        // Snapshot al entrar a editar
+        originalContacts = localContacts.map(c => ({ ...c }));
+    }
+
     editButton.querySelector("span").textContent = active ? "save" : "edit";
     editButton.childNodes[2].textContent         = active ? " Guardar" : " Editar";
 
@@ -97,8 +160,7 @@ function toggleEdit(active) {
         view.classList.toggle("hidden", active);
         input.classList.toggle("hidden", !active);
     });
-/*
-    // Status select
+
     const statusView   = $("customerStatus");
     const statusSelect = $("customerStatus-edit");
     if (active) {
@@ -106,74 +168,87 @@ function toggleEdit(active) {
         statusView.classList.add("hidden");
         statusSelect.classList.remove("hidden");
     } else {
-        customer.status      = statusSelect.value === "1";
-        statusView.innerHTML = badges.status(customer.status);
+        customer.status = statusSelect.value === "1";
+        statusView.innerHTML = badges.status(!!customer.status);
         statusView.classList.remove("hidden");
         statusSelect.classList.add("hidden");
     }
-*/
-    document.querySelectorAll(".contactWidget").forEach(c => {
-        if(active){
-            c.querySelector(".editContactBtn").classList.remove("hidden");
-            c.querySelector(".deleteContactBtn").classList.remove("hidden");
-        }else{
-            c.querySelector(".editContactBtn").classList.add("hidden");
-            c.querySelector(".deleteContactBtn").classList.add("hidden");
+
+    $("addContactBtn").classList.toggle("hidden", !active);
+    document.querySelectorAll(".editContactBtn, .deleteContactBtn")
+        .forEach(btn => btn.classList.toggle("hidden", !active));
+
+    if (!active && (createMode || !editMode)) {
+        if (!validarCampos()) {
+            // Revertir contactos si falla validación
+            localContacts = originalContacts.map(c => ({ ...c }));
+            renderContacts();
+            editMode = true;
+            await toggleEdit(true);
+            return;
         }
-    });
 
-    const addContactBtn = $("addContactBtn");
-
-    if(active) addContactBtn.classList.remove("hidden");
-    else addContactBtn.classList.add("hidden");
-
-    if (!active && (createMode || editMode)) {
-        if (!validarCampos()) { editMode = true; toggleEdit(true); return; }
         if (createMode) {
-            console.log("Guardado");
-            const nuevo = guardarCustomer();
-            $("idCustomer").textContent = $("upperClientId").textContent = nuevo.id;
+            const newCustomer = await saveNewCustomer();
+            $("idCustomer").textContent = $("upperClientId").textContent = newCustomer.id_customer;
             deleteBtn.classList.remove("hidden");
-            document.querySelectorAll(".viewAll").forEach(b => {
-                b.classList.remove("hidden");
-            });
-            window.history.replaceState({}, "", `?id=${nuevo.id}`);
+            document.querySelectorAll(".viewAll").forEach(b => b.classList.remove("hidden"));
+            window.history.replaceState({}, "", `?id=${newCustomer.id}`);
+        } else {
+            await saveEditedCustomer();
         }
+
+        await syncContacts();
+
+        editMode = false;
+        originalContacts = localContacts.map(c => ({ ...c }));
     }
 }
 
 // --- Guardar Customer ---
-async function guardarCustomer() {
-    const nuevoCustomer = {
-        nombre:    $("customerName-edit").value.trim(),
-        rfc:     $("customerRFC-edit").value.trim() || null,
-        direccion_fiscal: $("customerAddress-edit").value.trim() || null,
-        estado:  $("customerStatus-edit").value === "1",
+async function saveNewCustomer() {
+    const newCustomer = {
+        id_customer: $("idCustomer-edit").value.trim(),
+        name:        $("customerName-edit").value.trim(),
+        rfc:         $("customerRFC-edit").value.trim() || null,
+        tax_address: $("customerAddress-edit").value.trim() || null,
+        status:      $("customerStatus-edit").value === "1",
     };
-
     try {
-        const res = await axios.post(
-            'http://10.22.177.228:3000/api/clientes', // cambia endpoint real
-            nuevoCustomer
-        );
-
-        console.log(res.data);
+        const res = await axios.post("http://localhost:3000/api/customers", newCustomer);
+        return res.data;
     } catch (err) {
         console.error(err.response?.data || err.message);
     }
+    return newCustomer;
+}
 
-    customers.push(nuevoCustomer);
-    return nuevoCustomer;
+async function saveEditedCustomer() {
+    const updatedCustomer = {
+        id_customer: $("idCustomer-edit").value.trim(),
+        name:        $("customerName-edit").value.trim(),
+        rfc:         $("customerRFC-edit").value.trim() || null,
+        tax_address: $("customerAddress-edit").value.trim() || null,
+        status:      $("customerStatus-edit").value === "1",
+    };
+    try {
+        const res = await axios.put(`http://localhost:3000/api/customers/${id}`, updatedCustomer);
+        return res.data;
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+    }
+    return updatedCustomer;
 }
 
 // --- Render Consignatarios ---
 function renderConsignees() {
-    $("activeConsignees").textContent = `(${consignee.length} activos)`;
+    $("activeConsignees").textContent = `(${consignees.length} activos)`;
 
-    $("consigneeWidget").innerHTML = consignee.length === 0
+    $("consigneeWidget").innerHTML = consignees.length === 0
         ? emptyWidget("Sin consignatarios")
-        : consignee.map(c => `
-            <div class="consigneeTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${c.id}"><div>
+        : consignees.map(c => `
+            <div class="consigneeTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${c.id}">
+                <div>
                     <div class="text-sm font-medium text-text-primary-light">${c.name}</div>
                     <div class="text-[10px] text-text-secondary-light">${c.address}</div>
                 </div>
@@ -181,9 +256,8 @@ function renderConsignees() {
             </div>`).join("");
 
     document.querySelectorAll(".consigneeTuple").forEach(el => {
-        const cData = consignee.find(c => c.id == el.dataset.id);
+        const cData = consignees.find(c => c.id == el.dataset.id);
         el.addEventListener("click", (e) => {
-            // Evitar que el click en el botón de redirect active la selección
             if (e.target.classList.contains("redirectConsignee")) return;
             selectItem("consignee", cData, el);
         });
@@ -191,19 +265,20 @@ function renderConsignees() {
 
     document.querySelectorAll(".redirectConsignee").forEach(c => {
         c.addEventListener("click", () => {
-            window.location.href = `/frontend/src/consignees/detailed_consignee.html?id=${c.dataset.id}`
+            window.location.href = `/frontend/src/consignees/detailed_consignee.html?id=${c.dataset.id}`;
         });
     });
 }
 
 // --- Render Platforms ---
 function renderPlatforms() {
-    $("activePlatforms").textContent = `(${platformCustomer.length} activas)`;
+    $("activePlatforms").textContent = `(${platforms.length} activas)`;
 
-    $("platformWidget").innerHTML = platformCustomer.length === 0
+    $("platformWidget").innerHTML = platforms.length === 0
         ? emptyWidget("Sin tarimas")
-        : platformCustomer.map(p => `
-            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${p.id}"><div class="flex items-center gap-3">
+        : platforms.map(p => `
+            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${p.id}">
+                <div class="flex items-center gap-3">
                     <div>
                         <div class="text-sm font-medium text-text-primary-light">${p.name}</div>
                         <div class="text-[10px] text-text-secondary-light">${p.description}, ${p.weight}kg</div>
@@ -213,7 +288,7 @@ function renderPlatforms() {
             </div>`).join("");
 
     document.querySelectorAll(".platformTuple").forEach(el => {
-        const pData = platformCustomer.find(p => p.id == el.dataset.id);
+        const pData = platforms.find(p => p.id == el.dataset.id);
         el.addEventListener("click", (e) => {
             if (e.target.classList.contains("redirectPlatform")) return;
             selectItem("platform", pData, el);
@@ -250,126 +325,37 @@ function renderFollowUps() {
             <td class="px-6 py-4 text-sm font-bold text-text-primary-light">${f.id}</td>
             <td class="px-6 py-4 text-xs text-text-secondary-light">${f.date}</td>
             <td class="px-6 py-4 text-sm font-medium">${f.weight} kg</td>
-            <td class="px-6 py-4 text-xs text-text-secondary-light">${consignee.find(c => c.id == f.idConsignee)?.name ?? '—'}</td>
+            <td class="px-6 py-4 text-xs text-text-secondary-light">${consignees.find(c => c.id == f.idConsignee)?.name ?? "—"}</td>
             <td class="px-6 py-4 text-right">
                 <span class="${statusClass[f.status] ?? "bg-gray-100 text-gray-800"} px-2 py-1 text-[10px] font-bold rounded-full">${f.status}</span>
             </td>
         </tr>`).join("");
 
-        document.querySelectorAll(".followUpTuple").forEach(f => {
-            f.addEventListener("click", () => {
-                window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${f.dataset.id}`;
-            });
+    document.querySelectorAll(".followUpTuple").forEach(f => {
+        f.addEventListener("click", () => {
+            // window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${f.dataset.id}`;
         });
+    });
 }
 
-// --- Eliminar Customer ---
-function eliminarCustomer() {
-    const idx = customers.findIndex(c => c.id == customer.id);
-    if (idx !== -1) customers.splice(idx, 1);
-}
-
-// --- Event Listeners ---
-editButton.addEventListener("click", () => { editMode = !editMode; toggleEdit(editMode); });
-
-document.querySelectorAll(".edit").forEach(input => {
-    input.addEventListener("input", () => input.classList.remove("border-red-400"));
-});
-
-$("viewAllConsignees").onclick = () => window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${id}`;
-$("viewAllPlatforms").onclick  = () => window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${id}`;
-$("viewAllFollowUps").onclick  = () => window.location.href = `/frontend/src/shared/list_view.html?type=followUps&id=${id}`;
-
-deleteBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
-confirmBtn.addEventListener("click", () => {
-    eliminarCustomer();
-    window.location.href = "/frontend/src/shared/list_view.html?type=customers";
-});
-
-$("addContactBtn").addEventListener("click", () => {
-    editingContact = null;
-    contactModal.classList.remove("hidden");
-});
-
-// --- Add Contact
-function validarContacto() {
-    const name  = $("contactName").value.trim();
-    const email = $("contactEmail").value.trim();
-    const phone = $("contactPhone").value.trim();
-
-    let valido = true;
-
-    // Nombre obligatorio
-    if (!name) {
-        nameErrorMsg.classList.remove("hidden");
-        valido = false;
-    } else {
-        nameErrorMsg.classList.add("hidden");
-    }
-
-    // Email o teléfono (al menos uno)
-    if (!email && !phone) {
-        contactErrorMsg.classList.remove("hidden");
-        valido = false;
-    } else {
-        contactErrorMsg.classList.add("hidden");
-    }
-
-    return valido;
-}
-
-saveContactBtn.addEventListener("click", () => {
-    if (!validarContacto()) return;
-
-    const nuevo = {
-        id: Date.now(),
-        idCustomer: Number(id),
-        name: $("contactName").value.trim(),
-        workstation: $("contactWorkstation").value.trim(),
-        email: $("contactEmail").value.trim(),
-        phone: $("contactPhone").value.trim(),
-    };
-
-    if (editingContact) {
-        Object.assign(editingContact, nuevo);
-    } else {
-        contacts.push(nuevo);
-    }
-
-    contactModal.classList.add("hidden");
-    limpiarFormulario();
-    renderContacts();
-});
-
-function limpiarFormulario() {
-    ["contactName", "contactWorkstation", "contactEmail", "contactPhone"]
-        .forEach(id => $(id).value = "");
-}
-
-cancelContactBtn.addEventListener("click", () => {
-    contactModal.classList.add("hidden");
-    limpiarFormulario();
-});
-
-// --- Render Contacts
+// --- Render Contacts ---
 function renderContacts() {
     const container = document.querySelector(".contactsContainer");
-    const customerContacts = contacts.filter(c => c.idCustomer == id);
+    const contacts  = localContacts;
 
-    if (customerContacts.length === 0) {
+    if (contacts.length === 0) {
         container.innerHTML = emptyWidget("Sin contactos");
         return;
     }
 
-    container.innerHTML = customerContacts.map(c => `
+    container.innerHTML = contacts.map(c => `
         <div class="contactWidget flex gap-4 p-3 rounded-lg bg-gray-50 border border-border-light">
             <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
                 ${c.name[0] ?? "?"}
             </div>
             <div class="flex-grow">
                 <div class="text-md font-bold">${c.name}</div>
-                <div class="text-[12px] text-gray-500 mb-1">${c.workstation ?? ""}</div>
+                <div class="text-[12px] text-gray-500 mb-1">${c.position ?? ""}</div>
                 ${c.email ? `<div class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">mail</span>${c.email}</div>` : ""}
                 ${c.phone ? `<div class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">call</span>${c.phone}</div>` : ""}
             </div>
@@ -383,30 +369,126 @@ function renderContacts() {
             </div>
         </div>`).join("");
 
-    // Listeners después de renderizar
     document.querySelectorAll(".editContactBtn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const c = contacts.find(c => c.id == btn.dataset.id);
+            const c = localContacts.find(c => c.id == btn.dataset.id);
             if (!c) return;
-            editingContact = c;
-            $("contactName").value        = c.name;
-            $("contactWorkstation").value = c.workstation || "";
-            $("contactEmail").value       = c.email || "";
-            $("contactPhone").value       = c.phone || "";
+            editingContact         = c;
+            $("contactName").value     = c.name;
+            $("contactPosition").value = c.position || "";
+            $("contactEmail").value    = c.email || "";
+            $("contactPhone").value    = c.phone || "";
             contactModal.classList.remove("hidden");
         });
     });
 
     document.querySelectorAll(".deleteContactBtn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const idx = contacts.findIndex(c => c.id == btn.dataset.id);
-            if (idx !== -1) contacts.splice(idx, 1);
-            renderContacts();
+            deleteContactModal.classList.remove("hidden");
+            selectedContactId = btn.dataset.id;
         });
     });
 }
 
-function renderSpecs() {
+// --- Eliminar Customer ---
+async function eliminarCustomer() {
+    try {
+        await axios.delete(`http://localhost:3000/api/customers/${id}`);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+    }
+}
+
+// --- Validar Contacto ---
+function validateContact() {
+    const name  = $("contactName").value.trim();
+    const email = $("contactEmail").value.trim();
+    const phone = $("contactPhone").value.trim();
+
+    contactErrorMsg.classList.add("hidden");
+
+    if (!name) {
+        contactErrorMsg.innerText = "Debes ingresar el nombre del contacto.";
+        contactErrorMsg.classList.remove("hidden");
+        return false;
+    }
+
+    if (!email && !phone) {
+        contactErrorMsg.innerText = "Debe haber al menos un teléfono o correo.";
+        contactErrorMsg.classList.remove("hidden");
+        return false;
+    }
+
+    return true;
+}
+
+function getErrorMessage(errorCode) {
+    const messages = {
+        MISSING_REQUIRED_FIELDS: "Faltan campos obligatorios",
+        INVALID_EMAIL_TYPE:      "Correo inválido",
+        CONTACT_NOT_FOUND:       "Contacto no encontrado",
+        INTERNAL_SERVER_ERROR:   "Algo salió mal. Intenta de nuevo",
+        VALIDATION_ERROR:        "Correo inválido",
+        DUPLICATE_ENTRY:         "Este contacto ya existe",
+    };
+    return messages[errorCode] || "Error desconocido";
+}
+
+function limpiarFormulario() {
+    ["contactName", "contactPosition", "contactEmail", "contactPhone"]
+        .forEach(id => $(id).value = "");
+}
+
+// --- Save contact (solo en local) ---
+saveContactBtn.addEventListener("click", () => {
+    if (!validateContact()) return;
+    contactErrorMsg.classList.add("hidden");
+
+    const contact = {
+        id_customer: customer.id,
+        name:        $("contactName").value.trim(),
+        position:    $("contactPosition").value.trim(),
+        email:       $("contactEmail").value.trim(),
+        phone:       $("contactPhone").value.trim(),
+    };
+
+    if (editingContact) {
+        const idx = localContacts.findIndex(c => c.id === editingContact.id);
+        if (idx !== -1) localContacts[idx] = { ...localContacts[idx], ...contact, _edited: true };
+    } else {
+        localContacts.push({ ...contact, id: `_tmp_${Date.now()}`, _new: true });
+    }
+
+    editingContact = null;
+    contactModal.classList.add("hidden");
+    limpiarFormulario();
+    renderContacts();
+});
+
+cancelContactBtn.addEventListener("click", () => {
+    editingContact = null;
+    contactModal.classList.add("hidden");
+    contactErrorMsg.classList.add("hidden");
+    limpiarFormulario();
+});
+
+// --- Delete contact (solo en local) ---
+cancelContactModal.addEventListener("click", () => deleteContactModal.classList.add("hidden"));
+confirmContactModal.addEventListener("click", () => {
+    localContacts = localContacts.filter(c => c.id != selectedContactId);
+    deleteContactModal.classList.add("hidden");
+    renderContacts();
+});
+
+// --- Add Contact button ---
+$("addContactBtn").addEventListener("click", () => {
+    editingContact = null;
+    limpiarFormulario();
+    contactModal.classList.remove("hidden");
+});
+
+// --- Render Specs ---
+async function renderSpecs() {
     const content  = $("specsContent");
     const subtitle = $("specsSubtitle");
 
@@ -424,23 +506,25 @@ function renderSpecs() {
             <div class="field-value">${value ?? "—"}</div>
         </div>`;
 
+    const { data: dispatches } = await axios.get("http://localhost:3000/api/dispatch");
+
     if (type === "consignee") {
         subtitle.textContent = "Configuración de Consignatario";
         content.innerHTML = `
             <div class="grid grid-cols-2 gap-4">
-                ${field("Carga Máxima (kg)", data.maxLoad)}
-                ${field("Carga Mínima (kg)", data.minLoad)}
-                ${field("Máx. Piezas", data.maxPieces)}
-                ${field("Embalaje Preferido", data.prefDispatchPackaging)}
-                ${field("Ancho Máx (cm)", data.maxWidth)}
-                ${field("Altura Máx (cm)", data.maxHeight)}
-                ${field("Ø Interno (cm)", data.internalDiameter)}
-                ${field("Ø Externo (cm)", data.externalDiameter)}
+                ${field("Carga Máxima (kg)", data.max_load)}
+                ${field("Carga Mínima (kg)", data.min_load)}
+                ${field("Máx. Piezas", data.max_pieces_number)}
+                ${field("Embalaje Preferido", dispatches.find(d => d.id == data.preferred_dispatch)?.name ?? "—")}
+                ${field("Ancho Máx (cm)", data.max_width)}
+                ${field("Altura Máx (cm)", data.max_height)}
+                ${field("Ø Interno Máximo (cm)", data.max_internal_diameter)}
+                ${field("Ø Externo Máximo (cm)", data.max_external_diameter)}
             </div>
             <div>
                 <label class="field-label">Instrucciones Adicionales</label>
                 <p class="text-xs text-text-secondary-light leading-relaxed italic">
-                    ${data.instructions ?? "Sin instrucciones especiales."}
+                    ${data.additional_instructions ?? "Sin instrucciones especiales."}
                 </p>
             </div>
             <div class="pt-4">
@@ -456,14 +540,11 @@ function renderSpecs() {
         content.innerHTML = `
             <div class="grid grid-cols-2 gap-4">
                 ${field("Peso Estimado (kg)", data.weight)}
-                ${field("Piezas", data.piecesNumber)}
+                ${field("Piezas", data.number_of_pieces)}
                 ${field("Altura (cm)", data.height)}
                 ${field("Ancho (cm)", data.width)}
-                ${field("Ø Interno (cm)", data.internalDiameter)}
-                ${field("Ø Externo (cm)", data.externalDiameter)}
-                <div class="col-span-2">
-                    ${field("Embalaje de Despacho", data.dispatchPackaging)}
-                </div>
+                ${field("Largo (cm)", data.length)}
+                ${field("Embalaje de Despacho", dispatches.find(d => d.id == data.id_dispatch_packaging)?.name ?? "—")}
             </div>
             <div>
                 <label class="field-label">Descripción</label>
@@ -480,7 +561,6 @@ function renderSpecs() {
             </div>`;
     }
 
-    // Listener del botón de navegación
     $("specsNavBtn").addEventListener("click", () => {
         const base = type === "consignee"
             ? "/frontend/src/consignees/detailed_consignee.html"
@@ -490,20 +570,17 @@ function renderSpecs() {
 }
 
 function selectItem(type, data, element) {
-    // Quitar selección visual anterior
     document.querySelectorAll(".consigneeTuple, .platformTuple").forEach(el => {
         el.classList.remove("border-primary", "bg-orange-50");
         el.classList.add("border-border-light");
     });
 
-    // Si ya estaba seleccionado el mismo, deseleccionar
     if (selectedItem?.data?.id === data.id && selectedItem?.type === type) {
         selectedItem = null;
         renderSpecs();
         return;
     }
 
-    // Aplicar selección visual al nuevo
     element.classList.add("border-primary", "bg-orange-50");
     element.classList.remove("border-border-light");
 
@@ -511,20 +588,39 @@ function selectItem(type, data, element) {
     renderSpecs();
 }
 
+// --- Event Listeners ---
+editButton.addEventListener("click", () => { editMode = !editMode; toggleEdit(editMode); });
+
+document.querySelectorAll(".edit").forEach(input => {
+    input.addEventListener("input", () => input.classList.remove("border-red-400"));
+});
+
+$("viewAllConsignees").onclick = () => window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${id}`;
+$("viewAllPlatforms").onclick  = () => window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${id}`;
+$("viewAllFollowUps").onclick  = () => window.location.href = `/frontend/src/shared/list_view.html?type=followUps&id=${id}`;
+
+deleteBtn.addEventListener("click",  () => modal.classList.remove("hidden"));
+cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
+confirmBtn.addEventListener("click", async () => {
+    await eliminarCustomer();
+    window.location.href = "/frontend/src/shared/list_view.html?type=customers";
+});
+
 // --- Init ---
+localContacts    = await fetchContacts();
+originalContacts = localContacts.map(c => ({ ...c }));
+
 renderCampos();
 renderConsignees();
 renderPlatforms();
 renderFollowUps();
 renderContacts();
-renderSpecs(); // estado vacío inicial
+await renderSpecs();
 
 if (createMode) {
     editMode = true;
     toggleEdit(true);
 } else {
     deleteBtn.classList.remove("hidden");
-    document.querySelectorAll(".viewAll").forEach(b => {
-        b.classList.remove("hidden");
-    });
+    document.querySelectorAll(".viewAll").forEach(b => b.classList.remove("hidden"));
 }

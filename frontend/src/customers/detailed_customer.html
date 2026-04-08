@@ -8,9 +8,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
-        rel="stylesheet"/>
-    <link 
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -75,12 +74,12 @@
 </head>
 
 <body class="bg-background-light h-screen flex flex-col overflow-hidden">
-    <header 
-    id="headerWidget" 
-    class="sticky top-0 z-50 font-[Manrope] bg-white w-full px-5 flex justify-between items-center shadow-lg shrink-0">
+    <header id="headerWidget"
+        class="sticky top-0 z-50 font-[Manrope] bg-white w-full px-5 flex justify-between items-center shadow-lg shrink-0">
     </header>
 
-    <main class="flex-1 overflow-y-auto custom-scrollbar flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <main
+        class="flex-1 overflow-y-auto custom-scrollbar flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <div
@@ -94,13 +93,11 @@
                     Panel de Cliente</h1>
             </div>
             <div class="flex space-x-3">
-                <button
-                id="editButton"
+                <button id="editButton"
                     class="editButton bg-white border border-primary text-primary hover:bg-orange-50 font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">edit</span> Editar
                 </button>
-                <button
-                id="deleteButton"
+                <button id="deleteButton"
                     class="hidden bg-primary hover:bg-primary-hover text-white font-[Manrope] font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span> Eliminar
                 </button>
@@ -116,30 +113,33 @@
                             class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
                             Información General</h3>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="editable grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <label
                                 class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Clave
-                                de Cliente</label>
+                                de Cliente *</label>
                             <div id="idCustomer" class="view text-text-primary-light font-bold text-lg"></div>
+                            <input id="idCustomer-edit" class="edit hidden field-input" autocomplete="o" name="none" />
                         </div>
                         <div class="editable sm:col-span-2">
-                            <label class="field-label">Nombre</label>
+                            <label class="field-label">Nombre *</label>
                             <div id="customerName" class="view field-value"></div>
-                            <input id="customerName-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
+                            <input id="customerName-edit" class="edit hidden field-input" autocomplete="o"
+                                name="none" />
                         </div>
                         <div class="editable">
                             <label class="field-label">RFC</label>
                             <div id="customerRFC" class="view field-value"></div>
-                            <input id="customerRFC-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
+                            <input id="customerRFC-edit" class="edit hidden field-input" autocomplete="o" name="none" />
                         </div>
                         <div class="editable lg:col-span-3">
                             <label class="field-label">Dirección Fiscal</label>
                             <div id="customerAddress" class="view field-value"></div>
-                            <input id="customerAddress-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
+                            <input id="customerAddress-edit" class="edit hidden field-input" autocomplete="o"
+                                name="none" />
                         </div>
                         <div>
-                            <label class="field-label">Estado</label>
+                            <label class="field-label">Estado *</label>
                             <div id="customerStatus" class="field-value"></div>
                             <select id="customerStatus-edit" class="hidden field-input">
                                 <option value="1">Activo</option>
@@ -157,10 +157,10 @@
                                 <span class="material-symbols-outlined text-primary text-xl">location_on</span>
                                 <h3
                                     class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
-                                    Consignatarios <span id="activeConsignees" class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
+                                    Consignatarios <span id="activeConsignees"
+                                        class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
-                            <button
-                                id="viewAllConsignees"
+                            <button id="viewAllConsignees"
                                 class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
                                 Todos</button>
                         </div>
@@ -176,36 +176,35 @@
                                 <span class="material-symbols-outlined text-primary text-xl">inventory_2</span>
                                 <h3
                                     class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
-                                    Tarimas Autorizadas <span id="activePlatforms" class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
+                                    Tarimas Autorizadas <span id="activePlatforms"
+                                        class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
-                            <button
-                                id="viewAllPlatforms"
-                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                            <button id="viewAllPlatforms"
+                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
+                                Todos
                             </button>
                         </div>
-                        <div id="platformWidget" class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar"></div>
+                        <div id="platformWidget" class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar">
+                        </div>
                     </div>
                 </div>
                 <div
                     class="bg-surface-light rounded-xl shadow-soft border border-border-light max-h-[325px] flex flex-col">
-                    <div
-                        class="p-4 border-b border-border-light flex justify-between items-center">
+                    <div class="p-4 border-b border-border-light flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">history</span>
-                            <h3
-                                class="text-lg font-display font-bold text-text-primary-light uppercase">
+                            <h3 class="text-lg font-display font-bold text-text-primary-light uppercase">
                                 Historial de Pedidos
                             </h3>
                         </div>
-                        <button
-                                id="viewAllFollowUps"
-                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver Todos
+                        <button id="viewAllFollowUps"
+                            class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
+                            Todos
                         </button>
                     </div>
                     <div class="overflow-auto flex-1 custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead
-                                id="followUpsThead"
+                            <thead id="followUpsThead"
                                 class="bg-gray-50 dark:bg-gray-800/50 text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
                                 <tr>
                                     <th class="px-6 py-3">Referencia</th>
@@ -215,7 +214,8 @@
                                     <th class="px-6 py-3 text-right">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody id="followUpsBody" class="divide-y divide-border-light dark:divide-border-dark"></tbody>
+                            <tbody id="followUpsBody" class="divide-y divide-border-light dark:divide-border-dark">
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -242,13 +242,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col">
+                <div
+                    class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col">
                     <div class="p-5 border-b border-border-light">
                         <div class="flex flex-row items-center gap-2">
                             <span class="material-symbols-outlined text-primary">dataset</span>
-                            <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">Especificaciones</h2>
+                            <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">
+                                Especificaciones</h2>
                         </div>
-                        <p id="specsSubtitle" class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
+                        <p id="specsSubtitle"
+                            class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
                     </div>
                     <div id="specsContent" class="p-6 space-y-5"></div>
                 </div>
@@ -261,68 +264,82 @@
 
     <div id="deleteModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
-            
+
             <h2 class="text-lg font-semibold mb-4">
-            ¿Seguro que quieres eliminar este cliente?
+                ¿Seguro que quieres eliminar este cliente?
             </h2>
 
             <p class="text-sm text-gray-500 mb-6">
-            Esta acción no se puede deshacer.
+                Esta acción no se puede deshacer.
             </p>
 
             <div class="flex justify-end gap-3">
-            <button id="cancelDelete" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
-                Cancelar
-            </button>
-            <button id="confirmDelete" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
-                Eliminar
-            </button>
+                <button id="cancelDelete" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                    Cancelar
+                </button>
+                <button id="confirmDelete"
+                    class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
+                    Eliminar
+                </button>
             </div>
         </div>
     </div>
 
     <div id="contactModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
-        
-        <h2 class="text-lg font-semibold mb-4">
-            Nuevo contacto
-        </h2>
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
 
-        <div class="space-y-3">
-            <input id="contactName" placeholder="Nombre" autocomplete="off" name="none"
-                class="w-full border rounded px-3 py-2 text-sm"/>
+            <h2 class="text-lg font-semibold mb-4">
+                Nuevo contacto
+            </h2>
 
-            <input id="contactWorkstation" placeholder="Puesto (opcional)" name="none"
-                class="w-full border rounded px-3 py-2 text-sm"/>
+            <div class="space-y-3">
+                <input id="contactName" placeholder="Nombre" autocomplete="off" name="none"
+                    class="w-full border rounded px-3 py-2 text-sm" />
 
-            <input id="contactEmail" placeholder="Correo"
-                class="w-full border rounded px-3 py-2 text-sm"/>
+                <input id="contactPosition" placeholder="Puesto (opcional)" name="none"
+                    class="w-full border rounded px-3 py-2 text-sm" />
 
-            <input id="contactPhone" placeholder="Teléfono"
-                class="w-full border rounded px-3 py-2 text-sm"/>
-        </div>
+                <input id="contactEmail" placeholder="Correo" class="w-full border rounded px-3 py-2 text-sm" />
 
-        <p id="nameError" class="text-red-500 text-xs mt-2 hidden">
-            Debes ingresar el nombre del contacto
-        </p>
+                <input id="contactPhone" placeholder="Teléfono" class="w-full border rounded px-3 py-2 text-sm" />
+            </div>
 
-        <p id="contactError" class="text-red-500 text-xs mt-2 hidden">
-            Debes ingresar al menos correo o teléfono
-        </p>
+            <p id="contactError" class="text-red-500 text-xs mt-2 hidden"></p>
 
-        <div class="flex justify-end gap-3 mt-6">
-            <button id="cancelContact" class="px-4 py-2 rounded bg-gray-100">
-                Cancelar
-            </button>
-            <button id="saveContact" class="px-4 py-2 rounded bg-primary text-white">
-                Guardar
-            </button>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelContact" class="px-4 py-2 rounded bg-gray-100">
+                    Cancelar
+                </button>
+                <button id="saveContact" class="px-4 py-2 rounded bg-primary text-white">
+                    Guardar
+                </button>
+            </div>
         </div>
     </div>
-</div>
+
+    <div id="deleteContactModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+
+            <h2 class="text-lg font-semibold mb-4">¿Seguro que quieres eliminar este contacto?</h2>
+
+            <p class="text-sm text-gray-500 mb-6">Si guardas el cliente esta acción no se podrá deshacer.</p>
+
+            <div class="flex justify-end gap-3">
+                <button id="cancelContactDelete" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                    Cancelar
+                </button>
+                <button id="confirmContactDelete"
+                    class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
 
 </body>
 <script src="../shared/header.js"></script>
 <script type="module" src="./detailed_customer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </html>

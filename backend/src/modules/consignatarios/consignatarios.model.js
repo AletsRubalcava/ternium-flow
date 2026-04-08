@@ -1,62 +1,82 @@
-import {DataTypes} from "sequelize";
-import {sequelize} from "../../config/database.js";
-import Cliente from "../clientes/clientes.model.js";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../../config/database.js";
+import customers from "../clientes/clientes.model.js";
+import dispatch_packaging from "../dispatch_packaging/dispatch_packaging.model.js";
 
-const Consignatario = sequelize.define("Consignatario", {
+const consignees = sequelize.define("consignees", {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
-  cliente_id: {
+  id_customer: {
     type: DataTypes.UUID,
     allowNull: false
   },
-  nombre: {
+  preferred_dispatch: {
+    type: DataTypes.UUID,
+    allowNull: false
+  },
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  direccion: {
+  address: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  diametro_interno: {
-    //Puede haber multiples?
-    //type: DataTypes.ARRAY(DataTypes.INTEGER),
+  min_load: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: false
+  },
+  max_load: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: false
+  },
+  max_pieces_number: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  diametro_externo: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  max_width: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: true
   },
-  peso_minimo_despacho: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  max_height: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: true
   },
-  peso_maximo_despacho: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  max_internal_diameter: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: true
   },
-  no_piezas_por_paquete: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  max_external_diameter: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: true
   },
-  ancho_maximo_tarima: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  additional_instructions: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-  embalaje_despacho: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  estado: {
+  status: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: true
+    defaultValue: false
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
   }
+}, {
+  tableName: "consignees",
+  timestamps: false
 });
 
-Consignatario.belongsTo(Cliente, { foreignKey: "clienteId", allowNull: false, onDelete: "CASCADE" });
+// Relaciones
+consignees.belongsTo(customers, { foreignKey: "id_customer", onDelete: "CASCADE" });
+consignees.belongsTo(dispatch_packaging, { foreignKey: "preferred_dispatch" });
 
-export default Consignatario;
+export default consignees;

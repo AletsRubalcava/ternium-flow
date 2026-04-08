@@ -1,51 +1,49 @@
-import Cliente  from "./clientes.model.js";
+import customers  from "./clientes.model.js";
 
-export async function createCliente(data) {
+export async function createCustomer(data) {
 
-    const cliente = await Cliente.create({
-        nombre: data.nombre.trim(),
+    const customer = await customers.create({
+        id_customer: data.id_customer.trim(),
+        name: data.name.trim(),
         rfc: data.rfc,
-        direccion_fiscal: data.direccion_fiscal,
-        estado: data.estado
+        tax_address: data.tax_address,
+        status: data.status,
     })
-    return cliente;
+    return customer;
 }
 
-export async function getAllClientes() {
-    const clientes = await Cliente.findAll();
-    return clientes;
+export async function getAllCustomers() {
+    const customer = await customers.findAll();
+    return customer;
 }
 
-export async function getClienteById(id) {
-    const cliente = await Cliente.findByPk(id);
-
-
-    return cliente;
+export async function getCustomerById(id) {
+    const customer = await customers.findByPk(id);
+    return customer;
 }
 
-export async function updateCliente(id, data) {
-    const cliente = await Cliente.findByPk(id);
-    if (!cliente) {
+export async function updateCustomer(id, data) {
+    const customer = await customers.findByPk(id);
+    if (!customer) {
         throw new Error("Cliente no encontrado");
     }
     
-    await cliente.update({
-        nombre: data.nombre.trim(),
+    await customer.update({
+        id_customer: data.id_customer.trim(),
+        name: data.name.trim(),
         rfc: data.rfc,
-        direccion_fiscal: data.direccion_fiscal,
-        estado: data.estado
+        tax_address: data.tax_address,
+        status: data.status,
+        updated_at: new Date()
     });
-
-    return cliente;
+    return customer;
 }
 
-export async function deleteCliente(id) {
-    const cliente = await Cliente.findByPk(id);
-    if (!cliente) {
+export async function deleteCustomer(id) {
+    const customer = await customers.findByPk(id);
+    if (!customer) {
         throw new Error("Cliente no encontrado");
     }
-    
-    await cliente.destroy();
-
+    await customer.destroy();
     return;
 }

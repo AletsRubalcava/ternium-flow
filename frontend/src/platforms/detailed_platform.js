@@ -1,5 +1,5 @@
 import { setActiveNav } from "../shared/page_directory.js";
-import { platforms, customers, consignees, dispatchPackaging, productLoad, products } from "../shared/db.js";
+import { dispatchPackaging, productLoad, products } from "../shared/db.js";
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");
@@ -16,11 +16,27 @@ const type       = params.get("type");
 
 (type == "preset") ? setActiveNav("presets") : setActiveNav("customers");
 
-let platform  = createMode ? {} : platforms.find(p => p.id == id);
-let consignee = createMode ? null : consignees.find(c => c.id == platform?.idConsignee);
-const customer = idCus
-    ? customers.find(c => c.id == idCus)
-    : customers.find(c => c.id == consignee?.idCustomer);
+let { data: platform }  = createMode ? {} : await axios.get(`http://localhost:3000/api/platforms/${id}`);
+const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+const platformRequest = resPlatformRequests.data.find(pr => pr.id_platform == id && pr.status === 'Aceptada');
+const { data: consignees } = await axios.get("http://localhost:3000/api/consignees");
+
+let customer;
+let consignee;
+
+if(createMode){
+    consignee = null;
+} else {
+    ({ data: consignee } = await axios.get(`http://localhost:3000/api/consignees/${platformRequest.id_consignee}`));
+}
+
+if (idCus) {
+    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${idCus}`);
+    customer = resCustomers.data;
+} else {
+    const resCustomer = await axios.get("http://localhost:3000/api/customers");
+    customer = resCustomer.data.find(c => c.id == consignee.id_customer);
+}
 
 let currentProductLoad = createMode
     ? []
@@ -59,7 +75,7 @@ $("spec-pack-edit").innerHTML = dispatchPackaging.map(d =>
 ).join("");
 
 $("platformConsignee-edit").innerHTML = consignees
-    .filter(c => c.idCustomer == customer?.id)
+    .filter(c => c.id_customer == customer?.id)
     .map(c => `<option value="${c.id}">${c.name}</option>`)
     .join("");
 
@@ -97,19 +113,17 @@ function calcSpecs() {
     platform.width        = maxWidth;
     platform.height       = maxHeight;
 }
-
+console.log(platform);
 // ── Render general info ──────────────────────────────────────────────────────
 function renderCampos() {
     if (createMode) {
         $("upperId").textContent             = "Nuevo";
-        $("platformID").textContent          = "—";
         $("platformName").textContent        = "";
         $("platformConsignee").textContent   = "—";
         $("platformDescription").textContent = "";
         $("platformStatus").innerHTML        = badges.status(false);
     } else {
-        $("upperId").textContent             = platform.id;
-        $("platformID").textContent          = platform.id;
+        $("upperId").textContent = platform.name;
         $("platformName").textContent        = platform.name        ?? "—";
         $("platformConsignee").textContent   = consignee?.name      ?? "—";
         $("platformDescription").textContent = platform.description ?? "—";
@@ -328,7 +342,7 @@ function toggleEdit(active) {
     if (active) {
         consSel.value = consignee?.id ?? "";
     } else {
-        consignee            = consignees.find(c => c.id == consSel.value);
+        consignee            = consignees.data.find(c => c.id == consSel.value);
         consView.textContent = consignee?.name ?? "—";
         platform.idConsignee = consignee?.id;
     }

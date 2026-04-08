@@ -1,44 +1,70 @@
-import { createConsignatario, getAllConsignatarios, getConsignatarioById, updateConsignatario, deleteConsignatario } from './consignatarios.service.js';
+import { createConsignee, getAllConsignatarios, getConsignatarioById, updateConsignee, deleteConsignee } from './consignatarios.service.js';
 
-export async function createConsignatarioHandler(req, res) {
+export async function createConsigneeHandler(req, res) {
     const data = req.body;
+    
+    // Validations
+    if (
+        !data.id_customer ||
+        !data.name ||        
+        !data.min_load ||
+        !data.max_load ||
+        !data.max_pieces_number ||
+        !data.preferred_dispatch ||
+        !data.max_internal_diameter ||
+        !data.max_internal_diameter
+    ) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 
+    // Logical validations
+    if (data.min_load > data.max_load) {
+        return res.status(400).json({ message: "Minimum load cannot be greater than maximum load" });
+    }
 
-    //Safery checks
-    if (!data.nombre || !data.diametro_interno || !data.diametro_externo || !data.peso_minimo_despacho || !data.peso_maximo_despacho || !data.no_piezas_por_paquete || !data.ancho_maximo_tarima || !data.embalaje_despacho || !data.cliente_id) {
-        return res.status(400).json({ message: "Faltan campos obligatorios" });
+    if (data.max_internal_diameter >= data.max_external_diameter) {
+        return res.status(400).json({ message: "Internal diameter cannot be greater than or equal to external diameter" });
     }
-    if (data.peso_minimo_despacho > data.peso_maximo_despacho) {
-        return res.status(400).json({ message: "El peso mínimo de despacho no puede ser mayor al peso máximo de despacho" });
+
+    if (data.max_pieces_number <= 0) {
+        return res.status(400).json({ message: "Number of pieces per package must be greater than 0" });
     }
-    if (data.diametro_interno >= data.diametro_externo) {
-        return res.status(400).json({ message: "El diámetro interno no puede ser mayor o igual al diámetro externo" });
+
+    if (data.max_width && data.max_width <= 0) {
+        return res.status(400).json({ message: "Maximum width must be greater than 0" });
     }
-    if (data.no_piezas_por_paquete <= 0) {
-        return res.status(400).json({ message: "El número de piezas por paquete debe ser mayor a 0" });
+
+    if (data.max_internal_diameter <= 0 || data.max_external_diameter <= 0) {
+        return res.status(400).json({ message: "Diameters must be greater than 0" });
     }
-    if (data.ancho_maximo_tarima <= 0) {
-        return res.status(400).json({ message: "El ancho máximo de la tarima debe ser mayor a 0" });
+
+    if (data.min_load <= 0 || data.max_load <= 0) {
+        return res.status(400).json({ message: "Load weights must be greater than 0" });
     }
-    if (data.diametro_interno <= 0 || data.diametro_externo <= 0) {
-        return res.status(400).json({ message: "Los diámetros deben ser mayores a 0" });
+
+    // Type validations
+    if (typeof data.name !== "string" || typeof data.address !== "string") {
+        return res.status(400).json({ message: "Name and address must be strings" });
     }
-    if (data.peso_minimo_despacho <= 0 || data.peso_maximo_despacho <= 0) {
-        return res.status(400).json({ message: "Los pesos de despacho deben ser mayores a 0" });
-    }
-    if (typeof data.nombre !== "string" || typeof data.embalaje_despacho !== "string") {
-        return res.status(400).json({ message: "El nombre y el embalaje de despacho deben ser cadenas de texto" });
-    }
-    if (typeof data.diametro_interno !== "number" || typeof data.diametro_externo !== "number" || typeof data.peso_minimo_despacho !== "number" || typeof data.peso_maximo_despacho !== "number" || typeof data.no_piezas_por_paquete !== "number" || typeof data.ancho_maximo_tarima !== "number") {
-        return res.status(400).json({ message: "Los campos de tipo numérico deben ser números" });
+
+    if (
+        typeof data.min_load !== "number" ||
+        typeof data.max_load !== "number" ||
+        typeof data.max_pieces_number !== "number" ||
+        (data.max_width !== undefined && typeof data.max_width !== "number") ||
+        (data.max_height !== undefined && typeof data.max_height !== "number") ||
+        (data.max_internal_diameter !== undefined && typeof data.max_internal_diameter !== "number") ||
+        (data.max_external_diameter !== undefined && typeof data.max_external_diameter !== "number")
+    ) {
+        return res.status(400).json({ message: "Numeric fields must be numbers" });
     }
 
     try {
-        const consignatario = await createConsignatario(data);
-        res.status(201).json(consignatario);
+        const consignee = await createConsignee(data);
+        res.status(201).json(consignee);
     } catch (error) {
-        res.status(500).json({ message: "Error al crear el consignatario" });
         console.error(error);
+        res.status(500).json({ message: "Error creating consignee" });
     }
 }
 
@@ -67,58 +93,83 @@ export async function getConsignatarioByIdHandler(req, res) {
     }
 }
 
-export async function updateConsignatarioHandler(req, res) {
+export async function updateConsigneeHandler(req, res) {
     const { id } = req.params;
     const data = req.body;
 
+    // Validations
+    if (
+        !data.id_customer ||
+        !data.name ||
+        !data.min_load ||
+        !data.max_load ||
+        !data.max_pieces_number ||
+        !data.preferred_dispatch ||
+        !data.max_internal_diameter ||
+        !data.max_external_diameter
+    ) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 
-    //Safery checks
-    if (!data.nombre || !data.diametro_interno || !data.diametro_externo || !data.peso_minimo_despacho || !data.peso_maximo_despacho || !data.no_piezas_por_paquete || !data.ancho_maximo_tarima || !data.embalaje_despacho || !data.cliente_id) {
-        return res.status(400).json({ message: "Faltan campos obligatorios" });
+    // Logical validations
+    if (data.min_load > data.max_load) {
+        return res.status(400).json({ message: "Minimum load cannot be greater than maximum load" });
     }
-    if (data.peso_minimo_despacho > data.peso_maximo_despacho) {
-        return res.status(400).json({ message: "El peso mínimo de despacho no puede ser mayor al peso máximo de despacho" });
+
+    if (data.max_internal_diameter >= data.max_external_diameter) {
+        return res.status(400).json({ message: "Internal diameter cannot be greater than or equal to external diameter" });
     }
-    if (data.diametro_interno >= data.diametro_externo) {
-        return res.status(400).json({ message: "El diámetro interno no puede ser mayor o igual al diámetro externo" });
+
+    if (data.max_pieces_number <= 0) {
+        return res.status(400).json({ message: "Number of pieces per package must be greater than 0" });
     }
-    if (data.no_piezas_por_paquete <= 0) {
-        return res.status(400).json({ message: "El número de piezas por paquete debe ser mayor a 0" });
+
+    if (data.max_width && data.max_width <= 0) {
+        return res.status(400).json({ message: "Maximum width must be greater than 0" });
     }
-    if (data.ancho_maximo_tarima <= 0) {
-        return res.status(400).json({ message: "El ancho máximo de la tarima debe ser mayor a 0" });
+
+    if (data.max_internal_diameter <= 0 || data.max_external_diameter <= 0) {
+        return res.status(400).json({ message: "Diameters must be greater than 0" });
     }
-    if (data.diametro_interno <= 0 || data.diametro_externo <= 0) {
-        return res.status(400).json({ message: "Los diámetros deben ser mayores a 0" });
+
+    if (data.min_load <= 0 || data.max_load <= 0) {
+        return res.status(400).json({ message: "Load weights must be greater than 0" });
     }
-    if (data.peso_minimo_despacho <= 0 || data.peso_maximo_despacho <= 0) {
-        return res.status(400).json({ message: "Los pesos de despacho deben ser mayores a 0" });
+
+    // Type validations
+    if (typeof data.name !== "string" || typeof data.address !== "string") {
+        return res.status(400).json({ message: "Name and address must be strings" });
     }
-    if (typeof data.nombre !== "string" || typeof data.embalaje_despacho !== "string") {
-        return res.status(400).json({ message: "El nombre y el embalaje de despacho deben ser cadenas de texto" });
-    }
-    if (typeof data.diametro_interno !== "number" || typeof data.diametro_externo !== "number" || typeof data.peso_minimo_despacho !== "number" || typeof data.peso_maximo_despacho !== "number" || typeof data.no_piezas_por_paquete !== "number" || typeof data.ancho_maximo_tarima !== "number") {
-        return res.status(400).json({ message: "Los campos de tipo numérico deben ser números" });
+
+    if (
+        typeof data.min_load !== "number" ||
+        typeof data.max_load !== "number" ||
+        typeof data.max_pieces_number !== "number" ||
+        (data.max_width !== undefined && typeof data.max_width !== "number") ||
+        (data.max_height !== undefined && typeof data.max_height !== "number") ||
+        (data.max_internal_diameter !== undefined && typeof data.max_internal_diameter !== "number") ||
+        (data.max_external_diameter !== undefined && typeof data.max_external_diameter !== "number")
+    ) {
+        return res.status(400).json({ message: "Numeric fields must be numbers" });
     }
 
     try {
-        const consignatario = await updateConsignatario(id, data);
-        res.status(200).json(consignatario);
-
+        const consignee = await updateConsignee(id, data);
+        res.status(200).json(consignee);
     } catch (error) {
         if (error.message === "Consignatario no encontrado") {
             return res.status(404).json({ message: error.message });
         }
-        res.status(500).json({ message: "Error al actualizar el consignatario" });
         console.error(error);
+        res.status(500).json({ message: "Error updating consignee" });
     }
 }
 
-export async function deleteConsignatarioHandler(req, res) {
+export async function deleteConsigneeHandler(req, res) {
     const { id } = req.params;
     
     try {
-        await deleteConsignatario(id);
+        await deleteConsignee(id);
         res.status(204).send();
     } catch (error) {
         if (error.message === "Consignatario no encontrado") {

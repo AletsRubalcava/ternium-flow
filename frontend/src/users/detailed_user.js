@@ -209,7 +209,7 @@ function guardarUsuario() {
     const rolSelected = document.querySelector(".roleButton.border-primary");
     const rolId = rolSelected
         ? Object.entries({ 1: "adminRoleButton", 2: "logisticsRoleButton", 3: "customRoleButton", 4: "customerRoleButton" })
-              .find(([, btnId]) => btnId === rolSelected.id)?.[0] ?? 4
+            .find(([, btnId]) => btnId === rolSelected.id)?.[0] ?? 4
         : 4;
 
     const nuevoUsuario = {
@@ -363,7 +363,7 @@ deleteBtn.addEventListener("click",  () => modal.classList.remove("hidden"));
 cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", () => {
     eliminarUsuario();
-    window.location.href = "/frontend/src/list_view.html?type=users";
+    window.location.href = "/frontend/src/shared/list_view.html?type=users";
 });
 
 // Cerrar modal de permisos al hacer click fuera

@@ -1,4 +1,4 @@
-import { customers, consignees, dispatchPackaging } from '../shared/db.js';
+import { consignees } from '../shared/db.js';
 import { setActiveNav } from '../shared/page_directory.js';
 import { apiKey } from '../shared/keys.js';
 
@@ -16,25 +16,38 @@ const id         = params.get("id");
 const idCus      = params.get("idCus");
 const createMode = params.get("create") === "true";
 
-let consignee = createMode ? {} : consignees.find(c => c.id == id);
-const customer  = idCus
-    ? customers.find(c => c.id == idCus)
-    : customers.find(c => c.id == consignee?.idCustomer);
+let consignee;
+let customer;
+
+if (id) {
+    const resConsignee = await axios.get(`http://localhost:3000/api/consignees/${id}`);
+    consignee = resConsignee.data;
+} else {
+    consignee =  {}
+}
+
+if (idCus) {
+    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${idCus}`);
+    customer = resCustomers.data;
+} else {
+    const resCustomer = await axios.get("http://localhost:3000/api/customers");
+    customer = resCustomer.data.find(c => c.id == consignee.id_customer);
+}
 
 let editMode = false;
 let isCreateMode = createMode;
 
 // Mapa de campos de especificaciones: id -> propiedad en consignee
 const specFields = [
-    { view: "maxLoad-view",      edit: "maxLoad-edit",      key: "maxLoad",                  type: "number" },
-    { view: "minLoad-view",      edit: "minLoad-edit",      key: "minLoad",                  type: "number" },
-    { view: "maxPieces-view",    edit: "maxPieces-edit",    key: "maxPieces",                type: "number" },
-    { view: "packaging-view",    edit: "packaging-edit",    key: "prefDispatchPackagingID",  type: "select" },
-    { view: "maxWidth-view",     edit: "maxWidth-edit",     key: "maxWidth",                 type: "number" },
-    { view: "maxHeight-view",    edit: "maxHeight-edit",    key: "maxHeight",                type: "number" },
-    { view: "intDiameter-view",  edit: "intDiameter-edit",  key: "internalDiameter",         type: "number" },
-    { view: "extDiameter-view",  edit: "extDiameter-edit",  key: "externalDiameter",         type: "number" },
-    { view: "instructions-view", edit: "instructions-edit", key: "instructions",             type: "textarea" },
+    { view: "maxLoad-view",      edit: "maxLoad-edit",      key: "max_load",                 type: "number" },
+    { view: "minLoad-view",      edit: "minLoad-edit",      key: "min_load",                 type: "number" },
+    { view: "maxPieces-view",    edit: "maxPieces-edit",    key: "max_pieces_number",        type: "number" },
+    { view: "packaging-view",    edit: "packaging-edit",    key: "preferred_dispatch",       type: "select" },
+    { view: "maxWidth-view",     edit: "maxWidth-edit",     key: "max_width",                type: "number" },
+    { view: "maxHeight-view",    edit: "maxHeight-edit",    key: "max_height",               type: "number" },
+    { view: "intDiameter-view",  edit: "intDiameter-edit",  key: "max_internal_diameter",    type: "number" },
+    { view: "extDiameter-view",  edit: "extDiameter-edit",  key: "max_external_diameter",    type: "number" },
+    { view: "instructions-view", edit: "instructions-edit", key: "additional_instructions",  type: "textarea" },
 ];
 
 const badges = {
@@ -49,13 +62,11 @@ if (customer) {
 function renderCampos() {
     if (createMode) {
         $("upperConsigneeId").textContent = "Nuevo";
-        $("consigneeID").textContent      = id;
         $("consigneeCustomer").textContent = customer.name;
         $("consigneeStatus").innerHTML    = badges.status(false);
     } else {
         Object.entries({
-            upperConsigneeId: id,
-            consigneeID:      consignee.id,
+            upperConsigneeId: consignee.name,
             consigneeCustomer: customer.name,
             consigneeName:    consignee.name,
             consigneeAddress: consignee.address,
@@ -65,7 +76,10 @@ function renderCampos() {
 }
 
 // --- Fill Dispatch Options
-$("packaging-edit").innerHTML = dispatchPackaging.map(c => `
+
+const dispatches = await axios.get("http://localhost:3000/api/dispatch");
+
+$("packaging-edit").innerHTML = dispatches.data.map(c => `
     <option value="${c.id}">${c.name}</option>
     `).join("");
 
@@ -75,8 +89,8 @@ function renderSpecs() {
         const el = $(view);
         if (!el) return;
 
-        if (key === "prefDispatchPackagingID") {
-            const packaging = dispatchPackaging.find(d => d.id == consignee[key]);
+        if (key === "preferred_dispatch") {
+            const packaging = dispatches.data.find(d => d.id == consignee[key]);
             el.textContent = packaging?.name ?? "—";
         } else {
             el.textContent = consignee[key] ?? "—";
@@ -89,7 +103,7 @@ function validarCampos() {
     let valido = true;
 
     // Campos de info general
-    ["consigneeName-edit", "consigneeAddress-edit"].forEach(fieldId => {
+    ["consigneeName-edit"].forEach(fieldId => {
         const input = $(fieldId);
         if (!input.value.trim()) {
             input.classList.add("border-red-400");
@@ -99,7 +113,7 @@ function validarCampos() {
 
     // Campos de especificaciones
     specFields
-        .filter(f => f.key !== "instructions")
+        .filter(f => f.key !== "additional_instructions")
         .forEach(({ edit, type }) => {
             const input = $(edit);
             if (!input) return;
@@ -144,7 +158,7 @@ function renderMap(){
 }
 
 // --- Toggle Edit ---
-function toggleEdit(active) {
+async function toggleEdit(active) {
     editButton.querySelector("span").textContent = active ? "save" : "edit";
     editButton.childNodes[2].textContent         = active ? " Guardar" : " Editar";
 
@@ -203,56 +217,86 @@ function toggleEdit(active) {
         if(!active) renderMap();
     });
 
-    if (!active && (isCreateMode || editMode)) {
+    if (!active && (isCreateMode || !editMode)) {
         if (!validarCampos()) { 
             editMode = true; 
             toggleEdit(true); 
             return; 
         }
-
         if (isCreateMode) {
-            const nuevo = guardarConsignee();
+            const nuevo = await saveNewConsignee();
 
             consignee = nuevo;
             isCreateMode = false;
 
-            $("consigneeID").textContent = nuevo.id;
-            $("upperConsigneeId").textContent = nuevo.id;
+            $("upperConsigneeId").textContent = nuevo.name;
 
             deleteBtn.classList.remove("hidden");
             window.history.replaceState({}, "", `?id=${nuevo.id}&idCus=${customer.id}`);
+        } else if (!editMode) {
+            const updatedCustomer = await saveEditedConsignee();
+            $("upperConsigneeId").textContent = updatedCustomer.name;
         }
+        editMode = false;
     }
 }
 
 // --- Guardar Consignee ---
-function guardarConsignee() {
-    const nuevo = {
-        id:         Number(id),
-        idCustomer: customer.id,
-        name:       $("consigneeName-edit").value.trim(),
-        address:    $("consigneeAddress-edit").value.trim(),
-        status:     $("consigneeStatus-edit").value === "1",
-    };
+async function saveNewConsignee() {
+    const newConsignee = {
+        id_customer: customer.id,
+        name: $("consigneeName-edit").value.trim(),
+        address: $("consigneeAddress-edit").value.trim(),
+        status: $("consigneeStatus-edit").value === "1",
+        max_load: Number($("maxLoad-edit").value.trim()),
+        min_load: Number($("minLoad-edit").value.trim()),
+        max_pieces_number: Number($("maxPieces-edit").value.trim()),
+        preferred_dispatch: $("packaging-edit").value.trim(),
+        max_width: Number($("maxWidth-edit").value.trim()),
+        max_height: Number($("maxHeight-edit").value.trim()),
+        max_internal_diameter: Number($("intDiameter-edit").value.trim()),
+        max_external_diameter: Number($("extDiameter-edit").value.trim()),
+        additional_instructions: $("instructions-edit").value.trim(),
+    }
 
-    specFields.forEach(({ edit, key }) => {
-        const el = $(edit);
-        if (!el) return;
-        nuevo[key] = key === "prefDispatchPackagingID"
-        ? Number(el.value)
-        : el.type === "number"
-            ? Number(el.value)
-            : el.value;
-    });
+    try {
+        const res = await axios.post('http://localhost:3000/api/consignees', newConsignee);
+        console.log(res.data);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+    }
+    return newConsignee;
+}
 
-    consignees.push(nuevo);
-    return nuevo;
+async function saveEditedConsignee(){
+    const newConsignee = {
+        id_customer: customer.id,
+        name: $("consigneeName-edit").value.trim(),
+        address: $("consigneeAddress-edit").value.trim(),
+        status: $("consigneeStatus-edit").value === "1",
+        max_load: Number($("maxLoad-edit").value.trim()),
+        min_load: Number($("minLoad-edit").value.trim()),
+        max_pieces_number: Number($("maxPieces-edit").value.trim()),
+        preferred_dispatch: $("packaging-edit").value.trim(),
+        max_width: Number($("maxWidth-edit").value.trim()),
+        max_height: Number($("maxHeight-edit").value.trim()),
+        max_internal_diameter: Number($("intDiameter-edit").value.trim()),
+        max_external_diameter: Number($("extDiameter-edit").value.trim()),
+        additional_instructions: $("instructions-edit").value.trim(),
+    }
+
+    try {
+        const res = await axios.put(`http://localhost:3000/api/consignees/${id}`, newConsignee);
+        console.log(res.data);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+    }
+    return newConsignee;
 }
 
 // --- Eliminar Consignee ---
-function deleteConsignee() {
-    const idx = consignees.findIndex(c => c.id == consignee.id);
-    if (idx !== -1) consignees.splice(idx, 1);
+async function deleteConsignee() {
+    await axios.delete(`http://localhost:3000/api/consignees/${id}`);
 }
 
 // --- Event Listeners ---
@@ -264,8 +308,8 @@ document.querySelectorAll(".edit").forEach(el =>
 
 deleteBtn.addEventListener("click", () => modal.classList.remove("hidden"));
 cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
-confirmBtn.addEventListener("click", () => {
-    deleteConsignee();
+confirmBtn.addEventListener("click", async () => {
+    await deleteConsignee();
     window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
 });
 
