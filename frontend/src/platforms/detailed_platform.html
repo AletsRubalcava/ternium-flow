@@ -71,21 +71,21 @@
             @apply bg-gray-50 dark:bg-gray-800 rounded px-2 py-1.5 text-xs font-bold border border-border-light dark:border-border-dark;
         }
         .spec-auto {
-            @apply bg-orange-50 dark:bg-orange-900/10 rounded px-2 py-1.5 text-xs font-bold border border-orange-100 dark:border-orange-800/30 text-text-primary-light dark:text-text-primary-dark;
+            @apply bg-orange-100 dark:bg-orange-900/10 rounded px-2 py-1.5 text-xs font-bold border border-orange-100 dark:border-orange-800/30 text-text-primary-light dark:text-text-primary-dark;
+        }
+        .spec-input {
+            @apply rounded px-2 py-1.5 text-xs font-bold border border-orange-100 text-text-primary-light;
         }
     </style>
 </head>
 
-<!-- h-screen + flex col: header (shrink-0) · main (flex-1 overflow) · footer (shrink-0) -->
 <body class="bg-background-light dark:bg-background-dark h-screen flex flex-col overflow-hidden transition-colors duration-300">
 
-    <!-- HEADER — fijo en la parte superior, no hace scroll -->
     <header id="headerWidget"
         class="font-[Manrope] bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0">
     </header>
 
-    <!-- MAIN — único elemento con scroll -->
-    <main class="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-6 lg:px-8 py-8 bg-background-light dark:bg-background-dark">
+    <main class="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-6 lg:px-8 py-5 bg-background-light dark:bg-background-dark">
         <div class="max-w-[1600px] mx-auto">
 
             <!-- Page header -->
@@ -158,31 +158,55 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <div>
                                         <label
-                                            class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Nombre</label>
+                                            class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Tarima</label>
                                         <div id="platformName"
-                                            class="text-text-primary-light dark:text-text-primary-dark font-bold text-lg">
+                                            class="text-text-primary-light dark:text-text-primary-dark font-bold">
                                         </div>
                                         <input id="platformName-edit" class="hidden edit edit-input"
                                             placeholder="Nombre de la tarima" />
                                     </div>
 
+                                    <!-- Customer -->
+                                    <div class="commercial-editable">
+                                        <label
+                                            class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Cliente</label>
+                                        <div id="platformCustomer"
+                                            class="text-text-primary-light dark:text-text-primary-dark font-bold">
+                                        </div>
+                                        <select id="platformCustomer-edit" class="hidden edit edit-input">
+                                            <option></option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Consignee -->
                                     <div>
                                         <label
                                             class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Consignatario</label>
                                         <div id="platformConsignee"
-                                            class="text-text-primary-light dark:text-text-primary-dark font-medium">
+                                            class="text-text-primary-light font-bold">
                                         </div>
-                                        <select id="platformConsignee-edit" class="hidden edit edit-input"></select>
                                     </div>
 
-                                    <div class="lg:col-span-2">
+                                    <!-- Description -->
+                                    <div>
                                         <label
                                             class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Descripción</label>
                                         <div id="platformDescription"
-                                            class="text-text-primary-light dark:text-text-primary-dark font-medium text-lg">
+                                            class="text-text-primary-light dark:text-text-primary-dark font-bold">
                                         </div>
                                         <input id="platformDescription-edit" class="hidden edit edit-input"
                                             placeholder="Descripción de la tarima" />
+                                    </div>
+
+                                    <!-- Type -->
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Tipo</label>
+                                        <div id="platformType"></div>
+                                        <select id="platformType-edit" class="hidden edit edit-input">
+                                            <option value="Custom">Personalizada</option>
+                                            <option value="Preset">Preestablecido</option>
+                                        </select>
                                     </div>
 
                                     <div>
@@ -230,7 +254,7 @@
                                         <tbody id="productTableBody"
                                             class="divide-y divide-border-light dark:divide-border-dark">
                                         </tbody>
-                                        <tfoot id="productTableFooter">
+                                        <tfoot id="productTableFooter" class="border-t-2">
                                         </tfoot>
                                     </table>
                                 </div>
@@ -341,16 +365,11 @@
                                 </span>
                             </div>
                             <p class="text-[9px] text-text-secondary-light dark:text-text-secondary-dark mt-1.5">
-                                Calculadas automáticamente desde los productos cargados.
+                                Los campos resaltados son calculados automáticamente desde los productos cargados.
                             </p>
                         </div>
 
                         <div class="p-4 space-y-3">
-                            <div>
-                                <label
-                                    class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Número de Piezas</label>
-                                <div id="spec-pieces-view" class="spec-auto">—</div>
-                            </div>
                             <div>
                                 <label
                                     class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Peso Estimado (kg)</label>
@@ -359,13 +378,28 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label
+                                        class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Número de Piezas</label>
+                                    <div id="spec-pieces-view" class="spec-auto">—</div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Largo (m)</label>
+                                    <div id="spec-length-view" class="spec-input">—</div>
+                                    <input id="spec-length-edit" class="hidden edit edit-input" type="number"/>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label
                                         class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Anchura (m)</label>
-                                    <div id="spec-width-view" class="spec-auto">—</div>
+                                    <div id="spec-width-view" class="spec-input">—</div>
+                                    <input id="spec-width-edit" class="hidden edit edit-input" type="number"/>
                                 </div>
                                 <div>
                                     <label
                                         class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Altura (m)</label>
-                                    <div id="spec-height-view" class="spec-auto">—</div>
+                                    <div id="spec-height-view" class="spec-input">—</div>
+                                    <input id="spec-height-edit" class="hidden edit edit-input" type="number"/>
                                 </div>
                             </div>
                             <div>
@@ -453,7 +487,7 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Producto (SKU)</label>
+                    <label class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Producto</label>
                     <select id="addProductSKU"
                         class="w-full border border-border-light dark:border-border-dark rounded px-3 py-2 text-sm bg-white dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40">
                     </select>

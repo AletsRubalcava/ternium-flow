@@ -36,16 +36,11 @@ export async function loadPlatforms() {
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nueva Tarima`;
 
-    newButton.classList.remove("hidden");
-
     newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}`;
 
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
-
-    console.log(consignees);
-    console.log(platforms);
 
     tbody.innerHTML = platforms.map(p => `
         <tr data-id="${p.id}" class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">

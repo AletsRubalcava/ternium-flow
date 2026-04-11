@@ -1,8 +1,11 @@
-import { products } from "../shared/db.js";
+import { emptyWidget } from "../shared/empty_widget.js";
 
-const attributes = ["ID", "No. Parte", "Nombre", "Familia", "Peso Unitario", "Estado"];
+const attributes = ["Nombre", "No. Parte", "Familia", "Peso Unitario", "Estado"];
 
-export function loadProductos() {
+export async function loadProductos() {
+    const { data: products } = await axios.get("http://localhost:3000/api/products")
+
+    const tableContainer = document.getElementById("tableContainer");
     const title = document.getElementById("pageTitle");
     const search = document.getElementById("search");
     const newButton = document.getElementById("newButton");
@@ -12,9 +15,6 @@ export function loadProductos() {
     title.textContent = "PRODUCTOS";
     search.placeholder = "Buscar Productos";
 
-    // 🔹 Nuevo ID
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
         Nuevo Producto`;
@@ -22,45 +22,45 @@ export function loadProductos() {
     newButton.classList.remove("hidden");
 
     newButton.onclick = () => {
-        window.location.href = `/frontend/src/products/detailed_product.html?create=true&id=${newId}`;
+        window.location.href = `/frontend/src/products/detailed_product.html?create=true`;
     };
 
-    // 🔹 Header
-    thead.innerHTML = attributes.map(a => `
-        <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display">
-            ${a}
-        </th>
-    `).join("");
+    if ( products.length != 0) {
+        thead.innerHTML = attributes.map(a => `
+            <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display">
+                ${a}
+            </th>
+        `).join("");
 
-    // 🔹 Body
-    tbody.innerHTML = products.map(p => `
-        <tr data-id="${p.id}" class="product-row bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">
-                ${p.id}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
-                ${p.numeroDeParte}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">
-                ${p.producto}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
-                ${p.familia}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
-                ${p.pesoUnitario} kg
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span class="px-2 py-1 text-xs font-bold rounded-full ${
-                    p.estado === "Activo"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                }">
-                    ${p.estado}
-                </span>
-            </td>
-        </tr>
-    `).join("");
+
+        tbody.innerHTML = products.map(p => `
+            <tr data-id="${p.id}" class="product-row bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
+                    ${p.name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">
+                    ${p.part_number}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
+                    ${p.family ?? "N/A"}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
+                    ${p.unit_weight} kg
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 text-xs font-bold rounded-full ${
+                        p.status == true
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                    }">
+                        ${p.status ? "Activo" : "Inactivo"}
+                    </span>
+                </td>
+            </tr>
+        `).join("");
+    } else {
+        tableContainer.innerHTML = emptyWidget("No hay productos")
+    }
 
     // 🔹 Click en fila (igual que consignee)
     document.querySelectorAll(".product-row").forEach(row => {

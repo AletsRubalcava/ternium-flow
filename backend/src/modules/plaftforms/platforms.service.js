@@ -10,7 +10,7 @@ export async function getPlatformById(id) {
 
 export async function createPlatform(data) {
     return await platforms.create({
-        id_consignee:       data.id_consignee,
+        type:               data.type,
         name:               data.name,
         description:        data.description,
         status:             data.status ?? false,
@@ -19,6 +19,7 @@ export async function createPlatform(data) {
         weight:             data.weight,
         width:              data.width,
         height:             data.height,
+        length:             data.length,
         created_at:         new Date(),
         updated_at:         new Date(),
     });
@@ -27,16 +28,17 @@ export async function createPlatform(data) {
 export async function updatePlatform(id, data) {
     const platform = await platforms.findByPk(id);
     if (!platform) throw new Error("Tarima no encontrada");
-
+    console.log(platform)
     await platform.update({
-        id_consignee:       data.id_consignee,
+        type:               data.type,
         name:               data.name,
         description:        data.description,
         status:             data.status,
-        dispatch_packaging: data.dispatch_packaging,
-        pieces_number:      data.pieces_number,
+        id_dispatch_packaging: data.id_dispatch_packaging,
+        pieces_number:      data.number_of_pieces,
         weight:             data.weight,
         width:              data.width,
+        length:             data.length,
         height:             data.height,
         updated_at:         new Date(),
     });

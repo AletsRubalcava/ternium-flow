@@ -1,5 +1,4 @@
 import { setActiveNav } from "../shared/page_directory.js";
-import { dispatchPackaging, productLoad, products } from "../shared/db.js";
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");
@@ -19,7 +18,9 @@ const type       = params.get("type");
 let { data: platform }  = createMode ? {} : await axios.get(`http://localhost:3000/api/platforms/${id}`);
 const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
 const platformRequest = resPlatformRequests.data.find(pr => pr.id_platform == id && pr.status === 'Aceptada');
-const { data: consignees } = await axios.get("http://localhost:3000/api/consignees");
+const { data: dispatchPackaging } = await axios.get("http://localhost:3000/api/dispatch");
+const { data: products } = await axios.get("http://localhost:3000/api/products"); 
+const { data: productLoad } = await axios.get("http://localhost:3000/api/items");
 
 let customer;
 let consignee;
@@ -38,23 +39,20 @@ if (idCus) {
     customer = resCustomer.data.find(c => c.id == consignee.id_customer);
 }
 
+let piecesNumber = platform.number_of_pieces;
+let weight = platform.weight;
+
 let currentProductLoad = createMode
     ? []
-    : productLoad.filter(pl => pl.idPlatform == platform?.id).map(pl => ({ ...pl }));
+    : productLoad.filter(pl => pl.id_platform == platform?.id).map(pl => ({ ...pl }));
+
+if (currentProductLoad.length > 0) calcSpecs();
 
 let editMode     = false;
 let isCreateMode = createMode;
 
-// ── Spec fields ──────────────────────────────────────────────────────────────
-const specFields = [
-    { view: "spec-pieces-view",  key: "piecesNumber",      label: "Número de Piezas"     },
-    { view: "spec-weight-view",  key: "weight",            label: "Peso Estimado (kg)"   },
-    { view: "spec-width-view",   key: "width",             label: "Anchura (m)"          },
-    { view: "spec-height-view",  key: "height",            label: "Altura (m)"           },
-    { view: "spec-pack-view",    key: "dispatchPackaging", label: "Embalaje de Despacho" },
-];
-
 const badges = {
+    type: v => `<span class="${v == "Custom" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v == "Custom" ? "Personalizada" : "Preestablecido"}</span>`,
     status: v => `<span class="${v ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v ? "Activo" : "Inactivo"}</span>`
 };
 
@@ -74,77 +72,64 @@ $("spec-pack-edit").innerHTML = dispatchPackaging.map(d =>
     `<option value="${d.id}">${d.name}</option>`
 ).join("");
 
-$("platformConsignee-edit").innerHTML = consignees
-    .filter(c => c.id_customer == customer?.id)
-    .map(c => `<option value="${c.id}">${c.name}</option>`)
-    .join("");
-
-$("addProductSKU").innerHTML = `<option value="">— Selecciona un producto —</option>` +
+$("addProductSKU").innerHTML = `<option value=""Selecciona un producto/option>` +
     products.map(p =>
-        `<option value="${p.id}">${p.id} · ${p.producto} (${p.tipo})</option>`
+        `<option value="${p.id}">${p.name} (${p.family ?? ""})</option>`
     ).join("");
 
 // ── Auto-calculate specs ─────────────────────────────────────────────────────
 function calcSpecs() {
     if (currentProductLoad.length === 0) {
-        platform.piecesNumber = 0;
-        platform.weight       = 0;
-        platform.width        = 0;
-        platform.height       = 0;
+        piecesNumber = 0;
+        weight       = 0;
         return;
     }
 
     let totalPieces = 0;
     let totalWeight = 0;
-    let maxWidth    = 0;
-    let maxHeight   = 0;
 
     currentProductLoad.forEach(row => {
-        const product = products.find(p => p.id == row.idProduct);
+        const product = products.find(p => p.id == row.id_product);
         if (!product) return;
         totalPieces += row.quantity ?? 0;
-        totalWeight += (product.pesoUnitario ?? 0) * (row.quantity ?? 0);
-        if ((product.width  ?? 0) > maxWidth)  maxWidth  = product.width  ?? 0;
-        if ((product.height ?? 0) > maxHeight) maxHeight = product.height ?? 0;
+        totalWeight += (product.unit_weight ?? 0) * (row.quantity ?? 0);
     });
 
-    platform.piecesNumber = totalPieces;
-    platform.weight       = Math.round(totalWeight * 100) / 100;
-    platform.width        = maxWidth;
-    platform.height       = maxHeight;
+    piecesNumber = totalPieces;
+    weight       = Math.round(totalWeight * 100) / 100;
 }
-console.log(platform);
+
 // ── Render general info ──────────────────────────────────────────────────────
 function renderCampos() {
     if (createMode) {
         $("upperId").textContent             = "Nuevo";
         $("platformName").textContent        = "";
+        $("platformCustomer").textContent   = "—";
         $("platformConsignee").textContent   = "—";
         $("platformDescription").textContent = "";
+        $("platformType").innerHTML = badges.type("Custom") ?? "—";
         $("platformStatus").innerHTML        = badges.status(false);
     } else {
         $("upperId").textContent = platform.name;
         $("platformName").textContent        = platform.name        ?? "—";
+        $("platformCustomer").textContent   = customer?.name      ?? "—";
         $("platformConsignee").textContent   = consignee?.name      ?? "—";
         $("platformDescription").textContent = platform.description ?? "—";
-        $("platformStatus").innerHTML        = badges.status(platform.status);
+        $("platformType").innerHTML = badges.type(platform.type) ?? "—";
+        $("platformStatus").innerHTML = badges.status(platform.status);
     }
 }
 
 // ── Render spec sidebar ──────────────────────────────────────────────────────
 function renderSpecs() {
-    calcSpecs();
+    $("spec-pieces-view").textContent = piecesNumber ?? "—";
+    $("spec-weight-view").textContent = weight       ?? "—";
+    $("spec-width-view").textContent  = platform.width        ?? "—";
+    $("spec-height-view").textContent = platform.height       ?? "—";
+    $("spec-length-view").textContent = platform.length       ?? "—";
 
-    specFields.forEach(({ view, key }) => {
-        const el = $(view);
-        if (!el) return;
-        if (key === "dispatchPackaging") {
-            const pkg = dispatchPackaging.find(d => d.id == platform.dispatchPackaging);
-            el.textContent = pkg?.name ?? "—";
-        } else {
-            el.textContent = (platform[key] != null && platform[key] !== "") ? platform[key] : "—";
-        }
-    });
+    const pkg = dispatchPackaging.find(d => d.id == (platform.id_dispatch_packaging ?? $("spec-pack-edit").value));
+    $("spec-pack-view").textContent = pkg?.name ?? "—";
 }
 
 // ── Render product load table ────────────────────────────────────────────────
@@ -164,15 +149,15 @@ function renderProductTable() {
             </tr>`;
     } else {
         tbody.innerHTML = currentProductLoad.map((row, idx) => {
-            const product = products.find(p => p.id == row.idProduct);
+            const product = products.find(p => p.id == row.id_product);
             return `
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group" data-idx="${idx}">
                 <td class="px-6 py-4 text-sm font-bold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">
-                    ${product?.numeroDeParte ?? row.idProduct}
+                    ${product?.part_number ?? row.id_product}
                 </td>
                 <td class="px-6 py-4 text-sm text-text-primary-light dark:text-text-primary-dark">
-                    <div class="font-medium">${product?.producto ?? "Desconocido"}</div>
-                    <div class="text-[10px] text-text-secondary-light dark:text-text-secondary-dark">${product?.tipo ?? ""} · ${product?.unidad ?? ""}</div>
+                    <div class="font-medium">${product?.name ?? "Desconocido"}</div>
+                    <div class="text-[10px] text-text-secondary-light dark:text-text-secondary-dark">${product?.family ?? ""}</div>
                 </td>
                 <td class="px-6 py-4 text-sm font-bold text-center bg-gray-50/50 dark:bg-white/5">
                     ${editMode
@@ -182,7 +167,7 @@ function renderProductTable() {
                         : row.quantity}
                 </td>
                 <td class="px-6 py-4 text-sm text-right font-medium">
-                    ${product?.pesoUnitario != null ? product.pesoUnitario + " kg" : "—"}
+                    ${product?.unit_weight != null ? product.unit_weight + " kg" : "—"}
                 </td>
                 ${editMode ? `
                 <td class="px-6 py-4 text-right">
@@ -205,7 +190,7 @@ function renderProductTable() {
                 </button>` : ""}
             </td>
         </tr>`;
-
+    calcSpecs();                
     renderSpecs();
 }
 
@@ -223,23 +208,24 @@ window.closeAddProduct = function () {
 };
 
 window.confirmAddProduct = function () {
-    const sku = $("addProductSKU").value;
+    const productID = $("addProductSKU").value;
     const qty = Number($("addProductQty").value);
     let valid = true;
 
-    if (!sku)             { $("addProductSKU").classList.add("border-red-400"); valid = false; }
+    if (!productID)             { $("addProductSKU").classList.add("border-red-400"); valid = false; }
     if (!qty || qty <= 0) { $("addProductQty").classList.add("border-red-400"); valid = false; }
     if (!valid) return;
 
-    const existing = currentProductLoad.find(r => r.idProduct == sku);
+    const existing = currentProductLoad.find(r => r.id_product == productID);
     if (existing) {
         existing.quantity += qty;
     } else {
-        currentProductLoad.push({ idPlatform: platform.id ?? null, idProduct: Number(sku), quantity: qty });
+        currentProductLoad.push({ idPlatform: platform.id ?? null, id_product: productID, quantity: qty });
     }
 
     closeAddProduct();
     renderProductTable();
+    console.log("updated")
     $("productTableError").classList.add("hidden");
 };
 
@@ -268,18 +254,12 @@ function validarCampos() {
         }
     });
 
-    const consSel = $("platformConsignee-edit");
-    if (!consSel.value) {
-        consSel.classList.add("border-red-400");
-        valid = false;
-    }
-
-    if (currentProductLoad.length === 0) {
+    /*if (currentProductLoad.length === 0) {
         $("productTableError").classList.remove("hidden");
         valid = false;
     } else {
         $("productTableError").classList.add("hidden");
-    }
+    }*/
 
     return valid;
 }
@@ -310,6 +290,9 @@ function toggleEdit(active) {
     const textFields = [
         { viewId: "platformName",        editId: "platformName-edit",        key: "name"        },
         { viewId: "platformDescription", editId: "platformDescription-edit", key: "description" },
+        { viewId: "spec-length-view",    editId: "spec-length-edit",         key: "length"      },
+        { viewId: "spec-height-view",    editId: "spec-height-edit",         key: "height"      },
+        { viewId: "spec-width-view",     editId: "spec-width-edit",          key: "width"       },
     ];
     textFields.forEach(({ viewId, editId, key }) => {
         const view  = $(viewId);
@@ -324,6 +307,18 @@ function toggleEdit(active) {
         input.classList.toggle("hidden", !active);
     });
 
+    // Type
+    const typeView = $("platformType");
+    const typeSelect = $("platformType-edit");
+    if (active) {
+        typeSelect.value = platform.type == "Custom" ? "Custom" : "Preset";
+    } else {
+        platform.type = typeSelect.value == "Custom" ? "Custom" : "Preset";
+        typeView.innerHTML = badges.type(platform.type);
+    }
+    typeView.classList.toggle("hidden", active);
+    typeSelect.classList.toggle("hidden", !active);
+
     // Status
     const statusView   = $("platformStatus");
     const statusSelect = $("platformStatus-edit");
@@ -336,26 +331,13 @@ function toggleEdit(active) {
     statusView.classList.toggle("hidden", active);
     statusSelect.classList.toggle("hidden", !active);
 
-    // Consignee
-    const consView = $("platformConsignee");
-    const consSel  = $("platformConsignee-edit");
-    if (active) {
-        consSel.value = consignee?.id ?? "";
-    } else {
-        consignee            = consignees.data.find(c => c.id == consSel.value);
-        consView.textContent = consignee?.name ?? "—";
-        platform.idConsignee = consignee?.id;
-    }
-    consView.classList.toggle("hidden", active);
-    consSel.classList.toggle("hidden", !active);
-
     // Dispatch packaging
     const packView = $("spec-pack-view");
     const packSel  = $("spec-pack-edit");
     if (active) {
-        packSel.value = platform.dispatchPackaging ?? dispatchPackaging[0]?.id ?? "";
+        packSel.value = platform.id_dispatch_packaging ?? dispatchPackaging[0]?.id ?? "";
     } else {
-        platform.dispatchPackaging = Number(packSel.value);
+        platform.id_dispatch_packaging = packSel.value;
     }
     packView.classList.toggle("hidden", active);
     packSel.classList.toggle("hidden", !active);
@@ -364,56 +346,47 @@ function toggleEdit(active) {
 
     // Commit al guardar
     if (!active) {
+        const newPlatform = savePlatform();
         if (isCreateMode) {
-            const nuevo = savePlatform();
-            platform     = nuevo;
+            platform     = newPlatform;
             isCreateMode = false;
 
-            $("platformID").textContent = nuevo.id;
-            $("upperId").textContent    = nuevo.id;
+            $("platformID").textContent = newPlatform.id;
+            
             deleteBtn.classList.remove("hidden");
-            window.history.replaceState({}, "", `?id=${nuevo.id}&idCus=${customer?.id}`);
-
-            currentProductLoad.forEach(row => {
-                row.idPlatform = nuevo.id;
-                productLoad.push(row);
-            });
-        } else {
-            const idx = platforms.findIndex(p => p.id == platform.id);
-            if (idx !== -1) platforms[idx] = { ...platform, updatedAt: new Date().toISOString() };
-
-            const toRemove = productLoad.reduce((acc, row, i) => {
-                if (row.idPlatform == platform.id) acc.push(i);
-                return acc;
-            }, []);
-            toRemove.reverse().forEach(i => productLoad.splice(i, 1));
-            currentProductLoad.forEach(row => productLoad.push({ ...row }));
+            window.history.replaceState({}, "", `?id=${nuevo.id}`);
         }
+        $("upperId").textContent = newPlatform.name;
     }
 
     renderProductTable();
 }
 
 // ── Save new platform ────────────────────────────────────────────────────────
-function savePlatform() {
+async function savePlatform() {
     calcSpecs();
-    const newId = platforms.length > 0 ? Math.max(...platforms.map(p => p.id)) + 1 : 1;
-    const nuevo = {
-        id:                newId,
-        idConsignee:       Number($("platformConsignee-edit").value),
+    const newPlatform = {
         name:              $("platformName-edit").value.trim(),
+        type:              $("platformType-edit").value.trim(),
         description:       $("platformDescription-edit").value.trim(),
         status:            $("platformStatus-edit").value === "1",
-        dispatchPackaging: Number($("spec-pack-edit").value),
-        piecesNumber:      platform.piecesNumber,
-        weight:            platform.weight,
-        width:             platform.width,
-        height:            platform.height,
-        createdAt:         new Date().toISOString(),
-        updatedAt:         new Date().toISOString(),
+        id_dispatch_packaging: $("spec-pack-edit").value.trim(),
+        number_of_pieces:  piecesNumber,
+        weight:            weight,
+        width:             Number($("spec-width-edit").value),
+        height:            Number($("spec-height-edit").value),
+        length:            Number($("spec-length-edit").value),
     };
-    platforms.push(nuevo);
-    return nuevo;
+
+    console.log(newPlatform)
+    
+    if (createMode) {
+        await axios.post(`http://localhost:3000/api/platforms`, newPlatform)
+    } else {
+        await axios.put(`http://localhost:3000/api/platforms/${id}`, newPlatform);
+    }
+
+    return newPlatform;
 }
 
 // ── Delete ───────────────────────────────────────────────────────────────────
@@ -449,8 +422,9 @@ confirmBtn.addEventListener("click", () => {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderCampos();
-renderSpecs();
 renderProductTable();
+renderSpecs();
+
 
 if (createMode) {
     editMode = true;

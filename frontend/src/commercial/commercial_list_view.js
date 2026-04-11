@@ -14,6 +14,14 @@ export function loadComercial() {
     title.textContent = "COMERCIAL";
     search.placeholder = "Buscar Solicitudes";
 
+
+
+    newButton.classList.remove("hidden")
+    newButton.innerHTML = `
+        <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
+            Nueva Asignación`;
+    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true`;
+
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");

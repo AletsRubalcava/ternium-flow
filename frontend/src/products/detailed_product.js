@@ -1,5 +1,4 @@
 import { setActiveNav } from "../shared/page_directory.js";
-import { products } from "../shared/db.js";
 
 setActiveNav("products");
 
@@ -10,17 +9,20 @@ const deleteBtn  = $("deleteButton");
 const modal      = $("deleteModal");
 const cancelBtn  = $("cancelDelete");
 const confirmBtn = $("confirmDelete");
+const specsErrorMsg = $("specsErrorMsg");
+const specsErrorBox = $("specsErrorBox");
 
 const params     = new URLSearchParams(window.location.search);
-const id         = params.get("id");
-const createMode = params.get("create") === "true";
+let id         = params.get("id");
+let createMode = params.get("create") === "true";
 
+const { data: products } = await axios.get("http://localhost:3000/api/products")
 let product  = createMode ? {} : products.find(p => p.id == id);
 let editMode = false;
 
 // --- Badges ---
 const badges = {
-    status: v => `<span class="${v === "Activo" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v ?? "Inactivo"}</span>`
+    status: v => `<span class="${v ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v ? "Activo" : "Inactivo"}</span>`
 };
 
 // --- Navigation ---
@@ -29,31 +31,29 @@ $("returnListView").href = `/frontend/src/shared/list_view.html?type=products`;
 // --- Render Campos ---
 function renderCampos() {
     if (createMode) {
-        $("upperID").textContent              = "Nuevo";
-        $("productID").textContent              = id;
-        $("productSKU").textContent           = "—";
-        $("productName").textContent          = "";
-        $("productFamilia").textContent       = "";
-        $("productStatus").innerHTML          = badges.status("Inactivo");
-        $("productCalibro").textContent       = "";
-        $("productEspesor").textContent       = "";
-        $("productLargo").textContent         = "";
-        $("productPeso").textContent          = "";
-        $("productDiametroInt").textContent   = "";
-        $("productDiametroExt").textContent   = "";
+        $("upperID").textContent            = "Nuevo";
+        $("productSKU").textContent         = "";
+        $("productName").textContent        = "";
+        $("productFamilia").textContent     = "";
+        $("productStatus").innerHTML        = badges.status(false);
+        $("productCalibro").textContent     = "";
+        $("productEspesor").textContent     = "";
+        $("productLargo").textContent       = "";
+        $("productPeso").textContent        = "";
+        $("productDiametroInt").textContent = "";
+        $("productDiametroExt").textContent = "";
     } else {
-        $("upperID").textContent              = id;
-        $("productID").textContent           = id ?? "—";
-        $("productSKU").textContent           = product.numeroDeParte ?? "—";
-        $("productName").textContent          = product.producto          ?? "—";
-        $("productFamilia").textContent       = product.familia         ?? "—";
-        $("productStatus").innerHTML          = badges.status(product.estado);
-        $("productCalibro").textContent       = product.calibre         ?? "—";
-        $("productEspesor").textContent       = product.espesor         ?? "—";
-        $("productLargo").textContent         = product.largo           ?? "—";
-        $("productPeso").textContent          = product.pesoUnitario    ?? "—";
-        $("productDiametroInt").textContent   = product.diametroInterno ?? "—";
-        $("productDiametroExt").textContent   = product.diametroExterno ?? "—";
+        $("upperID").textContent            = product.name;
+        $("productSKU").textContent         = product.part_number        ?? "";
+        $("productName").textContent        = product.name               ?? "—";
+        $("productFamilia").textContent     = product.family              ?? "N/A";
+        $("productStatus").innerHTML        = badges.status(product.status);
+        $("productCalibro").textContent     = product.caliber             ?? "N/A";
+        $("productEspesor").textContent     = product.thickness           ?? "—";
+        $("productLargo").textContent       = product.length              ?? "—";
+        $("productPeso").textContent        = product.unit_weight         ?? "—";
+        $("productDiametroInt").textContent = product.internal_diameter   ?? "—";
+        $("productDiametroExt").textContent = product.external_diameter   ?? "—";
     }
 }
 
@@ -61,8 +61,7 @@ function renderCampos() {
 function validarCampos() {
     let valid = true;
 
-    // Campos de texto obligatorios
-    ["productSKU-edit", "productName-edit", "productFamilia-edit"].forEach(fid => {
+    ["productSKU-edit", "productName-edit"].forEach(fid => {
         const el = $(fid);
         if (!el.value.trim()) {
             el.classList.add("border-red-400");
@@ -70,8 +69,7 @@ function validarCampos() {
         }
     });
 
-    // Campos numéricos obligatorios (deben ser > 0)
-    ["productCalibro-edit", "productEspesor-edit", "productLargo-edit", "productPeso-edit",  "productDiametroInt-edit", "productDiametroExt-edit"].forEach(fid => {
+    ["productEspesor-edit", "productLargo-edit", "productPeso-edit", "productDiametroInt-edit", "productDiametroExt-edit"].forEach(fid => {
         const el  = $(fid);
         const val = Number(el.value);
         if (el.value === "" || isNaN(val) || val <= 0) {
@@ -79,6 +77,21 @@ function validarCampos() {
             valid = false;
         }
     });
+
+    const internalDiameter = Number($("productDiametroInt-edit").value);
+    const externalDiameter = Number($("productDiametroExt-edit").value);
+
+    // Reset error state
+    specsErrorMsg.classList.add("opacity-0", "translate-y-1");
+    specsErrorMsg.classList.remove("opacity-100", "translate-y-0");
+    specsErrorBox.classList.remove("ring-2", "ring-red-400", "ring-offset-4", "ring-offset-white");
+
+    if (internalDiameter > 0 && externalDiameter > 0 && internalDiameter >= externalDiameter) {
+        specsErrorMsg.classList.remove("opacity-0", "translate-y-1");
+        specsErrorMsg.classList.add("opacity-100", "translate-y-0");
+        specsErrorBox.classList.add("ring-2", "ring-red-400", "ring-offset-4", "ring-offset-white");
+        valid = false;
+    }
 
     return valid;
 }
@@ -88,8 +101,7 @@ document.querySelectorAll(".edit").forEach(el =>
 );
 
 // --- Toggle Edit ---
-function toggleEdit(active) {
-    // Si se intenta guardar, validar antes de continuar
+async function toggleEdit(active) {
     if (!active) {
         if (!validarCampos()) {
             editMode = true;
@@ -102,71 +114,87 @@ function toggleEdit(active) {
     editButton.querySelector("span").textContent = active ? "save" : "edit";
     editButton.childNodes[2].textContent         = active ? " Guardar" : " Editar";
 
-    // Campos editables genéricos (.editable con .view / .edit)
     document.querySelectorAll(".editable").forEach(f => {
         const view  = f.querySelector(".view");
         const input = f.querySelector(".edit");
         if (!view || !input) return;
         if (active) {
-            input.value = view.textContent.trim() === "—" ? "" : view.textContent.trim();
+            input.value = view.textContent.trim() === "N/A" ? "" : view.textContent.trim();
         } else {
-            view.textContent = input.value || "—";
+            view.textContent = input.value || "N/A";
         }
         view.classList.toggle("hidden", active);
         input.classList.toggle("hidden", !active);
     });
 
-    // Status select
+    // Reset error al salir de edit mode
+    if (!active) {
+        specsErrorMsg.classList.add("opacity-0", "translate-y-1");
+        specsErrorMsg.classList.remove("opacity-100", "translate-y-0");
+        specsErrorBox.classList.remove("ring-2", "ring-red-400", "ring-offset-4", "ring-offset-white");
+    }
+
     const statusView   = $("productStatus");
     const statusSelect = $("productStatus-edit");
+
     if (active) {
-        statusSelect.value = product.estado ?? "Activo";
+        statusSelect.value = product.status ? "true" : "false";
     } else {
-        product.estado       = statusSelect.value;
-        statusView.innerHTML = badges.status(product.estado);
+        product.status       = statusSelect.value === "true";
+        statusView.innerHTML = badges.status(product.status);
     }
+
     statusView.classList.toggle("hidden", active);
     statusSelect.classList.toggle("hidden", !active);
 
-    // Commit al guardar
     if (!active) {
-        product.producto           = $("productName-edit").value.trim();
-        product.familia          = $("productFamilia-edit").value.trim();
-        product.calibre          = $("productCalibro-edit").value.trim();
-        product.espesor          = Number($("productEspesor-edit").value);
-        product.largo            = Number($("productLargo-edit").value);
-        product.pesoUnitario     = Number($("productPeso-edit").value);
-        product.diametroInterno  = Number($("productDiametroInt-edit").value);
-        product.diametroExterno  = Number($("productDiametroExt-edit").value);
-        product.fechaActualizacion = new Date().toISOString().split("T")[0];
+        const newProduct = await saveProduct();
+        $("upperID").textContent = newProduct.name;
 
-        if (createMode && !product.id) {
-            // Guardar nuevo producto
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-            product.id                = newId;
-            product.fechaCreacion     = new Date().toISOString().split("T")[0];
-            products.push({ ...product });
-
-            $("productID").textContent = newId;
-            $("upperID").textContent   = product.numeroDeParte ?? newId;
-            $("productFechaCreacion").textContent     = product.fechaCreacion;
-            $("productFechaActualizacion").textContent = product.fechaActualizacion;
-
+        if (createMode) {
             deleteBtn.classList.remove("hidden");
-            window.history.replaceState({}, "", `?id=${newId}`);
-        } else {
-            // Actualizar existente
-            const idx = products.findIndex(p => p.id == product.id);
-            if (idx !== -1) products[idx] = { ...product };
-            $("productFechaActualizacion").textContent = product.fechaActualizacion;
+            id = newProduct.id;
+            window.history.replaceState({}, "", `?id=${newProduct.id}`);
+            createMode = false;
         }
     }
 }
 
+async function saveProduct() {
+    const newProduct = {
+        name:              $("productName-edit").value.trim(),
+        part_number:       $("productSKU-edit").value.trim(),
+        family:            $("productFamily-edit").value.trim() || null,
+        status:            $("productStatus-edit").value === "true",
+        caliber:           $("productCalibro-edit").value.trim() || null,
+        thickness:         Number($("productEspesor-edit").value),
+        length:            Number($("productLargo-edit").value),
+        unit_weight:       Number($("productPeso-edit").value),
+        internal_diameter: Number($("productDiametroInt-edit").value),
+        external_diameter: Number($("productDiametroExt-edit").value),
+    };
+
+    if (createMode) {
+        try {
+            const res = await axios.post(`http://localhost:3000/api/products`, newProduct);
+            return res.data;
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+        }
+    } else {
+        try {
+            const res = await axios.put(`http://localhost:3000/api/products/${id}`, newProduct);
+            return res.data;
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+        }
+    }
+    return newProduct;
+}
+
 // --- Eliminar ---
-function eliminarProducto() {
-    const idx = products.findIndex(p => p.id == product.id);
-    if (idx !== -1) products.splice(idx, 1);
+async function deleteProduct() {
+    await axios.delete(`http://localhost:3000/api/products/${id}`);
 }
 
 // --- Event Listeners ---
@@ -178,7 +206,7 @@ editButton.addEventListener("click", () => {
 deleteBtn.addEventListener("click",  () => modal.classList.remove("hidden"));
 cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", () => {
-    eliminarProducto();
+    deleteProduct();
     window.location.href = `/frontend/src/shared/list_view.html?type=products`;
 });
 

@@ -9,17 +9,13 @@ export async function createContactHandler(req, res) {
     const email = data.email?.trim();
     const phone = data.phone?.trim();
 
-    console.log(data.id_customer);
-    console.log(name);
-    console.log(email);
-    console.log(phone);
     // Validations
     if (!data.id_customer || !name || (!email && !phone)) {
         return res.status(400).json({ 
             error: "MISSING_REQUIRED_FIELDS"
         });
     }
-    console.log("lol");
+
     // Type validations
     if (typeof name !== "string") {
         return res.status(400).json({ 
