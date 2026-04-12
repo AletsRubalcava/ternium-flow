@@ -34,10 +34,10 @@ export async function updateContact(id, data) {
 
     await contact.update({
         ...(data.id_customer !== undefined && { id_customer: data.id_customer }),
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.position !== undefined && { position: data.position }),
-        ...(data.email !== undefined && { email: data.email }),
-        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.name        !== undefined && { name: data.name }),
+        ...(data.position    !== undefined && { position: data.position }),
+        ...(data.email       !== undefined && { email: data.email ?? null }),
+        ...(data.phone       !== undefined && { phone: data.phone ?? null }),
         updated_at: new Date()
     });
 

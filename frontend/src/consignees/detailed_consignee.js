@@ -1,6 +1,4 @@
-import { consignees } from '../shared/db.js';
 import { setActiveNav } from '../shared/page_directory.js';
-import { apiKey } from '../shared/keys.js';
 
 setActiveNav("customers");
 
@@ -150,13 +148,13 @@ document.querySelectorAll(".edit, .spec-edit").forEach(el =>
     el.addEventListener("input", () => el.classList.remove("border-red-400"))
 );
 
-function renderMap(){
+async function renderMap() {
     if (consignee?.address) {
         const encoded = encodeURIComponent(consignee.address);
-        $("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encoded}`;
+        const { data } = await axios.get("http://localhost:3000/api/config");
+        $("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${data.googleApiKey}&q=${encoded}`;
     }
 }
-
 // --- Toggle Edit ---
 async function toggleEdit(active) {
     editButton.querySelector("span").textContent = active ? "save" : "edit";

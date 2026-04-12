@@ -17,7 +17,7 @@ const confirmContactModal = $("confirmContactDelete");
 const cancelContactModal  = $("cancelContactDelete");
 
 const params     = new URLSearchParams(window.location.search);
-const id         = params.get("id");
+let id         = params.get("id");
 const createMode = params.get("create") === "true";
 
 let customer;
@@ -129,6 +129,7 @@ async function syncContacts() {
     const toCreate = localContacts.filter(c => c._new);
     await Promise.all(toCreate.map(c => {
         const { _new, id, ...payload } = c;
+        console.log(payload)
         return axios.post("http://localhost:3000/api/contacts", payload);
     }));
 
@@ -190,6 +191,7 @@ async function toggleEdit(active) {
 
         if (createMode) {
             const newCustomer = await saveNewCustomer();
+            id = newCustomer.id;
             $("idCustomer").textContent = $("upperClientId").textContent = newCustomer.id_customer;
             deleteBtn.classList.remove("hidden");
             document.querySelectorAll(".viewAll").forEach(b => b.classList.remove("hidden"));

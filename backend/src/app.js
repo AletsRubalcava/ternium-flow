@@ -11,6 +11,7 @@ import platformRoutes from './modules/plaftforms/platforms.routes.js';
 import platformRequestRoutes from "./modules/platform_request/platform_request.routes.js"
 import contactRoutes from "./modules/contacts/contacts.routes.js"
 import platformItemRoutes from "./modules/platform_items/platform_items.routes.js"
+import configRoutes from "./modules/consignatarios/config.routes.js";
 
 const app = express();
 
@@ -25,5 +26,6 @@ app.use('/api/platform_request', platformRequestRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/items', platformItemRoutes);
+app.use("/api", configRoutes);
 
 export default app;

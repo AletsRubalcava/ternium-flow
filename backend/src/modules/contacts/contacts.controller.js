@@ -6,7 +6,7 @@ export async function createContactHandler(req, res) {
 
     // Normalize
     const name = data.name?.trim();
-    const email = data.email?.trim();
+    const email = data.email?.trim() || null;
     const phone = data.phone?.trim();
 
     // Validations
@@ -36,7 +36,12 @@ export async function createContactHandler(req, res) {
     }
 
     try {
-        const contact = await createContact(data);
+        const contact = await createContact({
+            ...data,
+            name,
+            email,
+            phone
+        });
         return res.status(201).json(contact);
 
     } catch (error) {

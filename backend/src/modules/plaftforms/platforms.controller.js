@@ -11,7 +11,7 @@ import { createPlatformItem, deleteItemsByPlatform } from "../platform_items/pla
 import { createPlatformRequest } from "../platform_request/platform_request.service.js";
 // ── Validar specs de tarima contra consignatario ──────────────────────────────
 import consignees from "../consignatarios/consignatarios.model.js";
-import platform_items from "../platform_items/platform_items.model.js";
+import platform_request from "../platform_request/platform_request.model.js";
 import products from "../products/products.model.js";
 
 async function validateAgainstConsignee(platformData, items, id_consignee) {
