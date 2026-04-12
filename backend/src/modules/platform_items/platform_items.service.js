@@ -1,14 +1,15 @@
 import platform_items from "./platform_items.model.js";
 
-export async function createPlatformItem(data) {
-    const item = await platform_items.create({
-        id_platform: data.id_platform.trim(),
+export async function createPlatformItem(data, transaction) {
+    return await platform_items.create({
+        id_platform: data.id_platform,
         id_product: data.id_product,
         quantity: data.quantity,
         created_at: new Date(),
         updated_at: new Date(),
+    }, {
+        transaction
     });
-    return item;
 }
 
 export async function getAllPlatformItems() {
@@ -42,13 +43,12 @@ export async function updatePlatformItems(id, data) {
     return await platform_items.findByPk(id);
 }
 
-export async function deletePlatformItems(id) {
-    const item = await platform_items.findByPk(id);
-
-    if (!item) {
-        error.code = "ITEM_NOT_FOUND";
-        throw error;
-    }
-
-    await item.destroy();
+export async function deleteItemsByPlatform(platformId, transaction) {
+    return await platform_items.destroy({
+        where: {
+            id_platform: platformId
+        },
+        transaction
+    });
 }
+

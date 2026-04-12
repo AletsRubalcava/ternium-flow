@@ -8,48 +8,38 @@ export async function getPlatformById(id) {
     return await platforms.findByPk(id);
 }
 
-export async function createPlatform(data) {
+export async function createPlatform(data, transaction) {
     return await platforms.create({
-        type:               data.type,
-        name:               data.name,
-        description:        data.description,
-        status:             data.status ?? false,
-        dispatch_packaging: data.dispatch_packaging,
-        pieces_number:      data.pieces_number,
-        weight:             data.weight,
-        width:              data.width,
-        height:             data.height,
-        length:             data.length,
-        created_at:         new Date(),
-        updated_at:         new Date(),
-    });
-}
-
-export async function updatePlatform(id, data) {
-    const platform = await platforms.findByPk(id);
-    if (!platform) throw new Error("Tarima no encontrada");
-    console.log(platform)
-    await platform.update({
-        type:               data.type,
-        name:               data.name,
-        description:        data.description,
-        status:             data.status,
+        type:                  data.type,
+        name:                  data.name,
+        description:           data.description,
+        status:                data.status ?? false,
         id_dispatch_packaging: data.id_dispatch_packaging,
-        pieces_number:      data.number_of_pieces,
-        weight:             data.weight,
-        width:              data.width,
-        length:             data.length,
-        height:             data.height,
-        updated_at:         new Date(),
-    });
-
-    return platform;
+        number_of_pieces:         data.number_of_pieces,
+        weight:                data.weight,
+        width:                 data.width,
+        height:                data.height,
+        length:                data.length,
+        created_at:            new Date(),
+        updated_at:            new Date(),
+    }, { transaction });
 }
 
-export async function deletePlatform(id) {
+export async function updatePlatform(id, data, transaction) {
+    const [updated] = await platforms.update(data, {
+        where: { id },
+        transaction
+    });
+
+    if (!updated) throw new Error("Tarima no encontrada");
+
+    return await platforms.findByPk(id, { transaction });
+}
+
+export async function deletePlatform(id, transaction) {
     const platform = await platforms.findByPk(id);
     if (!platform) throw new Error("Tarima no encontrada");
 
-    await platform.destroy();
+    await platform.destroy({transaction}) ;
     return platform;
 }

@@ -272,32 +272,52 @@ function renderConsignees() {
 
 // --- Render Platforms ---
 function renderPlatforms() {
-    $("activePlatforms").textContent = `(${platforms.length} activas)`;
+    const acceptedRequests = platformRequests.filter(pr => pr.status === "Aceptada");
 
-    $("platformWidget").innerHTML = platforms.length === 0
-        ? emptyWidget("Sin tarimas")
-        : platforms.map(p => `
-            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center" data-id="${p.id}">
+    $("activePlatforms").textContent = `(${acceptedRequests.length} activas)`;
+
+    if (acceptedRequests.length === 0) {
+        $("platformWidget").innerHTML = emptyWidget("Sin tarimas");
+        return;
+    }
+
+    $("platformWidget").innerHTML = acceptedRequests.map(pr => {
+        const platform  = resPlatforms.data.find(p => p.id === pr.id_platform);
+        const consignee = consignees.find(c => c.id === pr.id_consignee);
+        if (!platform) return "";
+
+        return `
+            <div class="platformTuple group cursor-pointer p-3 rounded-lg border border-border-light hover:border-primary/50 transition-all flex justify-between items-center"
+                data-platform-id="${platform.id}" data-request-id="${pr.id}">
                 <div class="flex items-center gap-3">
                     <div>
-                        <div class="text-sm font-medium text-text-primary-light">${p.name}</div>
-                        <div class="text-[10px] text-text-secondary-light">${p.description}, ${p.weight}kg</div>
+                        <div class="text-sm font-medium text-text-primary-light">${platform.name}</div>
+                        <div class="text-[10px] text-text-secondary-light">${consignee?.name ?? "—"} · ${platform.weight}kg</div>
                     </div>
                 </div>
-                <span data-id="${p.id}" class="redirectPlatform text-[20px] material-symbols-outlined text-gray-300 group-hover:text-primary">open_in_new</span>
-            </div>`).join("");
+                <span data-platform-id="${platform.id}" data-request-id="${pr.id}"
+                    class="redirectPlatform text-[20px] material-symbols-outlined text-gray-300 group-hover:text-primary">
+                    open_in_new
+                </span>
+            </div>`;
+    }).join("");
 
     document.querySelectorAll(".platformTuple").forEach(el => {
-        const pData = platforms.find(p => p.id == el.dataset.id);
+        const platformId = el.dataset.platformId;
+        const requestId  = el.dataset.requestId;
+        const platform   = resPlatforms.data.find(p => p.id == platformId);
+
         el.addEventListener("click", (e) => {
             if (e.target.classList.contains("redirectPlatform")) return;
-            selectItem("platform", pData, el);
+            selectItem("platform", platform, el);
         });
     });
 
-    document.querySelectorAll(".redirectPlatform").forEach(p => {
-        p.addEventListener("click", () => {
-            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${p.dataset.id}`;
+    document.querySelectorAll(".redirectPlatform").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const platformId = btn.dataset.platformId;
+            const requestId  = btn.dataset.requestId;
+            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platformId}&requestId=${requestId}&section=customers`;
         });
     });
 }

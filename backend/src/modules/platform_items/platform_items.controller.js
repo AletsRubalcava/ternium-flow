@@ -1,4 +1,4 @@
-import { createPlatformItem, getAllPlatformItems, getPlatformItemsById, updatePlatformItems, deletePlatformItems } from "./platform_items.service.js";
+import { createPlatformItem, getAllPlatformItems, getPlatformItemsById, updatePlatformItems, deleteItemsByPlatform } from "./platform_items.service.js";
 
 export async function createPlatformItemHandler(req, res) {
     const data = req.body;
@@ -139,7 +139,7 @@ export async function updatePlatformItemHandler(req, res) {
     }
 }
 
-export async function deletePlatformItemHandler(req, res) {
+export async function deleteItemsByPlatformHandler(req, res) {
     const { id } = req.params;
 
     if (!id) {
@@ -147,13 +147,13 @@ export async function deletePlatformItemHandler(req, res) {
     }
 
     try {
-        await deletePlatformItems(id);
+        await deleteItemsByPlatform(id);
 
         return res.sendStatus(204);
 
     } catch (error) {
-        if (error.code === "ITEM_NOT_FOUND") {
-            return res.status(404).json({ error: "ITEM_NOT_FOUND" });
+        if (error.code === "PLATFORM_NOT_FOUND") {
+            return res.status(404).json({ error: "PLATFORM_NOT_FOUND" });
         }
 
         console.error(error);
