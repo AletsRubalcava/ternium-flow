@@ -76,10 +76,46 @@ function renderCampos() {
 // --- Fill Dispatch Options
 
 const dispatches = await axios.get("http://localhost:3000/api/dispatch");
+const { data: platformRequests } = await axios.get("http://localhost:3000/api/platform_request");
+const hasActiveRequests = platformRequests.some(
+    pr => pr.id_consignee == consignee?.id && pr.status !== "Rechazada"
+);
 
 $("packaging-edit").innerHTML = dispatches.data.map(c => `
     <option value="${c.id}">${c.name}</option>
     `).join("");
+
+function showToast(items, type = "error") {
+    const existing = document.getElementById("specToast");
+    if (existing) existing.remove();
+
+    const isError = type === "error";
+    const color   = isError ? "red" : "yellow";
+    const icon    = isError ? "error" : "warning";
+    const title   = isError ? "Edición bloqueada" : "Advertencia";
+
+    const toast = document.createElement("div");
+    toast.id = "specToast";
+    toast.className = `fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white border border-${color}-200 rounded-xl shadow-lg p-4 flex gap-3 items-start animate-[fadeIn_0.2s_ease]`;
+    toast.innerHTML = `
+        <span class="material-symbols-outlined text-${color}-500 mt-0.5 shrink-0">${icon}</span>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-${color}-700 mb-1">${title}</p>
+            <ul class="space-y-0.5">
+                ${items.map(msg => `
+                    <li class="text-xs text-${color}-600 flex items-start gap-1">
+                        <span class="mt-0.5 shrink-0">•</span>${msg}
+                    </li>`).join("")}
+            </ul>
+        </div>
+        <button onclick="document.getElementById('specToast').remove()"
+            class="text-gray-400 hover:text-gray-600 shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-sm">close</span>
+        </button>`;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast?.remove(), 8000);
+}
 
 // --- Render Specs (vista) ---
 function renderSpecs() {
@@ -109,29 +145,26 @@ function validarCampos() {
         }
     });
 
-    // Campos de especificaciones
+    // Campos de especificaciones (skip si están bloqueados)
     specFields
         .filter(f => f.key !== "additional_instructions")
         .forEach(({ edit, type }) => {
             const input = $(edit);
-            if (!input) return;
+            if (!input || input.disabled) return;
 
             let invalido = false;
 
             if (input.tagName === "SELECT") {
                 invalido = !input.value;
-            } 
-            else if (type === "number") {
+            } else if (type === "number") {
                 const value = input.value;
-
                 if (value === "") {
-                    invalido = true; // vacío
+                    invalido = true;
                 } else {
                     const num = Number(value);
-                    invalido = num <= 0 || isNaN(num); // 👈 clave
+                    invalido = num <= 0 || isNaN(num);
                 }
-            } 
-            else {
+            } else {
                 invalido = !input.value.trim();
             }
 
@@ -170,13 +203,8 @@ async function toggleEdit(active) {
         } else {
             view.textContent = input.value;
 
-            // 👇 AQUÍ está la magia
-            if (input.id === "consigneeName-edit") {
-                consignee.name = input.value;
-            }
-            if (input.id === "consigneeAddress-edit") {
-                consignee.address = input.value;
-            }
+            if (input.id === "consigneeName-edit")    consignee.name    = input.value;
+            if (input.id === "consigneeAddress-edit") consignee.address = input.value;
         }
 
         view.classList.toggle("hidden", active);
@@ -203,28 +231,42 @@ async function toggleEdit(active) {
 
         if (active) {
             editEl.value = consignee[key] ?? "";
+
+            if (hasActiveRequests && key !== "additional_instructions") {
+                editEl.disabled = true;
+                editEl.classList.add("opacity-50", "cursor-not-allowed", "bg-gray-50");
+            }
         } else {
-            consignee[key]    = editEl.type === "number" ? Number(editEl.value) : editEl.value;
+            if (!hasActiveRequests || key === "additional_instructions") {
+                consignee[key] = editEl.type === "number" ? Number(editEl.value) : editEl.value;
+            }
             viewEl.textContent = consignee[key] ?? "—";
+            editEl.disabled = false;
+            editEl.classList.remove("opacity-50", "cursor-not-allowed", "bg-gray-50");
         }
 
         viewEl.classList.toggle("hidden", active);
         editEl.classList.toggle("hidden", !active);
 
         renderSpecs();
-        if(!active) renderMap();
+        if (!active) renderMap();
     });
 
+    // Toast al entrar a editar si tiene requests activas
+    if (active && hasActiveRequests && !isCreateMode) {
+        showToast(["Este consignatario tiene solicitudes de tarima activas o pendientes. Las especificaciones no pueden modificarse."], "warning");
+    }
+
     if (!active && (isCreateMode || !editMode)) {
-        if (!validarCampos()) { 
-            editMode = true; 
-            toggleEdit(true); 
-            return; 
+        if (!validarCampos()) {
+            editMode = true;
+            toggleEdit(true);
+            return;
         }
         if (isCreateMode) {
             const nuevo = await saveNewConsignee();
 
-            consignee = nuevo;
+            consignee    = nuevo;
             isCreateMode = false;
 
             $("upperConsigneeId").textContent = nuevo.name;
