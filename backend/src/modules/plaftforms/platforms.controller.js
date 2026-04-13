@@ -142,9 +142,10 @@ export async function createPlatformHandler(req, res) {
         }
     }
 
-    const request = data.request
+    const request = data.request ?? null;
+    const isPreset = type === "Preset";
 
-    if (!request.id_consignee) {
+    if (!isPreset && (!request || !request.id_consignee)) {
         return res.status(400).json({ error: "MISSING_REQUEST_FIELDS" });
     }
 
@@ -163,12 +164,15 @@ export async function createPlatformHandler(req, res) {
         }
 
         const createdPlatform = await sequelize.transaction(async (t) => {
-    
-        const violations = await validateAgainstConsignee(newPlatform, items, request.id_consignee);
-        if (violations.length > 0) {
-            const err = new Error("CONSIGNEE_SPEC_VIOLATION");
-            err.violations = violations;
-            throw err;
+
+        // Solo validar contra consignatario si no es Preset
+        if (!isPreset) {
+            const violations = await validateAgainstConsignee(newPlatform, items, request.id_consignee);
+            if (violations.length > 0) {
+                const err = new Error("CONSIGNEE_SPEC_VIOLATION");
+                err.violations = violations;
+                throw err;
+            }
         }
 
         const platformCreated = await createPlatform(newPlatform, t);
@@ -178,13 +182,16 @@ export async function createPlatformHandler(req, res) {
                 ...item,
                 id_platform: platformCreated.id
             }, t);
-        }
+            }
 
-        await createPlatformRequest({
-            id_platform: platformCreated.id,
-            id_consignee: request.id_consignee,
-            comments: request.comments ?? null
-        }, t);
+            // Solo crear request si no es Preset
+        if (!isPreset) {
+            await createPlatformRequest({
+                id_platform:  platformCreated.id,
+                id_consignee: request.id_consignee,
+                comments:     request.comments ?? null
+            }, t);
+        }
 
         return platformCreated;
     });
@@ -261,7 +268,12 @@ export async function updatePlatformHandler(req, res) {
     }
 
     const existingRequest = await platform_request.findOne({ where: { id_platform: id } });
-    if (!existingRequest) return res.status(404).json({ error: "PLATFORM_REQUEST_NOT_FOUND" });
+    const isPreset = type === "Preset";
+
+    // Solo bloquear si no es preset y no hay request
+    if (!isPreset && !existingRequest) {
+        return res.status(404).json({ error: "PLATFORM_REQUEST_NOT_FOUND" });
+    }
 
     try {
         const newPlatform = {
@@ -277,24 +289,24 @@ export async function updatePlatformHandler(req, res) {
             length:                platform.length           ?? 0,
         }
 
-        await sequelize.transaction( async (t) => {
-
-            const violations = await validateAgainstConsignee(newPlatform, items, existingRequest.id_consignee);
-            if (violations.length > 0) {
-                const err = new Error("CONSIGNEE_SPEC_VIOLATION");
-                err.violations = violations;
-                throw err;
+        await sequelize.transaction(async (t) => {
+            // Solo validar contra consignatario si no es Preset
+            if (!isPreset && existingRequest) {
+                const violations = await validateAgainstConsignee(newPlatform, items, existingRequest.id_consignee);
+                if (violations.length > 0) {
+                    const err = new Error("CONSIGNEE_SPEC_VIOLATION");
+                    err.violations = violations;
+                    throw err;
+                }
             }
 
-            const updatedPlatform = await updatePlatform(id, newPlatform, t);
+            await updatePlatform(id, newPlatform, t);
             await deleteItemsByPlatform(id, t);
 
             for (const item of items) {
-                await createPlatformItem({
-                    ...item,
-                    id_platform: id
-                }, t);
+                await createPlatformItem({ ...item, id_platform: id }, t);
             }
+
             return res.status(200).json(newPlatform);
         });
     } catch (error) {

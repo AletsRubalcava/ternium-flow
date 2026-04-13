@@ -1,30 +1,26 @@
-import { platforms, platformType } from "../shared/db.js";
-
 const attributes = ["Clave", "Nombre", "Consignatario", "Estado"];
 
 export async function loadPresets() {
+    const resPlatforms  = await axios.get("http://localhost:3000/api/platforms");
     const resConsignees = await axios.get("http://localhost:3000/api/consignees");
+
     const allConsignees = resConsignees.data;
+    const platform      = resPlatforms.data.filter(p => p.type === "Preset");
 
-    const platform = platforms.filter(p => p.type == platformType.preset);
-
-    const title = document.getElementById("pageTitle");
-    const search = document.getElementById("search");
+    const title     = document.getElementById("pageTitle");
+    const search    = document.getElementById("search");
     const newButton = document.getElementById("newButton");
-    const thead = document.getElementById("listViewThead");
-    const tbody = document.getElementById("listViewBody");
-
-    title.textContent = "PAQUETES";
-    search.placeholder = "Buscar Paquetes";
+    const thead     = document.getElementById("listViewThead");
+    const tbody     = document.getElementById("listViewBody");
+    console.log(title)
+    title.textContent      = "PAQUETES";
+    search.placeholder     = "Buscar Paquetes";
 
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-            Nuevo Paquete`;
-
+        Nuevo Paquete`;
     newButton.classList.remove("hidden");
-
-    const newId = platforms.length > 0 ? Math.max(...platform.map(p => p.id)) + 1 : 1;
-    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&id=${newId}&type=preset`;
+    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&section=presets`;
 
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
@@ -47,8 +43,7 @@ export async function loadPresets() {
 
     document.querySelectorAll(".customer-row").forEach(row => {
         row.addEventListener("click", () => {
-            const id = row.dataset.id;
-            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${id}&type=preset`;
+            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${row.dataset.id}&section=presets`;
         });
     });
 }

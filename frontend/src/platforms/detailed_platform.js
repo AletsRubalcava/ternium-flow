@@ -12,10 +12,14 @@ const confirmRejectBtn = $("confirmReject");
 
 const params       = new URLSearchParams(window.location.search);
 const id           = params.get("id");
-const requestId    = params.get("requestId");   // ← nuevo
+const requestId    = params.get("requestId");
 const createMode   = params.get("create") === "true";
 const type         = params.get("section");
+const isPresetSection = type === "presets";
 const isCommercial = type === "commercial";
+
+
+console.log(isPresetSection)
 
 setActiveNav(type);
 
@@ -24,6 +28,13 @@ let platform = createMode
     : (await axios.get(`http://localhost:3000/api/platforms/${id}`)).data;
 
 const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+
+const hasActiveRequests = isPresetSection && !createMode
+    ? resPlatformRequests.data.some(
+        pr => pr.id_platform == id && pr.status !== "Rechazada"
+    )
+    : false;
+
 const platformRequest = requestId
     ? resPlatformRequests.data.find(pr => pr.id == requestId)
     : resPlatformRequests.data.find(pr => pr.id_platform == id);
@@ -42,7 +53,7 @@ let consignee = null;
 let piecesNumber = platform.number_of_pieces ?? 0;
 let weight       = platform.weight ?? 0;
 
-if (!createMode) {
+if (!createMode && !isPresetSection) {
     consignee = (await axios.get(`http://localhost:3000/api/consignees/${platformRequest.id_consignee}`)).data;
     customer  = allCustomers.find(c => c.id == consignee.id_customer);
 }
@@ -56,7 +67,8 @@ if (currentProductLoad.length > 0) calcSpecs();
 let editMode         = false;
 let isCreateMode     = createMode;
 let isPresetMode     = false;
-let selectedPresetName = ""; // ← nombre del preset seleccionado
+let selectedPresetName = "";
+
 
 const badges = {
     type:   v => `<span class="${v == "Custom" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v == "Custom" ? "Personalizada" : "Preestablecido"}</span>`,
@@ -78,7 +90,7 @@ if (isCommercial && !createMode) {
 }
 
 // ── Navigation ───────────────────────────────────────────────────────────────
-if (type == "preset") {
+if (type == "presets") {
     $("returnListView").innerText = "PAQUETES";
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=presets`;
 } else if (type == "commercial") {
@@ -140,6 +152,7 @@ $("platformPreset-edit").addEventListener("change", () => {
 
 // ── Customer / Consignee selects (solo createMode) ───────────────────────────
 function initCustomerConsigneeSelects() {
+    if (!createMode || isPresetSection) return;
     if (!createMode) return;
 
     const customerSelect  = $("platformCustomer-edit");
@@ -254,24 +267,38 @@ function calcSpecs() {
 
 // ── Render general info ──────────────────────────────────────────────────────
 function renderCampos() {
+    const customerRow  = document.querySelector(".commercial-editable");
+    const consigneeRow = document.querySelector(".consignee-field");
+
+    if (isPresetSection) {
+        customerRow?.classList.add("hidden");
+        consigneeRow?.classList.add("hidden");
+    }
+
     if (createMode) {
         $("upperId").textContent             = "Nuevo";
         $("platformName").textContent        = "";
-        $("platformCustomer").textContent    = "—";
-        $("platformConsignee").textContent   = "—";
+        if (!isPresetSection) {
+            $("platformCustomer").textContent  = "—";
+            $("platformConsignee").textContent = "—";
+        }
         $("platformDescription").textContent = "";
-        $("platformType").innerHTML          = badges.type("Custom");
+        $("platformType").innerHTML          = badges.type(isPresetSection ? "Preset" : "Custom");
         $("platformStatus").innerHTML        = badges.status(false);
     } else {
         $("upperId").textContent             = platform.name;
         $("platformName").textContent        = platform.name        ?? "—";
-        $("platformCustomer").textContent    = customer?.name       ?? "—";
-        $("platformConsignee").textContent   = consignee?.name      ?? "—";
+        if (!isPresetSection) {
+            $("platformCustomer").textContent  = customer?.name     ?? "—";
+            $("platformConsignee").textContent = consignee?.name    ?? "—";
+        }
         $("platformDescription").textContent = platform.description ?? "—";
         $("platformType").innerHTML          = badges.type(platform.type);
-        $("platformStatus").innerHTML        = platformRequest?.status == "Aceptada"
+        $("platformStatus").innerHTML        = isPresetSection
             ? badges.status(platform.status)
-            : badges.pending;
+            : (platformRequest?.status == "Aceptada"
+                ? badges.status(platform.status)
+                : badges.pending);
     }
 }
 
@@ -422,7 +449,7 @@ function validarCampos() {
         });
     }
 
-    if (isCreateMode) {
+    if (isCreateMode && !isPresetSection) {
         const customerSelect  = $("platformCustomer-edit");
         const consigneeSelect = $("platformConsignee-edit");
         if (!customerSelect.value)  { customerSelect.style.borderColor  = "#f87171"; valid = false; }
@@ -460,7 +487,7 @@ document.querySelectorAll(".edit").forEach(el =>
 
 // ── Validación contra especificaciones del consignatario ─────────────────────
 function validarEspecificacionesConsignatario() {
-    if (!consignee) return { valid: true, warnings: [], violations: [] };
+    if (!consignee || isPresetSection) return { valid: true, warnings: [], violations: [] };
 
     const violations = []; // bloquean
     const warnings   = []; // solo avisan
@@ -600,17 +627,15 @@ async function toggleEdit(active) {
             return;
         }
 
-        // ── Actualizar platform con los valores actuales del form ─────────
-        platform.name        = isPresetMode ? selectedPresetName : $("platformName-edit").value;
+        platform.name        = $("platformName-edit").value;
         platform.description = $("platformDescription-edit").value;
         platform.width       = Number($("spec-width-edit").value);
         platform.height      = Number($("spec-height-edit").value);
         platform.length      = Number($("spec-length-edit").value);
         platform.id_dispatch_packaging = $("spec-pack-edit").value;
         platform.status      = $("platformStatus-edit").value === "1";
-        platform.type        = isPresetMode ? "Preset" : $("platformType-edit").value;
+        platform.type        = isPresetSection ? "Preset" : (isPresetMode ? "Preset" : $("platformType-edit").value);
 
-        // ── Validar contra consignatario con valores actualizados ─────────
         calcSpecs();
         limpiarMarcasConsignatario();
         const { valid, violations, warnings } = validarEspecificacionesConsignatario();
@@ -648,11 +673,11 @@ async function toggleEdit(active) {
         if (active) {
             input.value = platform[key] ?? "";
         } else {
-            // platform ya fue actualizado arriba, solo sincronizar el DOM
             view.textContent = platform[key] || "—";
         }
 
-        if (key === "name" && active && isPresetMode) {
+        // En preset section nunca usamos el select de preset, siempre el input de nombre
+        if (key === "name" && active && isPresetMode && !isPresetSection) {
             view.classList.add("hidden");
             input.classList.add("hidden");
             $("platformPreset-edit").classList.remove("hidden");
@@ -663,34 +688,55 @@ async function toggleEdit(active) {
         input.classList.toggle("hidden", !active);
     });
 
-    // Al salir de edit, limpiar estado de preset
-    if (!active) {
+    // Al entrar a editar en preset section: ocultar preset select, mostrar nombre normal
+    if (active && isPresetSection) {
+        $("platformPreset-edit").classList.add("hidden");
+        $("platformName-edit").classList.remove("hidden");
+        setNonTypeFieldsDisabled(false);
+    }
+
+    // Al salir de edit en modo no-preset-section, limpiar estado de preset
+    if (!active && !isPresetSection) {
         $("platformPreset-edit").classList.add("hidden");
         setNonTypeFieldsDisabled(false);
     }
 
     const customerView   = $("platformCustomer");
     const customerSelect = $("platformCustomer-edit");
-    if (isCreateMode) {
+    if (isCreateMode && !isPresetSection) {
         customerView.classList.toggle("hidden", active);
         customerSelect.classList.toggle("hidden", !active);
+    } else if (isPresetSection) {
+        customerView.classList.add("hidden");
+        customerSelect.classList.add("hidden");
     }
 
     const consigneeView   = $("platformConsignee");
     const consigneeSelect = $("platformConsignee-edit");
-    if (isCreateMode) {
+    if (isCreateMode && !isPresetSection) {
         consigneeView.classList.toggle("hidden", active);
         consigneeSelect.classList.toggle("hidden", !active);
+    } else if (isPresetSection) {
+        consigneeView.classList.add("hidden");
+        consigneeSelect.classList.add("hidden");
     }
 
     const typeView   = $("platformType");
     const typeSelect = $("platformType-edit");
     if (active) {
-        typeSelect.value    = platform.type === "Custom" ? "Custom" : "Preset";
-        typeSelect.onchange = () => handleTypeChange(typeSelect.value);
+        typeSelect.value = isPresetSection ? "Preset" : (platform.type === "Custom" ? "Custom" : "Preset");
+
+        if (isPresetSection) {
+            typeSelect.disabled = true;
+            typeSelect.onchange = null;
+        } else {
+            typeSelect.disabled = false;
+            typeSelect.onchange = () => handleTypeChange(typeSelect.value);
+        }
     } else {
         typeView.innerHTML  = badges.type(platform.type);
         typeSelect.onchange = null;
+        typeSelect.disabled = false;
     }
     typeView.classList.toggle("hidden", active);
     typeSelect.classList.toggle("hidden", !active);
@@ -726,12 +772,14 @@ async function toggleEdit(active) {
                 platform     = newPlatform;
                 isCreateMode = false;
 
-                customerSelect.classList.add("hidden");
-                customerView.classList.remove("hidden");
-                consigneeSelect.classList.add("hidden");
-                consigneeView.classList.remove("hidden");
-                customerView.textContent  = customer?.name  ?? "—";
-                consigneeView.textContent = consignee?.name ?? "—";
+                if (!isPresetSection) {
+                    customerSelect.classList.add("hidden");
+                    customerView.classList.remove("hidden");
+                    consigneeSelect.classList.add("hidden");
+                    consigneeView.classList.remove("hidden");
+                    customerView.textContent  = customer?.name  ?? "—";
+                    consigneeView.textContent = consignee?.name ?? "—";
+                }
 
                 if (isCommercial) {
                     editButton.classList.add("hidden");
@@ -740,7 +788,7 @@ async function toggleEdit(active) {
                     actionBtn2.classList.remove("hidden");
                 }
 
-                window.history.replaceState({}, "", `?id=${newPlatform.id}`);
+                window.history.replaceState({}, "", `?id=${newPlatform.id}&section=${type}`);
             } else {
                 Object.assign(platform, newPlatform);
             }
@@ -802,9 +850,39 @@ function revertToEditMode() {
 async function savePlatform() {
     calcSpecs();
 
-    const name = isPresetMode
+    const name = isPresetMode && !isPresetSection
         ? selectedPresetName
         : $("platformName-edit").value.trim();
+
+    // Preset section: crear tarima directamente, sin request ni consignatario
+    if (isPresetSection) {
+        const name = $("platformName-edit").value.trim(); // siempre del input, ignorar isPresetMode
+
+        const newPlatform = {
+            name,
+            type:                  "Preset",
+            description:           $("platformDescription-edit").value.trim(),
+            status:                $("platformStatus-edit").value === "1",
+            id_dispatch_packaging: $("spec-pack-edit").value.trim(),
+            id_consignee:          null,
+            number_of_pieces:      piecesNumber,
+            weight,
+            width:                 Number($("spec-width-edit").value),
+            height:                Number($("spec-height-edit").value),
+            length:                Number($("spec-length-edit").value),
+        };
+
+        const data = { platform: newPlatform, items: currentProductLoad, request: null };
+
+        if (isCreateMode) {
+            const res = await axios.post(`http://localhost:3000/api/platforms`, data);
+            return res.data;
+        } else {
+            const res = await axios.put(`http://localhost:3000/api/platforms/${id}`, data);
+            return res.data;
+        }
+    }
+
 
     // ── Si es createMode + preset, solo crear el request directamente ────────
     if (isCreateMode && isPresetMode) {
@@ -911,10 +989,14 @@ actionBtn2.addEventListener("click", () => {
     }
 });
 
-cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", async () => {
     await deletePlatform();
-    window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id}`;
+
+    if (isPresetSection) {
+        window.location.href = `/frontend/src/shared/list_view.html?type=presets`;
+    } else {
+        window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id}`;
+    }
 });
 
 cancelRejectBtn.addEventListener("click", () => rejectModal.classList.add("hidden"));
@@ -940,4 +1022,12 @@ if (createMode) {
     toggleEdit(true);
 } else {
     if (!isCommercial) actionBtn2.classList.remove("hidden");
+
+    // Bloquear edición si preset tiene requests activas
+    if (hasActiveRequests) {
+        editButton.disabled = true;
+        editButton.classList.add("opacity-50", "cursor-not-allowed");
+        editButton.title = "No se puede editar: este preset tiene solicitudes activas o pendientes";
+        showToast(["Este paquete tiene solicitudes de tarima activas o pendientes y no puede editarse."], "warning");
+    }
 }
