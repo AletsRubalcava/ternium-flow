@@ -14,7 +14,7 @@ import consignees from "../consignatarios/consignatarios.model.js";
 import platform_request from "../platform_request/platform_request.model.js";
 import products from "../products/products.model.js";
 
-async function validateAgainstConsignee(platformData, items, id_consignee) {
+export async function validateAgainstConsignee(platformData, items, id_consignee) {
     const consignee = await consignees.findByPk(id_consignee);
     if (!consignee) throw new Error("CONSIGNEE_NOT_FOUND");
 

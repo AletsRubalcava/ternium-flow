@@ -3,9 +3,10 @@ import {
     updatePlatformRequest,
     createPlatformRequest
 } from "./platform_request.service.js";
-import { deletePlatform } from "../plaftforms/platforms.service.js"
 import { sequelize } from "../../config/database.js";
 import platforms from "../plaftforms/platforms.model.js";
+import platform_items from "../platform_items/platform_items.model.js"
+import {validateAgainstConsignee} from "../plaftforms/platforms.controller.js"
 
 const status = {
     Approved: "Aceptada",

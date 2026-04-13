@@ -18,9 +18,6 @@ const type         = params.get("section");
 const isPresetSection = type === "presets";
 const isCommercial = type === "commercial";
 
-
-console.log(isPresetSection)
-
 setActiveNav(type);
 
 let platform = createMode
@@ -981,6 +978,7 @@ editButton.addEventListener("click", () => {
 });
 
 actionBtn2.addEventListener("click", () => {
+    console.log(isCommercial)
     if (isCommercial) {
         rejectModal.classList.remove("hidden");
         $("rejectComments").value = "";
@@ -999,7 +997,8 @@ confirmBtn.addEventListener("click", async () => {
     }
 });
 
-cancelRejectBtn.addEventListener("click", () => rejectModal.classList.add("hidden"));
+cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+cancelRejectBtn.addEventListener("click", () => {rejectModal.classList.add("hidden")});
 confirmRejectBtn.addEventListener("click", async () => {
     const comments = $("rejectComments").value.trim();
     if (!comments) {
