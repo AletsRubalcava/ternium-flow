@@ -1,4 +1,8 @@
-import { setActiveNav } from "../shared/page_directory.js";
+import { renderHeader } from "../shared/components/header.js";
+import { getAppContext, roles } from "../shared/app_context.js";
+
+const context = getAppContext();
+renderHeader(context);
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");
@@ -17,8 +21,6 @@ const createMode   = params.get("create") === "true";
 const type         = params.get("section");
 const isPresetSection = type === "presets";
 const isCommercial = type === "commercial";
-
-setActiveNav(type);
 
 let platform = createMode
     ? { name: "", description: "", type: "Custom", status: false, width: "", height: "", length: "", id_dispatch_packaging: null }

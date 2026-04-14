@@ -45,14 +45,6 @@
     </style>
 </head>
 
-<!--
-    LAYOUT STRATEGY:
-    - body: flex flex-col h-screen  →  divide verticalmente: [scroll-root flexible] + [footer fijo]
-    - footer: shrink-0              →  nunca se comprime, siempre visible sin overflow
-    - #scroll-root: flex-1 min-h-0 overflow-auto  →  ocupa todo el espacio restante;
-      si el contenido no cabe, el scroll aparece AQUÍ, el footer nunca se toca
-    - header: sticky top-0         →  se queda visible al hacer scroll dentro de #scroll-root
--->
 <body class="bg-background-light font-display text-slate-900 flex flex-col h-screen">
 
     <!-- Zona scrollable: ocupa todo el espacio entre header y footer -->
@@ -63,18 +55,11 @@
         <div class="flex flex-1 min-h-0">
             <!-- Aside: altura completa del espacio disponible, scroll interno propio -->
             <aside class="w-[450px] shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
-                <div class="px-6 pt-3 flex justify-between items-center">
-                    <h1 class="text-2xl font-extrabold tracking-tight">Comercial</h1>
+                <div class="px-6 pt-4 flex justify-between items-center">
+                    <h1 id="asideTitle" class="text-2xl font-extrabold tracking-tight"></h1>
                 </div>
-                <div class="px-6 py-2 flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">pending_actions</span>
-                        <h3 class="text-slate-900 text-xl font-extrabold tracking-tight">Aprobaciones Pendientes</h3>
-                    </div>
-                    <span id="Pending Approvals"
-                        class="bg-rose-100 text-rose-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase"></span>
-                </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4" id="aprobaciones"></div>
+                <div id="asideSubtitle"></div>
+                <div id="asideWidgets" class="flex-1 overflow-y-auto custom-scrollbar p-4"></div>
             </aside>
 
             <!-- Main: scroll propio, independiente del aside -->
@@ -165,9 +150,11 @@
         <p class="text-[10px] text-slate-400">© 2026 Ternium Flow</p>
     </footer>
 
+    <div id="rejectModal" class="hidden"></div>
+
 </body>
-<script type="module" src="../shared/header.js"></script>
-<script src="home_comercial_widget.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="./home.js"></script>
 <script type="module" src="home_presets_widget.js"></script>
 <script type="module" src="../shared/page_directory.js"></script>
 </html>

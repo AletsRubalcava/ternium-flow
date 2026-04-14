@@ -1,5 +1,5 @@
 const attributes = ["Tarima", "Consignatario", "Fecha Solicitud", "Acción"];
-import { emptyWidget } from "../shared/empty_widget.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 export async function loadComercial() {
     const tableContainer = document.getElementById("tableContainer");

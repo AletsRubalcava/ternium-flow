@@ -1,6 +1,6 @@
 import { session } from "./session.js";
 
-const clientId = session.getClientId();
+const clientId = session.getUserId();
 
 document.getElementById("headerWidget").innerHTML = `
         <!-- LEFT SIDE -->

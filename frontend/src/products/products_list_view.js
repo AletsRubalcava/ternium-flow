@@ -1,4 +1,4 @@
-import { emptyWidget } from "../shared/empty_widget.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const attributes = ["Nombre", "No. Parte", "Familia", "Peso Unitario", "Estado"];
 

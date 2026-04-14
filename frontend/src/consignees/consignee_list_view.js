@@ -1,6 +1,14 @@
-import { customers } from "../shared/db.js";
+import { renderHeader } from "../shared/components/header.js";
+import { getAppContext, roles } from "../shared/app_context.js";
+import { api } from "../shared/api/api_routes.js";
+import { setActiveNav } from "../shared/page_directory.js";
+import { navIds } from "../shared/constants/navigation.js";
 
 const attributes = ["Consignatario", "Cliente", "Dirección", "Estado"];
+
+const context = getAppContext();
+renderHeader(context);
+(context.role === roles.customer) ? setActiveNav(navIds.consignees) : setActiveNav(navIds.customers);
 
 export async function loadConsignees() {
     const params = new URLSearchParams(window.location.search);
@@ -24,7 +32,7 @@ export async function loadConsignees() {
     const resCustomers = await axios.get(`http://localhost:3000/api/customers/${id}`);
     const customer = resCustomers.data;
 
-    const resConsignee = await axios.get("http://localhost:3000/api/consignees");
+    const resConsignee = await axios.get(api.consignees.getAll());
     const consignees = resConsignee.data.filter(c => c.id_customer == id);
 
     newButton.onclick = () => window.location.href = `/frontend/src/consignees/detailed_consignee.html?create=true&idCus=${customer.id}`;

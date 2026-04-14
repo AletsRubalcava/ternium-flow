@@ -1,6 +1,6 @@
 import { session } from "../shared/session.js";
 
-const clientId = session.getClientId();
+const clientId = session.getUserId();
 
 const { data: dataConsignees } = await axios.get("http://localhost:3000/api/consignees")
 const consignees = dataConsignees.filter(c => c.id_customer == clientId)
