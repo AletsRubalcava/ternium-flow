@@ -115,20 +115,20 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div class="p-6 border-b border-slate-100 flex flex-wrap gap-4 items-center justify-between">
                         <div>
-                            <h3 class="text-slate-900 text-xl font-extrabold tracking-tight">Paquetes</h3>
-                            <p class="text-slate-500 text-xs">Preestablecidos de tarimas</p>
+                            <h3 id="platformsTitle" class="text-slate-900 text-xl font-extrabold tracking-tight"></h3>
+                            <p id="platformsSubtitle" class="hidden text-slate-500 text-xs">Preestablecidos de tarimas</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <button
-                                class="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all">
-                                <span class="material-symbols-outlined text-sm">add_circle</span> Nuevo Paquete
+                                id="newPlatformButton" class="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all">
+                                <span class="material-symbols-outlined text-sm">add_circle</span>
                             </button>
                         </div>
                     </div>
                     <div class="h-[40vh] overflow-auto">
                         <table class="w-full text-left">
                             <thead class="bg-light-gray-slate sticky top-0">
-                                <tr>
+                                <tr id="platformsTableRow">
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nombre</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Detalles de Configuración</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Peso de Carga</th>
@@ -136,7 +136,7 @@
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Editar</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100" id="presetsWidgetContent"></tbody>
+                            <tbody id="tableDataContent" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -155,6 +155,5 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script type="module" src="./home.js"></script>
-<script type="module" src="home_presets_widget.js"></script>
 <script type="module" src="../shared/page_directory.js"></script>
 </html>

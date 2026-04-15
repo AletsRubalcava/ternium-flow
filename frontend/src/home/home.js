@@ -7,12 +7,13 @@ import { emptyWidget } from "../shared/components/empty_widget.js"
 import { renderRejectModal, openRejectModal } from "../shared/components/reject_modal.js";
 import { setActiveNav } from "../shared/page_directory.js";
 import { navIds } from "../shared/constants/navigation.js";
+import { platformTableRow } from "./platform_row.js";
+import { platforms } from "../shared/db.js";
 
 const context = getAppContext();
 renderHeader(context);
 renderRejectModal();
 setActiveNav(navIds.home);
-
 
 const $ = (el) => document.getElementById(el);
 const endityId = context.entityId;
@@ -21,12 +22,17 @@ const { data: customers } = await axios.get(api.customers.getAll());
 const consignees = await loadConsignees();
 const { data: plaftforms } = await axios.get(api.platforms.getAll());
 let pendingPlatformRequests = await loadPendingPlatformRequests();
+const { data: platformsRequests } = await axios.get(api.platform_request.getAll());
 
 // --- HTML ELEMENTS ---
 const asideTitle = $("asideTitle");
 const asideSubtitle = $("asideSubtitle");
 const asideWidgets = $("asideWidgets");
-const rejectModal = $("rejectModal");
+const platformsTitle = $("platformsTitle");
+const platformsSubtitle = $("platformsSubtitle");
+const newPlatformButton = $("newPlatformButton");
+const platformsTableRow = $("platformsTableRow");
+const tableDataContent = $("tableDataContent");
 
 async function loadConsignees() {
     const { data } = await axios.get(api.consignees.getAll());
@@ -49,7 +55,7 @@ async function loadPendingPlatformRequests() {
 function renderAside() {
     if (context.role === roles.customer) {
         asideTitle.innerHTML = `
-            <div class="flex items-center gap-2">
+            <div class="consigneeCard flex items-center gap-2">
                 Consignatarios
                 <span class="text-primary material-symbols-outlined">corporate_fare</span>
             </div>
@@ -82,38 +88,101 @@ function renderAside() {
 
         $("pendingApprovals").innerText = `${pendingPlatformRequests.length} Pendientes`;
         (pendingPlatformRequests.length !== 0) ? asideWidgets.innerHTML = approvals.map(a => pendingApprovalsCard(a)) : asideWidgets.innerHTML = emptyWidget("Sin solicitudes pendientes");
-        
-        asideWidgets.addEventListener("click", async (e) => {
-            const card = e.target.closest(".approvalCard");
-            if (!card) return;
-
-            const btn = e.target.closest("button");
-            const idRequest = card.dataset.idRequest;
-            const idPlatform = card.dataset.idPlatform;
-
-            if (btn) {
-                const { action } = btn.dataset;
-                if (action === platformRequestAction.approve) {
-                    console.log(idRequest);
-                    await axios.patch(api.platform_request.approve(idRequest));
-                    pendingPlatformRequests = await loadPendingPlatformRequests();
-                    renderAside();
-                    return
-                }
-                if (action === platformRequestAction.reject) {
-                    const comments = await openRejectModal();
-                    if (comments === null) return; // canceló
-
-                    await axios.patch(api.platform_request.reject(idRequest), { comments });
-                    pendingPlatformRequests = await loadPendingPlatformRequests();
-                    renderAside();
-                    return;
-                }
-                return;
-            }
-            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${idPlatform}&type=commercial`;
-        });
     }
 }
 
+asideWidgets.addEventListener("click", async (e) => {
+
+    // --- CONSIGNEES ---
+    const consigneeCard = e.target.closest(".consigneeCard");
+    if (consigneeCard) {
+        const id = consigneeCard.dataset.id;
+
+        const btn = e.target.closest("button");
+        if (!btn) return;
+
+        window.location.href = `/frontend/src/consignees/detailed_consignee.html?id=${id}`;
+        return;
+    }
+
+    // --- APPROVALS ---
+    const approvalCard = e.target.closest(".approvalCard");
+    if (approvalCard) {
+        const btn = e.target.closest("button");
+        const idRequest = approvalCard.dataset.idRequest;
+        const idPlatform = approvalCard.dataset.idPlatform;
+
+        if (btn) {
+            const { action } = btn.dataset;
+
+            if (action === platformRequestAction.approve) {
+                await axios.patch(api.platform_request.approve(idRequest));
+                pendingPlatformRequests = await loadPendingPlatformRequests();
+                renderAside();
+                return;
+            }
+
+            if (action === platformRequestAction.reject) {
+                const comments = await openRejectModal();
+                if (comments === null) return;
+
+                await axios.patch(api.platform_request.reject(idRequest), { comments });
+                pendingPlatformRequests = await loadPendingPlatformRequests();
+                renderAside();
+                return;
+            }
+
+            return;
+        }
+
+        window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${idPlatform}&type=commercial`;
+    }
+});
+
+function renderPlatforms() {
+    if (context.role === roles.customer) {
+        platformsTitle.innerText = "Tarimas Autorizadas";
+        newPlatformButton.innerHTML = `<span class="material-symbols-outlined text-sm">add_circle</span>Nueva Tarima`;
+
+        const rows = ["Tarima", "Descripción", "Consignatario", "Peso de Carga"];
+        platformsTableRow.innerHTML = rows.map(tr => {
+            return `<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${tr}</th>`;
+        }).join("");
+
+        const approvedPlatforms = plaftforms.map(p => {
+            const request = platformsRequests.find(r => 
+                r.id_platform === p.id
+            );
+            console.log(request);
+            console.log(platformRequestStatus.approved);
+            const consignee = consignees.find(c => c.id === request?.id_consignee);
+
+            return {
+                ...p,
+                consigneeName: consignee?.name ?? "N/A"
+            };
+        });
+
+        tableDataContent.innerHTML = approvedPlatforms.map(p => platformTableRow(p)).join("");
+    } else if (context.role === roles.admin) {
+        platformsTitle.innerText = "Paquetes";
+        platformsSubtitle.classList.remove("hidden");
+        newPlatformButton.innerHTML = `<span class="material-symbols-outlined text-sm">add_circle</span>Nuevo Paquete`;
+    }
+}
+
+newPlatformButton.addEventListener("click", () => {
+    window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${endityId}`;
+});
+
+tableDataContent.addEventListener("click", (e) => {
+    const row = e.target.closest(".platformData");
+    if (!row) return;
+
+    const id = row.dataset.id;
+
+    window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${id}`;
+});
+
 renderAside();
+renderPlatforms();

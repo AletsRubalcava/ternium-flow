@@ -8,9 +8,10 @@ const attributes = ["Consignatario", "Cliente", "Dirección", "Estado"];
 
 const context = getAppContext();
 renderHeader(context);
-(context.role === roles.customer) ? setActiveNav(navIds.consignees) : setActiveNav(navIds.customers);
 
 export async function loadConsignees() {
+    (context.role === roles.customer) ? setActiveNav(navIds.consignees) : setActiveNav(navIds.customers);
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 

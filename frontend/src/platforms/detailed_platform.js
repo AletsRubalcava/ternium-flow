@@ -1,8 +1,11 @@
-import { renderHeader } from "../shared/components/header.js";
+import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext, roles } from "../shared/app_context.js";
+import { renderHeader } from "../shared/components/header.js";
+import { navIds } from "../shared/constants/navigation.js";
 
 const context = getAppContext();
 renderHeader(context);
+(context.role == roles.customer) ? setActiveNav(navIds.platforms) : setActiveNav(navIds.customers);
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");
@@ -95,7 +98,7 @@ if (type == "presets") {
 } else if (type == "commercial") {
     $("returnListView").innerText = "COMERCIAL";
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=commercial`;
-} else if (customer) {
+} else if (context.role === roles.customer && customer) {
     $("returnListView").innerText = "TARIMAS";
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer.id}`;
 }

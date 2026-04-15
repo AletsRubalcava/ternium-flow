@@ -1,6 +1,6 @@
 export function consigneeCard(consignee) {
     return `
-        <div data-id="${consignee.id}" class="p-4 rounded-xl border border-slate-100 bg-slate-100 hover:border-primary/30 transition-all group">
+        <div data-id="${consignee.id}" class="consigneeCard p-4 rounded-xl border border-slate-100 bg-slate-100 hover:border-primary/30 transition-all group">
             
             <div class="flex justify-between items-start mb-1">
                 <h4 class="font-bold text-slate-900">${consignee.name}</h4>

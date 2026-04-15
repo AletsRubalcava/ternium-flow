@@ -1,6 +1,11 @@
-import { setActiveNav } from '../shared/page_directory.js';
+import { setActiveNav } from "../shared/utils/nav.js";
+import { getAppContext, roles } from "../shared/app_context.js";
+import { renderHeader } from "../shared/components/header.js";
+import { navIds } from "../shared/constants/navigation.js";
 
-setActiveNav("customers");
+const context = getAppContext();
+renderHeader(context);
+(context.role == roles.customer) ? setActiveNav(navIds.consignees) : setActiveNav(navIds.customers);
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");

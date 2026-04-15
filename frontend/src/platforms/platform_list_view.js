@@ -1,6 +1,17 @@
+import { renderHeader } from "../shared/components/header.js";
+import { getAppContext, roles } from "../shared/app_context.js";
+import { api } from "../shared/api/api_routes.js";
+import { setActiveNav } from "../shared/page_directory.js";
+import { navIds } from "../shared/constants/navigation.js";
+
 const attributes = ["Nombre", "Cliente", "Consignatario", "Estado"];
 
+const context = getAppContext();
+renderHeader(context);
+
 export async function loadPlatforms() {
+    (context.role === roles.customer) ? setActiveNav(navIds.platforms) : setActiveNav(navIds.customers);
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
@@ -17,12 +28,6 @@ export async function loadPlatforms() {
         consignees.some(c => c.id === pr.id_consignee) && pr.status === "Aceptada"
     );
 
-    const platforms = resPlatforms.data.filter(p =>
-        platformRequests.some(pr =>
-            pr.id_platform === p.id && pr.status === 'Aceptada'
-        )
-    );
-
     const title = document.getElementById("pageTitle");
     const search = document.getElementById("search");
     const newButton = document.getElementById("newButton");
@@ -35,6 +40,8 @@ export async function loadPlatforms() {
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
             Nueva Tarima`;
+
+    newButton.classList.remove("hidden");
 
     newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}`;
 

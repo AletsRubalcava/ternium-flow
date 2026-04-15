@@ -61,7 +61,7 @@ const presets = [
     }
 ]
 
-const tbody = document.getElementById("presetsWidgetContent");
+const tbody = document.getElementById("tableDataContent");
 tbody.innerHTML = presets.map(preset =>`
     <tr class="hover:bg-slate-200 transition-colors group">
         <td class="px-6 py-4">
@@ -78,11 +78,6 @@ tbody.innerHTML = presets.map(preset =>`
             <div class="flex items-center gap-1.5">
                 <span class="text-[12px] font-bold text-slate-400">${preset.usos} usos</span>
             </div>
-        </td>
-        <td class="px-6 py-4 text-right">
-            <button class="text-slate-400 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined text-lg">edit_note</span>
-            </button>
         </td>
     </tr>
 `).join("");

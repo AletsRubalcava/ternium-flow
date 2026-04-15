@@ -1,4 +1,4 @@
-import { session } from "../customer_view/shared/session.js";
+import { session } from "./session.js";
 
 export function getAppContext() {
     return {

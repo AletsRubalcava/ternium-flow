@@ -1,6 +1,6 @@
 export const platformRequestStatus = {
     pending: "Pendiente",
-    approved: "Aprobada",
+    approved: "Aceptada",
     rejected: "Rechazada",
 } 
 
