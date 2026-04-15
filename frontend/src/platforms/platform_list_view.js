@@ -43,7 +43,7 @@ export async function loadPlatforms() {
 
     newButton.classList.remove("hidden");
 
-    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}`;
+    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}&section=${navIds.customers}`;
 
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
@@ -73,7 +73,7 @@ export async function loadPlatforms() {
         row.addEventListener("click", () => {
             const platformId = row.dataset.platformId;
             const requestId  = row.dataset.requestId;
-            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platformId}&requestId=${requestId}&section=customers`;
+            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platformId}&requestId=${requestId}&section=${navIds.customers}`;
         });
     });
 }

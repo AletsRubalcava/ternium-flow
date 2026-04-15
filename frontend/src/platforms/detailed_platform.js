@@ -92,15 +92,15 @@ if (isCommercial && !createMode) {
 }
 
 // ── Navigation ───────────────────────────────────────────────────────────────
-if (type == "presets") {
+if (type == navIds.presets) {
     $("returnListView").innerText = "PAQUETES";
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=presets`;
-} else if (type == "commercial") {
+} else if (type == navIds.commercial) {
     $("returnListView").innerText = "COMERCIAL";
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=commercial`;
-} else if (context.role === roles.customer && customer) {
+} else if (type == navIds.customers) {
     $("returnListView").innerText = "TARIMAS";
-    $("returnListView").href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer.id}`;
+    $("returnListView").href = `/frontend/src/shared/list_view.html?type=platforms&id=${context.entityId}`;
 }
 
 // ── Populate selects ─────────────────────────────────────────────────────────
