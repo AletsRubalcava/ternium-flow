@@ -6,6 +6,7 @@ import { loadUsers } from "../users/users_list_view.js";
 import { loadPresets } from "../platforms/preset_list_view.js";
 import { loadComercial } from "../commercial/commercial_list_view.js";
 import { navIds } from "./constants/navigation.js";
+import { setActiveNav } from "./utils/nav.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -36,11 +37,3 @@ document.addEventListener("DOMContentLoaded", () => {
         setActiveNav("users");
     }
 });
-
-export function setActiveNav(navId) {
-    const active = document.getElementById(navId);
-    if (active) {
-        active.classList.remove("text-slate-500", "font-medium");
-        active.classList.add("text-primary", "font-semibold", "border-b-2", "border-primary");
-    }
-}

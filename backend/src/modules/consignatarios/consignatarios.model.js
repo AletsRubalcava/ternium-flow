@@ -41,7 +41,7 @@ const consignees = sequelize.define("consignees", {
     type: DataTypes.DECIMAL(10,2),
     allowNull: true
   },
-  max_height: {
+  max_length: {
     type: DataTypes.DECIMAL(10,2),
     allowNull: true
   },

@@ -27,6 +27,10 @@ const products = sequelize.define("products", {
     type: DataTypes.NUMERIC(10, 2),
     allowNull: false
   },
+  width: {
+    type: DataTypes.NUMERIC(10, 2),
+    allowNull: false
+  },
   unit_weight: {
     type: DataTypes.NUMERIC(10, 2),
     allowNull: false

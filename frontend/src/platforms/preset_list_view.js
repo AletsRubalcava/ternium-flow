@@ -12,7 +12,7 @@ export async function loadPresets() {
     const newButton = document.getElementById("newButton");
     const thead     = document.getElementById("listViewThead");
     const tbody     = document.getElementById("listViewBody");
-    console.log(title)
+
     title.textContent      = "PAQUETES";
     search.placeholder     = "Buscar Paquetes";
 

@@ -1,14 +1,13 @@
 import { renderHeader } from "../shared/components/header.js";
 import { getAppContext, roles } from "../shared/app_context.js";
-import { api, platformRequestStatus, platformRequestAction } from "../shared/api/api_index.js"
+import { api, platformRequestStatus, platformRequestAction, plaftformType } from "../shared/api/api_index.js"
 import { consigneeCard } from "./consignee.card.js";
 import { pendingApprovalsCard } from "./comercial_card.js";
 import { emptyWidget } from "../shared/components/empty_widget.js"
 import { renderRejectModal, openRejectModal } from "../shared/components/reject_modal.js";
-import { setActiveNav } from "../shared/page_directory.js";
+import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../shared/constants/navigation.js";
 import { platformTableRow } from "./platform_row.js";
-import { platforms } from "../shared/db.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -20,7 +19,7 @@ const endityId = context.entityId;
 
 const { data: customers } = await axios.get(api.customers.getAll());
 const consignees = await loadConsignees();
-const { data: plaftforms } = await axios.get(api.platforms.getAll());
+const { data: platforms } = await axios.get(api.platforms.getAll());
 let pendingPlatformRequests = await loadPendingPlatformRequests();
 const { data: platformsRequests } = await axios.get(api.platform_request.getAll());
 
@@ -76,7 +75,7 @@ function renderAside() {
         const approvals = pendingPlatformRequests.map(a => {
             const consignee = consignees.find(c => c.id === a.id_consignee);
             const customer = customers.find(c => c.id === consignee?.id_customer);
-            const platform = plaftforms.find(p => p.id === a.id_platform);
+            const platform = platforms.find(p => p.id === a.id_platform);
 
             return {
                 ...a,
@@ -149,30 +148,56 @@ function renderPlatforms() {
             return `<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${tr}</th>`;
         }).join("");
 
-        const approvedPlatforms = plaftforms.map(p => {
-            const request = platformsRequests.find(r => 
-                r.id_platform === p.id
-            );
-            console.log(request);
-            console.log(platformRequestStatus.approved);
-            const consignee = consignees.find(c => c.id === request?.id_consignee);
+        const approvedRequests = platformsRequests.filter(r => 
+            r.status === platformRequestStatus.approved
+        );
 
-            return {
-                ...p,
-                consigneeName: consignee?.name ?? "N/A"
-            };
-        });
+        const approvedPlatforms = platforms
+            .filter(p => approvedRequests.some(r => r.id_platform === p.id))
+            .map(p => {
+                const request = approvedRequests.find(r => r.id_platform === p.id);
+                const consignee = consignees.find(c => c.id === request?.id_consignee);
+
+                return {
+                    ...p,
+                    consigneeName: consignee?.name ?? "N/A"
+                };
+            });
 
         tableDataContent.innerHTML = approvedPlatforms.map(p => platformTableRow(p)).join("");
     } else if (context.role === roles.admin) {
         platformsTitle.innerText = "Paquetes";
         platformsSubtitle.classList.remove("hidden");
         newPlatformButton.innerHTML = `<span class="material-symbols-outlined text-sm">add_circle</span>Nuevo Paquete`;
+
+        const rows = ["Tarima", "Descripción", "Usos Actuales", "Peso de Carga"];
+        platformsTableRow.innerHTML = rows.map(tr => {
+            return `<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${tr}</th>`;
+        }).join("");
+
+        const presets = platforms
+        .filter(p => p.type === plaftformType.preset)
+        .map(p => {
+            const uses = platformsRequests.filter(r => 
+                r.id_platform === p.id &&
+                r.status === platformRequestStatus.approved
+            ).length;
+
+            return {
+                ...p,
+                uses
+            };
+        });
+        tableDataContent.innerHTML = presets.map(p => platformTableRow(p)).join("");        
     }
 }
 
 newPlatformButton.addEventListener("click", () => {
-    window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${endityId}`;
+    if (context.role === roles.customer) {
+        window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${endityId}&section=${navIds.customers}`;
+    } else {
+        window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${endityId}&section=${navIds.presets}`;
+    }
 });
 
 tableDataContent.addEventListener("click", (e) => {
@@ -181,7 +206,7 @@ tableDataContent.addEventListener("click", (e) => {
 
     const id = row.dataset.id;
 
-    window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${id}`;
+    window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${id}&section=${context.role !== roles.customer ? `${navIds.presets}` : `${navIds.customers}`}`;
 });
 
 renderAside();

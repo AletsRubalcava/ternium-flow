@@ -15,6 +15,7 @@ export async function createProductHandler(req, res) {
         !part_number ||
         data.thickness == null ||
         data.length == null ||
+        data.width == null ||
         data.unit_weight == null ||
         data.internal_diameter == null ||
         data.external_diameter == null
@@ -39,6 +40,7 @@ export async function createProductHandler(req, res) {
     const numericFields = [
         "thickness",
         "length",
+        "width",
         "unit_weight",
         "internal_diameter",
         "external_diameter"
@@ -70,6 +72,7 @@ export async function createProductHandler(req, res) {
             thickness: data.thickness,
             part_number,
             length: data.length,
+            width: data.width,
             unit_weight: data.unit_weight,
             family,
             internal_diameter: data.internal_diameter,
@@ -133,6 +136,7 @@ export async function updateProductHandler(req, res) {
         !part_number ||
         data.thickness == null ||
         data.length == null ||
+        data.width == null ||
         data.unit_weight == null ||
         data.internal_diameter == null ||
         data.external_diameter == null
@@ -158,6 +162,7 @@ export async function updateProductHandler(req, res) {
     const numericFields = [
         "thickness",
         "length",
+        "width",
         "unit_weight",
         "internal_diameter",
         "external_diameter"
@@ -189,6 +194,7 @@ export async function updateProductHandler(req, res) {
             thickness: data.thickness,
             part_number,
             length: data.length,
+            width: data.width,
             unit_weight: data.unit_weight,
             family,
             internal_diameter: data.internal_diameter,

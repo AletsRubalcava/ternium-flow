@@ -1,7 +1,12 @@
 import { users, changes, entities } from '../shared/db.js';
-import { setActiveNav } from "../shared/page_directory.js";
+import { setActiveNav } from '../shared/utils/nav.js';
+import { renderHeader } from '../shared/components/header.js';
+import { getAppContext } from '../shared/app_context.js';
+import { navIds } from '../shared/constants/navigation.js';
 
-setActiveNav("users");
+const context = getAppContext();
+renderHeader(context);
+setActiveNav(navIds.users);
 
 // --- Shortcuts ---
 const $ = id => document.getElementById(id);

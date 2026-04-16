@@ -2,7 +2,7 @@ import { session } from "./session.js";
 
 export function getAppContext() {
     return {
-        role: roles.customer, // TEMPORARY
+        role: roles.admin, // TEMPORARY
         entityId: session.getUserId()
     };
 }

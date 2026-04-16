@@ -52,7 +52,7 @@ export async function createConsigneeHandler(req, res) {
         typeof data.max_load !== "number" ||
         typeof data.max_pieces_number !== "number" ||
         (data.max_width !== undefined && typeof data.max_width !== "number") ||
-        (data.max_height !== undefined && typeof data.max_height !== "number") ||
+        (data.max_length !== undefined && typeof data.max_length !== "number") ||
         (data.max_internal_diameter !== undefined && typeof data.max_internal_diameter !== "number") ||
         (data.max_external_diameter !== undefined && typeof data.max_external_diameter !== "number")
     ) {
@@ -146,7 +146,7 @@ export async function updateConsigneeHandler(req, res) {
         typeof data.max_load !== "number" ||
         typeof data.max_pieces_number !== "number" ||
         (data.max_width !== undefined && typeof data.max_width !== "number") ||
-        (data.max_height !== undefined && typeof data.max_height !== "number") ||
+        (data.max_length !== undefined && typeof data.max_length !== "number") ||
         (data.max_internal_diameter !== undefined && typeof data.max_internal_diameter !== "number") ||
         (data.max_external_diameter !== undefined && typeof data.max_external_diameter !== "number")
     ) {

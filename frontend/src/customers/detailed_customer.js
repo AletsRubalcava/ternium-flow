@@ -1,7 +1,12 @@
 import { followUps } from "../shared/db.js";
-import { setActiveNav } from "../shared/page_directory.js";
+import { renderHeader } from "../shared/components/header.js";
+import { getAppContext } from "../shared/app_context.js";
+import { setActiveNav } from "../shared/utils/nav.js";
+import { navIds } from "../shared/constants/navigation.js";
 
-setActiveNav("customers");
+const context = getAppContext();
+renderHeader(context);
+setActiveNav(navIds.customers)
 
 // --- Shortcuts ---
 const $ = id => document.getElementById(id);
@@ -539,7 +544,7 @@ async function renderSpecs() {
                 ${field("Máx. Piezas", data.max_pieces_number)}
                 ${field("Embalaje Preferido", dispatches.find(d => d.id == data.preferred_dispatch)?.name ?? "—")}
                 ${field("Ancho Máx (cm)", data.max_width)}
-                ${field("Altura Máx (cm)", data.max_height)}
+                ${field("Largo Máx (cm)", data.max_length)}
                 ${field("Ø Interno Máximo (cm)", data.max_internal_diameter)}
                 ${field("Ø Externo Máximo (cm)", data.max_external_diameter)}
             </div>

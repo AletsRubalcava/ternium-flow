@@ -1,6 +1,11 @@
-import { setActiveNav } from "../shared/page_directory.js";
+import { setActiveNav } from "../shared/utils/nav.js";
+import { getAppContext } from "../shared/app_context.js";
+import { renderHeader } from "../shared/components/header.js";
+import { navIds } from "../shared/constants/navigation.js";
 
-setActiveNav("products");
+const context = getAppContext();
+renderHeader(context);
+setActiveNav(navIds.products);
 
 // --- Shortcuts ---
 const $ = id => document.getElementById(id);
@@ -39,6 +44,7 @@ function renderCampos() {
         $("productCalibro").textContent     = "";
         $("productEspesor").textContent     = "";
         $("productLargo").textContent       = "";
+        $("productWidth").textContent       = "";
         $("productPeso").textContent        = "";
         $("productDiametroInt").textContent = "";
         $("productDiametroExt").textContent = "";
@@ -51,6 +57,7 @@ function renderCampos() {
         $("productCalibro").textContent     = product.caliber             ?? "N/A";
         $("productEspesor").textContent     = product.thickness           ?? "—";
         $("productLargo").textContent       = product.length              ?? "—";
+        $("productWidth").textContent       = product.width              ?? "—";
         $("productPeso").textContent        = product.unit_weight         ?? "—";
         $("productDiametroInt").textContent = product.internal_diameter   ?? "—";
         $("productDiametroExt").textContent = product.external_diameter   ?? "—";
@@ -69,7 +76,7 @@ function validarCampos() {
         }
     });
 
-    ["productEspesor-edit", "productLargo-edit", "productPeso-edit", "productDiametroInt-edit", "productDiametroExt-edit"].forEach(fid => {
+    ["productEspesor-edit", "productLargo-edit", "productPeso-edit", "productWidth-edit", "productDiametroInt-edit", "productDiametroExt-edit"].forEach(fid => {
         const el  = $(fid);
         const val = Number(el.value);
         if (el.value === "" || isNaN(val) || val <= 0) {
@@ -169,6 +176,7 @@ async function saveProduct() {
         caliber:           $("productCalibro-edit").value.trim() || null,
         thickness:         Number($("productEspesor-edit").value),
         length:            Number($("productLargo-edit").value),
+        width:             Number($("productWidth-edit").value),
         unit_weight:       Number($("productPeso-edit").value),
         internal_diameter: Number($("productDiametroInt-edit").value),
         external_diameter: Number($("productDiametroExt-edit").value),

@@ -1,7 +1,7 @@
 import { renderHeader } from "../shared/components/header.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { api } from "../shared/api/api_routes.js";
-import { setActiveNav } from "../shared/page_directory.js";
+import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../shared/constants/navigation.js";
 
 const attributes = ["Consignatario", "Cliente", "Dirección", "Estado"];

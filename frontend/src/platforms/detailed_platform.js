@@ -5,7 +5,6 @@ import { navIds } from "../shared/constants/navigation.js";
 
 const context = getAppContext();
 renderHeader(context);
-(context.role == roles.customer) ? setActiveNav(navIds.platforms) : setActiveNav(navIds.customers);
 
 const $ = id => document.getElementById(id);
 const editButton = $("editButton");
@@ -22,8 +21,10 @@ const id           = params.get("id");
 const requestId    = params.get("requestId");
 const createMode   = params.get("create") === "true";
 const type         = params.get("section");
-const isPresetSection = type === "presets";
-const isCommercial = type === "commercial";
+const isPresetSection = type === navIds.presets;
+const isCommercial = type === navIds.commercial;
+
+(context.role == roles.customer) ? setActiveNav(navIds.platforms) : setActiveNav(type);
 
 let platform = createMode
     ? { name: "", description: "", type: "Custom", status: false, width: "", height: "", length: "", id_dispatch_packaging: null }
@@ -1013,6 +1014,102 @@ confirmRejectBtn.addEventListener("click", async () => {
     rejectModal.classList.add("hidden");
     await rejectPlatform(comments);
     window.location.href = `/frontend/src/shared/list_view.html?type=commercial`;
+});
+
+// ── Predicción ───────────────────────────────────────────────────────────────
+const predictBtn = $("predictBtn");
+const clearBtn   = $("clearBtn");
+
+predictBtn.addEventListener("click", () => {
+    const predictionData = {
+        consignee: $("predConsignee").value.trim(),
+        partNumber: $("predNumPart").value.trim(),
+        thickness: Number($("predThickness").value),
+        width: Number($("predWidth").value),
+        length: Number($("predLength").value),
+        weight: Number($("predWeight").value),
+        location: $("predLocation").value.trim()
+    };
+
+    console.log( predictionData);
+});
+
+clearBtn.addEventListener("click", () => {
+    [
+        "predConsignee",
+        "predNumPart",
+        "predThickness",
+        "predWidth",
+        "predLength",
+        "predWeight",
+        "predLocation"
+    ].forEach(id => {
+        const el = $(id);
+        if (el) el.value = "";
+    });
+});
+
+function mockPrediction(data) {
+    return {
+        packaging: "Tarima reforzada",
+        pieces: Math.floor(Math.random() * 100) + 20,
+        maxWeight: (data.weight || 0) + 50,
+        confidence: (Math.random() * 0.3 + 0.7).toFixed(2),
+        risk: data.weight > 100 ? "Alto" : "Bajo",
+        manualSupervision: data.weight > 120 ? "Sí" : "No"
+    };
+}
+
+function renderPredictionResults(result) {
+    $("resPackaging").textContent = result.packaging;
+    $("resPieces").textContent = result.pieces;
+    $("resMaxWeight").textContent = result.maxWeight + " kg";
+    $("resConfidence").textContent = result.confidence;
+    $("resRisk").textContent = result.risk;
+    $("resManual").textContent = result.manualSupervision;
+}
+
+predictBtn.addEventListener("click", () => {
+    const predictionData = {
+        consignee: $("predConsignee").value.trim(),
+        partNumber: $("predNumPart").value.trim(),
+        thickness: Number($("predThickness").value),
+        width: Number($("predWidth").value),
+        length: Number($("predLength").value),
+        weight: Number($("predWeight").value),
+        location: $("predLocation").value.trim()
+    };
+
+    const result = mockPrediction(predictionData);
+
+    renderPredictionResults(result);
+});
+
+clearBtn.addEventListener("click", () => {
+    [
+        "predConsignee",
+        "predNumPart",
+        "predThickness",
+        "predWidth",
+        "predLength",
+        "predWeight",
+        "predLocation"
+    ].forEach(id => {
+        const el = $(id);
+        if (el) el.value = "";
+    });
+
+    [
+        "resPackaging",
+        "resPieces",
+        "resMaxWeight",
+        "resConfidence",
+        "resRisk",
+        "resManual"
+    ].forEach(id => {
+        const el = $(id);
+        if (el) el.textContent = "—";
+    });
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
