@@ -12,6 +12,7 @@ import platformRequestRoutes from "./modules/platform_request/platform_request.r
 import contactRoutes from "./modules/contacts/contacts.routes.js"
 import platformItemRoutes from "./modules/platform_items/platform_items.routes.js"
 import configRoutes from "./modules/consignatarios/config.routes.js";
+import predictionRoutes from "./modules/prediction/prediction.routes.js";
 
 const app = express();
 
@@ -27,5 +28,6 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/items', platformItemRoutes);
 app.use("/api", configRoutes);
+app.use("/api/prediction", predictionRoutes);
 
 export default app;
