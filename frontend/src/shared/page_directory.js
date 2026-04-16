@@ -7,6 +7,7 @@ import { loadPresets } from "../platforms/preset_list_view.js";
 import { loadComercial } from "../commercial/commercial_list_view.js";
 import { navIds } from "./constants/navigation.js";
 import { setActiveNav } from "./utils/nav.js";
+import { loadFolllowUps } from "../followUps/followUp_list_view.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -31,7 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setActiveNav("products");
     } else if (type === navIds.presets) {
         loadPresets();
-        setActiveNav("presets")  
+        setActiveNav("presets");
+    } else if (type === navIds.followUps) {
+        loadFolllowUps();
+        setActiveNav(navIds.followUps);  
     } else if (type === navIds.users){
         loadUsers();
         setActiveNav("users");
