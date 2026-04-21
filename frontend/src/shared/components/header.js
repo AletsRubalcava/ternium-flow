@@ -1,4 +1,4 @@
-import { navIds } from "../constants/navigation.js";
+import { navIds } from "../../../../shared/navigation.js";
 
 export function renderHeader(context) {
     const element = document.getElementById("headerWidget");
@@ -21,7 +21,7 @@ export function renderHeader(context) {
             <a id="${navIds.products}" class="${customerView ? "hidden " : ""} text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=${navIds.products}">Productos</a>
             <a id="${navIds.presets}" class="${customerView ? "hidden " : ""} text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=${navIds.presets}">Paquetes</a>
             <a id="${navIds.followUps}" class="${customerView ? "hidden " : ""} text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=${navIds.followUps}">Seguimientos</a>
-            <a id="${navIds.users}" class="${customerView ? "hidden " : ""} text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src//shared/list_view.html?type=${navIds.users}">Usuarios</a>
+            <a id="${navIds.users}" class="${customerView ? "hidden " : ""} text-slate-500 text-sm font-medium hover:text-primary transition-colors py-5" href="/frontend/src/shared/list_view.html?type=${navIds.users}">Usuarios</a>
         </nav>
         <button class="size-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100">
             <span class="material-symbols-outlined text-xl">notifications</span>

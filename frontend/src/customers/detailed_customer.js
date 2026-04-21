@@ -2,7 +2,7 @@ import { followUps } from "../shared/db.js";
 import { renderHeader } from "../shared/components/header.js";
 import { getAppContext } from "../shared/app_context.js";
 import { setActiveNav } from "../shared/utils/nav.js";
-import { navIds } from "../shared/constants/navigation.js";
+import { navIds } from "../../../shared/navigation.js";
 
 const context = getAppContext();
 renderHeader(context);

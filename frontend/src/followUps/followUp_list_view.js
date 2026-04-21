@@ -1,3 +1,6 @@
+import { api } from "../shared/api/api_index.js";
+import { timeAgo } from "../shared/utils/time_ago.js";
+
 const attributes = [
     "Clave Seguimiento",
     "Tarima",
@@ -6,63 +9,111 @@ const attributes = [
     "Última Actualización",
 ];
 
-// Loads customers information to the table
-export async function loadFolllowUps(){
-    // Get components
+export async function loadFolllowUps() {
     const $ = id => document.getElementById(id);
+
     const title = $("pageTitle");
     const search = $("search");
     const newButton = $("newButton");
     const thead = $("listViewThead");
     const tbody = $("listViewBody");
 
-    // Main title
+    // UI setup
     title.innerHTML = "SEGUIMIENTOS";
-
-    // Search bar placeholder
     search.placeholder = "Buscar Seguimiento...";
 
-    // New Button
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-            Nuevo Seguimiento`;
-
+        Nuevo Seguimiento`;
     newButton.classList.remove("hidden");
 
-    const response = await axios.get("http://localhost:3000/api/customers");
-    const customers = response.data;
+    newButton.onclick = () => {
+        window.location.href = `/frontend/src/followUps/detailed_followUp.html?create=true`;
+    };
 
-    newButton.onclick = () => window.location.href = `/frontend/src/followUps/detailed_followUp.html?create=true`;
+    try {
+        const { data: followUps } = await axios.get(api.followUps.getAll());
+        const { data: requests } = await axios.get(api.platform_request.getAll());
+        const { data: consignees } = await axios.get(api.consignees.getAll());
+        const { data: platforms } = await axios.get(api.platforms.getAll());
 
-    //Writes the attributes (thead) into the table
-    thead.innerHTML = attributes.map(a => `
-        <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
-    `).join("");
+        const followUpsEnriched = followUps.map(f => {
+            const request = requests.find(r => r.id === f.id_request);
+            const consignee = consignees.find(c => c.id === request?.id_consignee);
+            const platform = platforms.find(p => p.id === request?.id_platform);
 
-    // Writes the custome data into the table
-    tbody.innerHTML = customers.map(c => `
-        <tr data-id="${c.id}"
-        class="customer-row bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors">
-        <td
-            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light dark:text-text-primary-dark">${c.id_customer}</td>
-        <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-primary-light dark:text-text-primary-dark font-medium">${c.name}</td>
-        <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.rfc ?? "N/A"}</td>
-        <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.contact ?? "N/A"}</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            <span
-                class=" ${c.status ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status ? "Activo" : "Inactivo"}</span>
-        </td>
-    </tr>
-    `).join("");
-
-    // For each row, adds a button which redirects to its detailed view
-    document.querySelectorAll(".customer-row").forEach(row => {
-        row.addEventListener("click", () => {
-            const id = row.dataset.id;
-            window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${id}`;
+            return {
+                ...f,
+                consigneeAddress: consignee?.address ?? "N/A",
+                platformName: platform?.name ?? "N/A"
+            };
         });
-    });
+
+        const requestMap = new Map(requests.map(r => [r.id, r]));
+
+        // Render headers
+        thead.innerHTML = attributes.map(a => `
+            <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display">
+                ${a}
+            </th>
+        `).join("");
+
+        const statusMap = {
+            pending:       { label: "Pendiente",   cls: "bg-yellow-100 text-yellow-800" },
+            inPreparation: { label: "Preparación", cls: "bg-blue-100 text-blue-800"     },
+            inTransit:     { label: "En tránsito", cls: "bg-purple-100 text-purple-800" },
+            delivered:     { label: "Entregado",   cls: "bg-green-100 text-green-800"   },
+            dismantled:    { label: "Desarmada",   cls: "bg-gray-100 text-gray-700"     },
+        };
+
+        function statusBadge(value) {
+            const s = statusMap[value] ?? { label: value, cls: "bg-gray-100 text-gray-700" };
+            return `<span class="${s.cls} px-2 inline-flex text-xs font-semibold rounded-full">${s.label}</span>`;
+        }
+
+        tbody.innerHTML = followUpsEnriched.map(f => `
+            <tr data-id="${f.id}"
+                class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
+
+                <td class="px-6 py-4 text-sm font-medium">
+                    ${f.tracking_key}
+                </td>
+
+                <td class="px-6 py-4 text-sm">
+                    ${f.platformName}
+                </td>
+
+                <td class="px-6 py-4 text-sm">
+                    ${f.consigneeAddress}
+                </td>
+
+                <td class="px-6 py-4">
+                    ${statusBadge(f.status)}
+                </td>
+
+                <td class="px-6 py-4 text-sm">
+                    ${timeAgo(f.updated_at)}
+                </td>
+
+            </tr>
+        `).join("");
+
+        // Click events
+        document.querySelectorAll(".customer-row").forEach(row => {
+            row.addEventListener("click", () => {
+                const id = row.dataset.id;
+                window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${id}`;
+            });
+        });
+
+    } catch (error) {
+        console.error("Error cargando followUps:", error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4 text-red-500">
+                    Error cargando datos
+                </td>
+            </tr>
+        `;
+    }
 }

@@ -5,9 +5,9 @@ import { loadPlatforms } from "../platforms/platform_list_view.js";
 import { loadUsers } from "../users/users_list_view.js";
 import { loadPresets } from "../platforms/preset_list_view.js";
 import { loadComercial } from "../commercial/commercial_list_view.js";
-import { navIds } from "./constants/navigation.js";
 import { setActiveNav } from "./utils/nav.js";
 import { loadFolllowUps } from "../followUps/followUp_list_view.js";
+import { navIds } from "../../../shared/navigation.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (type === navIds.followUps) {
         loadFolllowUps();
         setActiveNav(navIds.followUps);  
-    } else if (type === navIds.users){
+    } else if (type === navIds.users) {
         loadUsers();
-        setActiveNav("users");
+        setActiveNav(navIds.users);
     }
 });
