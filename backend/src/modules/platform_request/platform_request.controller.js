@@ -1,7 +1,8 @@
 import {
     getAllPlatformRequests,
     updatePlatformRequest,
-    createPlatformRequest
+    createPlatformRequest,
+    getPlatformRequestByID
 } from "./platform_request.service.js";
 import { sequelize } from "../../config/database.js";
 import platforms from "../plaftforms/platforms.model.js";
@@ -21,6 +22,18 @@ export async function getAllPlatformsRequestsHandler(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al obtener las solicitudes" });
+    }
+}
+
+export async function getPlatformRequestByIDHandler(req, res) {
+    const { id } = req.params;
+    try {
+        const request = await getPlatformRequestByID(id);
+        if (!request) return res.status(404).json({ error: "PLATFORM_NOT_FOUND" });
+        res.status(200).json(request);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
 

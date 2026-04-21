@@ -11,6 +11,10 @@ export async function getAllPlatformRequests() {
     return await platform_request.findAll();
 }
 
+export async function getPlatformRequestByID(id) {
+    return platform_request.findByPk(id);
+}
+
 export async function createPlatformRequest(data, transaction) {
     // Verificar si ya existe una request pendiente con la misma combinación
     const existing = await platform_request.findOne({

@@ -17,7 +17,7 @@ form.addEventListener("submit", async function (e) {
 
         if (res.ok) {
             localStorage.setItem("token", data.token);
-            window.location.href = '/frontend/src/home.html';
+            window.location.href = '/frontend/src/home/home.html';
         } else {
             const mensajes = data.detalles
                 ? data.detalles.join('\n')

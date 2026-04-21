@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { navIds } from "../../shared/navigation.js"
 
 
 //Routes
@@ -11,6 +12,7 @@ import platformRoutes from './modules/plaftforms/platforms.routes.js';
 import platformRequestRoutes from "./modules/platform_request/platform_request.routes.js"
 import contactRoutes from "./modules/contacts/contacts.routes.js"
 import platformItemRoutes from "./modules/platform_items/platform_items.routes.js"
+import followUpsRoutes from "./modules/followups/followUp.routes.js"
 import configRoutes from "./modules/consignatarios/config.routes.js";
 import predictionRoutes from "./modules/prediction/prediction.routes.js";
 
@@ -27,6 +29,7 @@ app.use('/api/platform_request', platformRequestRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/items', platformItemRoutes);
+app.use('/api/follow_ups', followUpsRoutes);
 app.use("/api", configRoutes);
 app.use("/api/prediction", predictionRoutes);
 

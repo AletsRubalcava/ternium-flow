@@ -1,7 +1,7 @@
 import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
-import { navIds } from "../shared/constants/navigation.js";
+import { navIds } from "../../../shared/navigation.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -306,7 +306,6 @@ async function saveNewConsignee() {
 
     try {
         const res = await axios.post('http://localhost:3000/api/consignees', newConsignee);
-        console.log(res.data);
     } catch (err) {
         console.error(err.response?.data || err.message);
     }
@@ -332,7 +331,6 @@ async function saveEditedConsignee(){
 
     try {
         const res = await axios.put(`http://localhost:3000/api/consignees/${id}`, newConsignee);
-        console.log(res.data);
     } catch (err) {
         console.error(err.response?.data || err.message);
     }

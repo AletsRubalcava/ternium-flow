@@ -6,7 +6,7 @@ import { pendingApprovalsCard } from "./comercial_card.js";
 import { emptyWidget } from "../shared/components/empty_widget.js"
 import { renderRejectModal, openRejectModal } from "../shared/components/reject_modal.js";
 import { setActiveNav } from "../shared/utils/nav.js";
-import { navIds } from "../shared/constants/navigation.js";
+import { navIds } from "../../../shared/navigation.js";
 import { platformTableRow } from "./platform_row.js";
 
 const context = getAppContext();
