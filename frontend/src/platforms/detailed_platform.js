@@ -1,7 +1,7 @@
 import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
-import { navIds } from "../shared/constants/navigation.js";
+import { navIds } from "../../../shared/navigation.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -1019,73 +1019,28 @@ confirmRejectBtn.addEventListener("click", async () => {
 // ── Predicción ───────────────────────────────────────────────────────────────
 const predictBtn = $("predictBtn");
 const clearBtn   = $("clearBtn");
+const loadCurrentPlatformBtn = $("loadCurrentPlatformBtn");
 
-predictBtn.addEventListener("click", () => {
-    const predictionData = {
-        consignee: $("predConsignee").value.trim(),
-        partNumber: $("predNumPart").value.trim(),
-        thickness: Number($("predThickness").value),
-        width: Number($("predWidth").value),
-        length: Number($("predLength").value),
-        weight: Number($("predWeight").value),
-        location: $("predLocation").value.trim()
-    };
+function parseOptionalNumber(id) {
+    const value = $(id)?.value?.trim() ?? "";
+    if (!value) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
 
-    console.log( predictionData);
-});
-
-clearBtn.addEventListener("click", () => {
-    [
-        "predConsignee",
-        "predNumPart",
-        "predThickness",
-        "predWidth",
-        "predLength",
-        "predWeight",
-        "predLocation"
-    ].forEach(id => {
-        const el = $(id);
-        if (el) el.value = "";
-    });
-});
-
-function mockPrediction(data) {
+function getPredictionFormData() {
     return {
-        packaging: "Tarima reforzada",
-        pieces: Math.floor(Math.random() * 100) + 20,
-        maxWeight: (data.weight || 0) + 50,
-        confidence: (Math.random() * 0.3 + 0.7).toFixed(2),
-        risk: data.weight > 100 ? "Alto" : "Bajo",
-        manualSupervision: data.weight > 120 ? "Sí" : "No"
+        consignatario: $("predConsignee").value.trim(),
+        numero_parte: $("predNumPart").value.trim(),
+        espesor: parseOptionalNumber("predThickness"),
+        ancho: parseOptionalNumber("predWidth"),
+        largo: parseOptionalNumber("predLength"),
+        peso: parseOptionalNumber("predWeight"),
+        ubicacion: $("predLocation").value.trim(),
     };
 }
 
-function renderPredictionResults(result) {
-    $("resPackaging").textContent = result.packaging;
-    $("resPieces").textContent = result.pieces;
-    $("resMaxWeight").textContent = result.maxWeight + " kg";
-    $("resConfidence").textContent = result.confidence;
-    $("resRisk").textContent = result.risk;
-    $("resManual").textContent = result.manualSupervision;
-}
-
-predictBtn.addEventListener("click", () => {
-    const predictionData = {
-        consignee: $("predConsignee").value.trim(),
-        partNumber: $("predNumPart").value.trim(),
-        thickness: Number($("predThickness").value),
-        width: Number($("predWidth").value),
-        length: Number($("predLength").value),
-        weight: Number($("predWeight").value),
-        location: $("predLocation").value.trim()
-    };
-
-    const result = mockPrediction(predictionData);
-
-    renderPredictionResults(result);
-});
-
-clearBtn.addEventListener("click", () => {
+function clearPredictionInputs() {
     [
         "predConsignee",
         "predNumPart",
@@ -1098,7 +1053,9 @@ clearBtn.addEventListener("click", () => {
         const el = $(id);
         if (el) el.value = "";
     });
+}
 
+function clearPredictionResults() {
     [
         "resPackaging",
         "resPieces",
@@ -1110,7 +1067,83 @@ clearBtn.addEventListener("click", () => {
         const el = $(id);
         if (el) el.textContent = "—";
     });
+}
+
+function setPredictionLoading(isLoading) {
+    if (!predictBtn) return;
+    predictBtn.disabled = isLoading;
+    predictBtn.classList.toggle("opacity-60", isLoading);
+    predictBtn.classList.toggle("cursor-not-allowed", isLoading);
+    predictBtn.innerHTML = isLoading
+        ? `<span class="material-symbols-outlined text-sm">hourglass_top</span> Prediciendo...`
+        : `<span class="material-symbols-outlined text-sm">model_training</span> Predecir`;
+}
+
+function renderPredictionResults(result) {
+    const confidence = Number(result.confianza);
+    const confidenceText = Number.isFinite(confidence)
+        ? `${(confidence * 100).toFixed(1)}%`
+        : "—";
+
+    const riskProbability = Number(result.riesgo_desarme);
+    const riskText = Number.isFinite(riskProbability)
+        ? `${result.nivel_riesgo ?? "—"} (${(riskProbability * 100).toFixed(1)}%)`
+        : (result.nivel_riesgo ?? "—");
+
+    $("resPackaging").textContent = result.embalaje_recomendado || "—";
+    $("resPieces").textContent = result.piezas_por_paquete || "—";
+    $("resMaxWeight").textContent = result.peso_maximo ? `${result.peso_maximo} kg` : "—";
+    $("resConfidence").textContent = confidenceText;
+    $("resRisk").textContent = riskText;
+    $("resManual").textContent = result.requires_review ? "Sí" : "No";
+}
+
+async function requestPrediction() {
+    const payload = getPredictionFormData();
+
+    if (!payload.consignatario || !payload.numero_parte) {
+        showToast(["Consignatario y Numero de Parte son obligatorios para predecir."], "error");
+        return;
+    }
+
+    setPredictionLoading(true);
+    try {
+        const { data } = await axios.post("http://localhost:3000/api/prediction/recommendation", payload);
+        renderPredictionResults(data);
+
+        if (data.explicacion_riesgo) {
+            showToast([`Riesgo: ${data.explicacion_riesgo}`], "warning");
+        }
+    } catch (error) {
+        const message =
+            error?.response?.data?.message ||
+            error?.response?.data?.error ||
+            "No se pudo obtener la prediccion en este momento.";
+        showToast([message], "error");
+    } finally {
+        setPredictionLoading(false);
+    }
+}
+
+function loadCurrentPlatformData() {
+    const topRow = [...currentProductLoad].sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0))[0];
+    const topProduct = topRow ? products.find(p => p.id == topRow.id_product) : null;
+
+    $("predConsignee").value = consignee?.name ?? "";
+    $("predNumPart").value = topProduct?.part_number ?? "";
+    $("predThickness").value = topProduct?.thickness ?? "";
+    $("predWidth").value = platform?.width ?? "";
+    $("predLength").value = platform?.length ?? "";
+    $("predWeight").value = weight ?? "";
+    $("predLocation").value = customer?.name ?? "";
+}
+
+predictBtn?.addEventListener("click", requestPrediction);
+clearBtn?.addEventListener("click", () => {
+    clearPredictionInputs();
+    clearPredictionResults();
 });
+loadCurrentPlatformBtn?.addEventListener("click", loadCurrentPlatformData);
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 initCustomerConsigneeSelects();
