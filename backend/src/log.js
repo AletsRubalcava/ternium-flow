@@ -14,7 +14,7 @@ app.use(cors({
 }));
 
 const saltRounds = 12;
-const JWT_SECRET = 'clave_secreta_muy_larga_y_segura'; // en producción usa una variable de entorno
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 // Usuarios de prueba
 const usuariosPlanos = {
@@ -27,7 +27,7 @@ async function inicializarUsuarios() {
     for (const [nombre, clave] of Object.entries(usuariosPlanos)) {
         usuarios[nombre] = { passwordHash: await bcrypt.hash(clave, saltRounds) };
     }
-    console.log('Usuarios inicializados con hash ✓');
+    console.log('Usuarios inicializados con hash');
 }
 
 // Brute-force protection
