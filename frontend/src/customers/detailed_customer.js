@@ -1,9 +1,10 @@
-import { followUps } from "../shared/db.js";
 import { renderHeader } from "../shared/components/header.js";
 import { getAppContext } from "../shared/app_context.js";
 import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
 import { api } from "../shared/api/api_routes.js";
+import { timeAgo } from "../shared/utils/time_ago.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -51,7 +52,8 @@ const platforms = resPlatforms.data.filter(p =>
     platformRequests.some(pr => pr.id_platform === p.id && pr.status === "Aceptada")
 );
 
-const followUp = createMode ? [] : followUps.filter(f => consignees.some(c => c.id == f.idConsignee));
+const { data: followUps } = await axios.get(api.followUps.getAll());
+const consigneeIds = new Set(consignees.map(c => c.id));
 
 const contactModal     = $("contactModal");
 const saveContactBtn   = $("saveContact");
@@ -69,19 +71,6 @@ let originalContacts  = [];
 const badges = {
     status: v => `<span class="${v ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs font-semibold rounded-full">${v ? "Activo" : "Inactivo"}</span>`
 };
-
-// --- Empty state widget ---
-function emptyWidget(mensaje) {
-    return `
-        <div class="py-10 w-full h-full flex items-center justify-center">
-            <div class="flex flex-col justify-center items-center gap-2">
-                <div class="size-20 rounded-full bg-slate-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-slate-400">playlist_remove</span>
-                </div>
-                <p class="text-slate-400">${mensaje}</p>
-            </div>
-        </div>`;
-}
 
 // --- Fetch contacts ---
 async function fetchContacts() {
@@ -197,6 +186,7 @@ async function toggleEdit(active) {
 
         if (createMode) {
             const newCustomer = await saveNewCustomer();
+            console.log(newCustomer);
             id = newCustomer.id;
             $("idCustomer").textContent = $("upperClientId").textContent = newCustomer.id_customer;
             deleteBtn.classList.remove("hidden");
@@ -224,10 +214,10 @@ async function saveNewCustomer() {
     };
     try {
         const res = await axios.post(api.customers.create(), newCustomer);
+        return res.data;
     } catch (err) {
-        console.error(err.response?.data || err.message);
+        return console.error(err.response?.data || err.message);
     }
-    return newCustomer;
 }
 
 async function saveEditedCustomer() {
@@ -240,10 +230,10 @@ async function saveEditedCustomer() {
     };
     try {
         const res = await axios.put(api.customers.update(id), updatedCustomer);
+        return res.data;
     } catch (err) {
-        console.error(err.response?.data || err.message);
+        return console.error(err.response?.data || err.message);
     }
-    return updatedCustomer;
 }
 
 // --- Render Consignatarios ---
@@ -329,37 +319,85 @@ function renderPlatforms() {
 }
 
 // --- Render Follow Ups ---
-function renderFollowUps() {
+async function renderFollowUps() {
     const thead = $("followUpsThead");
     const tbody = $("followUpsBody");
 
-    if (followUp.length === 0) {
-        thead.innerHTML = "";
-        tbody.innerHTML = emptyWidget("Sin seguimientos");
-        return;
+    const attributes = [
+        "Clave Seguimiento",
+        "Tarima",
+        "Dir. Envío",
+        "Estado",
+        "Última Actualización",
+    ];
+
+    thead.innerHTML = attributes.map(a => `
+        <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display">
+            ${a}
+        </th>
+    `).join("");
+
+    const { data: requests }     = await axios.get(api.platform_request.getAll());
+    const { data: allPlatforms } = await axios.get(api.platforms.getAll());
+
+    const clientRequestIds = new Set(
+        requests
+            .filter(r => consignees.some(c => c.id === r.id_consignee))
+            .map(r => r.id)
+    );
+
+    const followUpsEmpty = $("followUpsEmpty");
+
+    if (clientRequestIds.size === 0) {
+        followUpsEmpty.classList.remove("hidden");
+        followUpsEmpty.innerHTML = emptyWidget("Sin Seguimientos");
+        return
     }
 
-    const statusClass = {
-        "Entregado":   "bg-green-100 text-green-800",
-        "En tránsito": "bg-orange-100 text-orange-800",
-        "Procesando":  "bg-blue-100 text-blue-800",
-        "Cancelado":   "bg-red-100 text-red-800",
+    followUpsEmpty.classList.add("hidden");
+
+    const followUpsFiltered = followUps.filter(f =>
+        clientRequestIds.has(f.id_request)
+    );
+
+    const followUpsEnriched = followUpsFiltered.map(f => {
+        const request   = requests.find(r => r.id === f.id_request);
+        const consignee = consignees.find(c => c.id === request?.id_consignee);
+        const platform  = allPlatforms.find(p => p.id === request?.id_platform);
+
+        return {
+            ...f,
+            consigneeAddress: consignee?.address ?? "—",
+            platformName:     platform?.name     ?? "—",
+        };
+    });
+
+    const statusMap = {
+        pending:       { label: "Pendiente",   cls: "bg-yellow-100 text-yellow-800"  },
+        inPreparation: { label: "Preparación", cls: "bg-blue-100 text-blue-800"      },
+        inTransit:     { label: "En tránsito", cls: "bg-purple-100 text-purple-800"  },
+        delivered:     { label: "Entregado",   cls: "bg-green-100 text-green-800"    },
+        dismantled:    { label: "Desarmada",   cls: "bg-gray-100 text-gray-700"      },
     };
 
-    tbody.innerHTML = followUp.map(f => `
-        <tr data-id="${f.id}" class="followUpTuple hover:bg-gray-200 transition-colors">
-            <td class="px-6 py-4 text-sm font-bold text-text-primary-light">${f.id}</td>
-            <td class="px-6 py-4 text-xs text-text-secondary-light">${f.date}</td>
-            <td class="px-6 py-4 text-sm font-medium">${f.weight} kg</td>
-            <td class="px-6 py-4 text-xs text-text-secondary-light">${consignees.find(c => c.id == f.idConsignee)?.name ?? "—"}</td>
-            <td class="px-6 py-4 text-right">
-                <span class="${statusClass[f.status] ?? "bg-gray-100 text-gray-800"} px-2 py-1 text-[10px] font-bold rounded-full">${f.status}</span>
-            </td>
-        </tr>`).join("");
+    const statusBadge = value => {
+        const s = statusMap[value] ?? { label: value, cls: "bg-gray-100 text-gray-700" };
+        return `<span class="${s.cls} px-2 inline-flex text-xs font-semibold rounded-full">${s.label}</span>`;
+    };
 
-    document.querySelectorAll(".followUpTuple").forEach(f => {
-        f.addEventListener("click", () => {
-            window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${f.dataset.id}`;
+    tbody.innerHTML = followUpsEnriched.map(f => `
+        <tr data-id="${f.id}" class="followUpTuple bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer">
+            <td class="px-6 py-4 text-sm font-medium">${f.tracking_key}</td>
+            <td class="px-6 py-4 text-sm">${f.platformName}</td>
+            <td class="px-6 py-4 text-sm">${f.consigneeAddress}</td>
+            <td class="px-6 py-4">${statusBadge(f.status)}</td>
+            <td class="px-6 py-4 text-sm text-text-secondary-light">${timeAgo(f.updated_at) ?? "—"}</td>
+        </tr>
+    `).join("");
+
+    document.querySelectorAll(".followUpTuple").forEach(row => {
+        row.addEventListener("click", () => {
+            window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${row.dataset.id}`;
         });
     });
 }

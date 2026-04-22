@@ -23,6 +23,7 @@ const consignees = await loadConsignees();
 const { data: platforms } = await axios.get(api.platforms.getAll());
 let pendingPlatformRequests = await loadPendingPlatformRequests();
 const { data: platformsRequests } = await axios.get(api.platform_request.getAll());
+const { data: followUps } = await axios.get(api.followUps.getAll());
 
 // --- HTML ELEMENTS ---
 const asideTitle = $("asideTitle");
@@ -50,6 +51,36 @@ async function loadPendingPlatformRequests() {
         return data.filter(pr => pr.status == platformRequestStatus.pending)
     }
     return data;
+}
+
+function renderFollowUpStats() {
+    const now  = new Date();
+    const ago7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const recent = followUps.filter(f => {
+        const d = new Date(f.updated_at ?? f.created_at);
+        return d >= ago7;
+    });
+
+    const total      = recent.length;
+    const delivered  = recent.filter(f => f.status === "delivered").length;
+    const dismantled = recent.filter(f => f.status === "dismantled").length;
+    const inTransit  = recent.filter(f => f.status === "inTransit").length;
+
+    // Eficiencia = entregadas / (entregadas + desarmadas), o 0 si no hay datos
+    const base       = delivered + dismantled;
+    const efficiency = base > 0 ? ((delivered / base) * 100).toFixed(1) : "—";
+
+    // Stats cards
+    document.querySelector(".bg-light-gray-slate.p-4 p.text-2xl").textContent         = total;
+    document.querySelector(".bg-emerald-50.p-4 p.text-2xl").textContent               = delivered;
+    document.querySelector(".bg-rose-50.p-4 p.text-2xl").textContent                  = dismantled;
+    document.querySelector(".bg-primary\\/5.p-4 p.text-2xl").textContent              = inTransit;
+
+    // Eficiencia
+    document.querySelector(".text-4xl.font-extrabold").textContent = efficiency !== "—"
+        ? `${efficiency}%`
+        : "—";
 }
 
 function renderAside() {
@@ -212,3 +243,4 @@ tableDataContent.addEventListener("click", (e) => {
 
 renderAside();
 renderPlatforms();
+renderFollowUpStats();

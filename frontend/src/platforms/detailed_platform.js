@@ -3,6 +3,7 @@ import { getAppContext, roles } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
 import { navIds } from "../../../shared/navigation.js";
 import { api } from "../shared/api/api_routes.js";
+import { timeAgo } from "../shared/utils/time_ago.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -1146,11 +1147,92 @@ clearBtn?.addEventListener("click", () => {
 });
 loadCurrentPlatformBtn?.addEventListener("click", loadCurrentPlatformData);
 
+// ── Render Follow Ups (Tab 2) ────────────────────────────────────────────────
+async function renderFollowUps() {
+    const tbody    = document.querySelector("#content2 tbody");
+    const tabBadge = document.querySelector("label[for='tab2'] span.bg-primary");
+    if (!tbody || createMode) return;
+
+    const { data: followUps } = await axios.get(api.followUps.getAll());
+
+    const platformRequestIds = new Set(
+        resPlatformRequests.data
+            .filter(pr => pr.id_platform == platform.id)
+            .map(pr => pr.id)
+    );
+
+    const filtered = followUps.filter(f => platformRequestIds.has(f.id_request));
+
+    if (tabBadge) tabBadge.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-10 text-center text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    Sin seguimientos vinculados a esta tarima.
+                </td>
+            </tr>`;
+        return;
+    }
+
+    // Enriquecer igual que en list view: request → consignee (address) + platform (name)
+    const enriched = filtered.map(f => {
+        const request   = resPlatformRequests.data.find(pr => pr.id === f.id_request);
+        const cons      = allConsignees.find(c => c.id === request?.id_consignee);
+        const plat      = allPlatforms.find(p => p.id === request?.id_platform);
+        return {
+            ...f,
+            consigneeAddress: cons?.address  ?? "N/A",
+            platformName:     plat?.name     ?? "N/A",
+        };
+    });
+
+    const statusMap = {
+        pending:       { label: "Pendiente",   cls: "bg-yellow-100 text-yellow-800"  },
+        inPreparation: { label: "Preparación", cls: "bg-blue-100 text-blue-800"      },
+        inTransit:     { label: "En tránsito", cls: "bg-purple-100 text-purple-800"  },
+        delivered:     { label: "Entregado",   cls: "bg-green-100 text-green-800"    },
+        dismantled:    { label: "Desarmada",   cls: "bg-gray-100 text-gray-700"      },
+    };
+
+    const statusBadge = value => {
+        const s = statusMap[value] ?? { label: value, cls: "bg-gray-100 text-gray-700" };
+        return `<span class="${s.cls} px-2 inline-flex text-xs font-semibold rounded-full">${s.label}</span>`;
+    };
+
+    tbody.innerHTML = enriched.map(f => `
+        <tr data-id="${f.id}" class="followUpRow hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors cursor-pointer">
+            <td class="px-6 py-4 text-sm font-medium">
+                ${f.tracking_key}
+            </td>
+            <td class="px-6 py-4 text-sm">
+                ${f.platformName}
+            </td>
+            <td class="px-6 py-4 text-sm">
+                ${f.consigneeAddress}
+            </td>
+            <td class="px-6 py-4">
+                ${statusBadge(f.status)}
+            </td>
+            <td class="px-6 py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                ${timeAgo(f.updated_at)}
+            </td>
+        </tr>
+    `).join("");
+
+    document.querySelectorAll(".followUpRow").forEach(row => {
+        row.addEventListener("click", () => {
+            window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${row.dataset.id}`;
+        });
+    });
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 initCustomerConsigneeSelects();
 renderCampos();
 renderProductTable();
 renderSpecs();
+renderFollowUps();
 
 if (createMode) {
     editMode = true;

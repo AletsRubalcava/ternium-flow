@@ -63,7 +63,8 @@ export const api = {
         getAll: () => `${BASE_URL}/users`,
         getByID: (id) => `${BASE_URL}/users/${id}`,
         update: (id) => `${BASE_URL}/users/${id}`,
-        delete: (id) => `${BASE_URL}/users/${id}`
+        delete: (id) => `${BASE_URL}/users/${id}`,
+        login: () => `${BASE_URL}/users/login`
     },
     contacts: {
         create: () => `${BASE_URL}/contacts`,
