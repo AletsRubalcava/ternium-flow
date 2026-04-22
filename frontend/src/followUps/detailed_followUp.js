@@ -28,12 +28,12 @@ $("returnListView").href      = `/frontend/src/shared/list_view.html?type=follow
 $("returnListView").innerText = "Seguimientos";
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
-const { data: allCustomers }  = await axios.get("http://localhost:3000/api/customers");
-const { data: allConsignees } = await axios.get("http://localhost:3000/api/consignees");
-const { data: allPlatforms }  = await axios.get("http://localhost:3000/api/platforms");
-const { data: allRequests }   = await axios.get("http://localhost:3000/api/platform_request");
-const { data: products }      = await axios.get("http://localhost:3000/api/products");
-const { data: productLoad }   = await axios.get("http://localhost:3000/api/items");
+const { data: allCustomers }  = await axios.get(api.customers.getAll());
+const { data: allConsignees } = await axios.get(api.consignees.getAll());
+const { data: allPlatforms }  = await axios.get(api.platforms.getAll());
+const { data: allRequests }   = await axios.get(api.platform_request.getAll());
+const { data: products }      = await axios.get(api.products.getAll());
+const { data: productLoad }   = await axios.get(api.platform_items.getAll());
 
 // Solo para view/edit mode
 let followUp        = null;
@@ -44,7 +44,7 @@ let customer        = null;
 let currentProductLoad = [];
 
 if (!createMode) {
-    const res = await axios.get(`http://localhost:3000/api/follow_ups/${id}`);
+    const res = await axios.get(api.followUps.getByID(id));
     followUp  = res.data;
 
     const reqRes    = await axios.get(api.platform_request.getByID(followUp.id_request));
@@ -337,7 +337,7 @@ async function saveNewFollowUp() {
         status:     "pending",
     };
 
-    const { data: created } = await axios.post("http://localhost:3000/api/follow_ups", payload);
+    const { data: created } = await axios.post(api.followUps.create(), payload);
 
     // Redirigir al detalle recién creado
     window.location.href = `?id=${created.id}`;

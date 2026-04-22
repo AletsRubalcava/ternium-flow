@@ -11,6 +11,7 @@ import { platformTableRow } from "./platform_row.js";
 
 const context = getAppContext();
 renderHeader(context);
+
 renderRejectModal();
 setActiveNav(navIds.home);
 

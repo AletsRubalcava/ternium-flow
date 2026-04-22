@@ -1,9 +1,10 @@
+import { api } from "../shared/api/api_routes.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const attributes = ["Nombre", "No. Parte", "Familia", "Peso Unitario", "Estado"];
 
 export async function loadProductos() {
-    const { data: products } = await axios.get("http://localhost:3000/api/products")
+    const { data: products } = await axios.get(api.products.getAll());
 
     const tableContainer = document.getElementById("tableContainer");
     const title = document.getElementById("pageTitle");

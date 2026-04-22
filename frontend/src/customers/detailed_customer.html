@@ -104,7 +104,10 @@
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-8 space-y-6">
+            <!-- LEFT / MAIN -->
+            <div class="xl:col-span-8 lg:col-span-3 col-span-1 space-y-6">
+
+                <!-- Información General -->
                 <div
                     class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft p-6 border border-border-light dark:border-border-dark">
                     <div class="flex items-center gap-2 mb-6 border-b border-border-light pb-4">
@@ -113,6 +116,7 @@
                             class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
                             Información General</h3>
                     </div>
+                    
                     <div class="editable grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <label
@@ -148,7 +152,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Consignatarios + Tarimas -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    <!-- Consignatarios -->
                     <div
                         class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft flex flex-col border border-border-light dark:border-border-dark overflow-hidden">
                         <div
@@ -161,13 +169,16 @@
                                         class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
                             <button id="viewAllConsignees"
-                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
-                                Todos</button>
+                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">
+                                Ver Todos
+                            </button>
                         </div>
                         <div class="p-4 max-h-[280px] overflow-y-auto custom-scrollbar">
                             <div id="consigneeWidget" class="space-y-3"></div>
                         </div>
                     </div>
+
+                    <!-- Tarimas -->
                     <div
                         class="bg-surface-light rounded-xl shadow-soft flex flex-col border border-border-light overflow-hidden">
                         <div
@@ -180,14 +191,18 @@
                                         class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
                             <button id="viewAllPlatforms"
-                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
-                                Todos
+                                class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">
+                                Ver Todos
                             </button>
                         </div>
-                        <div id="platformWidget" class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar">
+                        <div id="platformWidget"
+                            class="p-4 space-y-3 max-h-[280px] overflow-y-auto custom-scrollbar">
                         </div>
                     </div>
+
                 </div>
+
+                <!-- Historial -->
                 <div
                     class="bg-surface-light rounded-xl shadow-soft border border-border-light max-h-[325px] flex flex-col">
                     <div class="p-4 border-b border-border-light flex justify-between items-center">
@@ -198,10 +213,11 @@
                             </h3>
                         </div>
                         <button id="viewAllFollowUps"
-                            class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">Ver
-                            Todos
+                            class="viewAll hidden text-primary hover:text-primary-hover font-display font-bold uppercase text-[10px] tracking-wider transition-colors">
+                            Ver Todos
                         </button>
                     </div>
+
                     <div class="overflow-auto flex-1 custom-scrollbar">
                         <table class="w-full text-left">
                             <thead id="followUpsThead"
@@ -214,13 +230,19 @@
                                     <th class="px-6 py-3 text-right">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody id="followUpsBody" class="divide-y divide-border-light dark:divide-border-dark">
+                            <tbody id="followUpsBody"
+                                class="divide-y divide-border-light dark:divide-border-dark">
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
-            <div class="xl:col-span-4 space-y-6">
+
+            <!-- RIGHT / SIDEBAR -->
+            <div class="xl:col-span-4 lg:col-span-1 col-span-1 space-y-6">
+
+                <!-- Contactos -->
                 <div
                     class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark flex flex-col overflow-hidden">
                     <div
@@ -242,20 +264,25 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Specs -->
                 <div
                     class="bg-surface-light rounded-xl shadow-soft border border-border-light overflow-hidden flex flex-col">
                     <div class="p-5 border-b border-border-light">
                         <div class="flex flex-row items-center gap-2">
                             <span class="material-symbols-outlined text-primary">dataset</span>
                             <h2 class="text-xl font-display font-bold text-text-primary-light uppercase">
-                                Especificaciones</h2>
+                                Especificaciones
+                            </h2>
                         </div>
                         <p id="specsSubtitle"
                             class="text-[10px] text-text-secondary-light uppercase font-bold tracking-widest"></p>
                     </div>
                     <div id="specsContent" class="p-6 space-y-5"></div>
                 </div>
+
             </div>
+
         </div>
     </main>
     <footer class="h-8 shrink-0 bg-white border-t border-slate-200 px-6 flex items-center justify-between z-50">

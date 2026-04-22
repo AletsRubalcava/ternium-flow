@@ -13,10 +13,11 @@ import {
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-export async function registerHandler(req, res) {
+// ── Crear usuario internamente (desde el sistema, ya autenticado) ─────────────
+export async function createUserHandler(req, res) {
   try {
-    const { nombre, email, password, role, id_cliente } = req.body;
-    
+    const { nombre, email, password, role, estado, id_cliente } = req.body;
+
     if (!nombre || !email || !password) {
       return res.status(400).json({ message: 'Nombre, email y password son requeridos' });
     }
@@ -26,22 +27,26 @@ export async function registerHandler(req, res) {
       return res.status(409).json({ message: 'Email ya registrado' });
     }
 
-    const user = await createUser({ nombre, email, password, role, id_cliente });
-    const safe = {
-      id: user.id,
-      nombre: user.nombre,
-      email: user.email,
-      role: user.role,
-      id_cliente: user.id_cliente,
-    };
+    const user = await createUser({ nombre, email, password, role, estado, id_cliente });
 
-    res.status(201).json(safe);
+    res.status(201).json({
+      id:         user.id,
+      nombre:     user.nombre,
+      email:      user.email,
+      role:       user.role,
+      estado:     user.estado,
+      id_cliente: user.id_cliente,
+    });
   } catch (error) {
+    if (error.message.includes('administrador') || error.message.includes('Email')) {
+      return res.status(409).json({ message: error.message });
+    }
     console.error(error);
-    res.status(500).json({ message: 'Error al registrar usuario' });
+    res.status(500).json({ message: 'Error al crear usuario' });
   }
 }
 
+// ── Login público ─────────────────────────────────────────────────────────────
 export async function loginHandler(req, res) {
   try {
     const { email, password } = req.body;
@@ -60,6 +65,10 @@ export async function loginHandler(req, res) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
+    if (user.estado === false) {
+      return res.status(403).json({ message: 'Usuario inactivo' });
+    }
+
     const token = jwt.sign(
       { id: user.id, role: user.role, id_cliente: user.id_cliente },
       JWT_SECRET,
@@ -69,10 +78,11 @@ export async function loginHandler(req, res) {
     res.status(200).json({
       token,
       user: {
-        id: user.id,
-        nombre: user.nombre,
-        email: user.email,
-        role: user.role,
+        id:         user.id,
+        nombre:     user.nombre,
+        email:      user.email,
+        role:       user.role,
+        estado:     user.estado,
         id_cliente: user.id_cliente,
       },
     });
@@ -84,8 +94,8 @@ export async function loginHandler(req, res) {
 
 export async function getAllUsersHandler(req, res) {
   try {
-    const users = await getAllUsers();
-    res.status(200).json(users);
+    const userList = await getAllUsers();
+    res.status(200).json(userList);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al obtener usuarios' });
@@ -112,17 +122,20 @@ export async function updateUserHandler(req, res) {
   try {
     const { id } = req.params;
     const user = await updateUser(id, req.body);
-    const safe = {
-      id: user.id,
-      nombre: user.nombre,
-      email: user.email,
-      role: user.role,
+    res.status(200).json({
+      id:         user.id,
+      nombre:     user.nombre,
+      email:      user.email,
+      role:       user.role,
+      estado:     user.estado,
       id_cliente: user.id_cliente,
-    };
-    res.status(200).json(safe);
+    });
   } catch (error) {
     if (error.message === 'Usuario no encontrado') {
       return res.status(404).json({ message: error.message });
+    }
+    if (error.message.includes('administrador') || error.message.includes('Email')) {
+      return res.status(409).json({ message: error.message });
     }
     console.error(error);
     res.status(500).json({ message: 'Error al actualizar usuario' });
@@ -137,6 +150,9 @@ export async function deleteUserHandler(req, res) {
   } catch (error) {
     if (error.message === 'Usuario no encontrado') {
       return res.status(404).json({ message: error.message });
+    }
+    if (error.message.includes('administrador') || error.message.includes('Email')) {
+      return res.status(409).json({ message: error.message });
     }
     console.error(error);
     res.status(500).json({ message: 'Error al eliminar usuario' });

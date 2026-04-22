@@ -1,5 +1,7 @@
-const attributes = ["Tarima", "Consignatario", "Fecha Solicitud", "Acción"];
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { api } from "../shared/api/api_routes.js";
+
+const attributes = ["Tarima", "Consignatario", "Fecha Solicitud", "Acción"];
 
 export async function loadComercial() {
     const tableContainer = document.getElementById("tableContainer");
@@ -12,9 +14,9 @@ export async function loadComercial() {
     title.textContent      = "COMERCIAL";
     search.placeholder     = "Buscar Solicitudes";
 
-    const { data: dataPlatformRequest } = await axios.get("http://localhost:3000/api/platform_request");
-    const { data: platforms }           = await axios.get("http://localhost:3000/api/platforms");
-    const { data: consignees }          = await axios.get("http://localhost:3000/api/consignees");
+    const { data: dataPlatformRequest } = await axios.get(api.platform_request.getAll());
+    const { data: platforms }           = await axios.get(api.platforms.getAll());
+    const { data: consignees }          = await axios.get(api.consignees.getAll());
 
     let platformRequests = dataPlatformRequest.filter(pr => pr.status === "Pendiente");
 
@@ -102,7 +104,7 @@ export async function loadComercial() {
                 btn.textContent = "Aceptando...";
 
                 try {
-                    await axios.patch(`http://localhost:3000/api/platform_request/${requestId}/accept`);
+                    await axios.patch(api.platform_request.approve(requestId));
                     row.remove();
                     platformRequests = platformRequests.filter(pr => pr.id !== requestId);
                     if (platformRequests.length === 0) renderRows([]);
@@ -152,7 +154,7 @@ export async function loadComercial() {
 
         try {
             await axios.patch(
-                `http://localhost:3000/api/platform_request/${pendingRejectId}/reject`,
+                api.platform_request.reject(pendingRejectId),
                 { comments }
             );
             pendingRejectRow?.remove();

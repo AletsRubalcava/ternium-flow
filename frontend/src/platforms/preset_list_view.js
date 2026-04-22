@@ -1,11 +1,24 @@
-const attributes = ["Clave", "Nombre", "Consignatario", "Estado"];
+import { api } from "../shared/api/api_routes.js";
+
+const attributes = ["Nombre", "Descripción", "Usos", "Estado"];
 
 export async function loadPresets() {
-    const resPlatforms  = await axios.get("http://localhost:3000/api/platforms");
-    const resConsignees = await axios.get("http://localhost:3000/api/consignees");
+    const resPlatforms        = await axios.get(api.platforms.getAll());
+    const resConsignees       = await axios.get(api.consignees.getAll());
+    const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
     const allConsignees = resConsignees.data;
-    const platform      = resPlatforms.data.filter(p => p.type === "Preset");
+    const allRequests   = resPlatformRequests.data;
+
+    const platforms = resPlatforms.data.filter(p => p.type === "Preset");
+
+    // 🧠 Mapa de usos (eficiente)
+    const usesMap = {};
+    allRequests.forEach(r => {
+        if (r.status === "Aceptada") {
+            usesMap[r.id_platform] = (usesMap[r.id_platform] || 0) + 1;
+        }
+    });
 
     const title     = document.getElementById("pageTitle");
     const search    = document.getElementById("search");
@@ -13,8 +26,8 @@ export async function loadPresets() {
     const thead     = document.getElementById("listViewThead");
     const tbody     = document.getElementById("listViewBody");
 
-    title.textContent      = "PAQUETES";
-    search.placeholder     = "Buscar Paquetes";
+    title.textContent  = "PAQUETES";
+    search.placeholder = "Buscar Paquetes";
 
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
@@ -26,13 +39,20 @@ export async function loadPresets() {
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
 
-    tbody.innerHTML = platform.map(p => {
-        const consignee = allConsignees.find(c => c.id == p.id_consignee);
+    tbody.innerHTML = platforms.map(p => {
+        const uses = usesMap[p.id] || 0;
+
         return `
         <tr data-id="${p.id}" class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${p.id}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${p.name}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${consignee?.name || "—"}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">
+                ${p.name}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">
+                ${p.description ?? "—"}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
+                ${uses} usos
+            </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <span class="${p.status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                     ${p.status ? "Activo" : "Inactivo"}

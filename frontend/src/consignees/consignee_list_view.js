@@ -3,6 +3,7 @@ import { getAppContext, roles } from "../shared/app_context.js";
 import { api } from "../shared/api/api_routes.js";
 import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
+import { emptyWidget } from "../shared/components/empty_widget.js"
 
 const attributes = ["Consignatario", "Cliente", "Dirección", "Estado"];
 
@@ -30,7 +31,7 @@ export async function loadConsignees() {
 
     newButton.classList.remove("hidden");
 
-    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${id}`);
+    const resCustomers = await axios.get(api.customers.getByID(id));
     const customer = resCustomers.data;
 
     const resConsignee = await axios.get(api.consignees.getAll());
@@ -42,6 +43,11 @@ export async function loadConsignees() {
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
 
+    if(consignees.length === 0) {
+        tableContainer.innerHTML = emptyWidget("Sin consignatarios")
+        return;
+    }
+    
     tbody.innerHTML = consignees.map(c => `
         <tr data-id="${c.id}" class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${c.name}</td>

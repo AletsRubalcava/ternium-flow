@@ -15,14 +15,14 @@ export async function loadPlatforms() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
-    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${id}`);
+    const resCustomers = await axios.get(api.customers.getByID(id));
     const customer = resCustomers.data;
 
-    const resConsignees = await axios.get("http://localhost:3000/api/consignees");
+    const resConsignees = await axios.get(api.consignees.getAll());
     const consignees = resConsignees.data.filter(c => c.id_customer == customer.id);
 
-    const resPlatforms = await axios.get("http://localhost:3000/api/platforms");
-    const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+    const resPlatforms = await axios.get(api.platforms.getAll());
+    const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
     const platformRequests = resPlatformRequests.data.filter(pr =>
         consignees.some(c => c.id === pr.id_consignee) && pr.status === "Aceptada"

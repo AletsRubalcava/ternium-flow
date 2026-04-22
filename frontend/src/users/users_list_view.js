@@ -1,15 +1,14 @@
-import {users} from "../shared/db.js"
+import { api } from "../shared/api/api_routes.js";
 
 const attributes = [
-    "Clave",
-    "Nombre",
-    "Apellidos",
+    "Nombre / Usuario",
     "Correo",
-    "Tipo",
-    "Estado",
+    "Rol",
 ];
 
-export function loadUsers(){
+export async function loadUsers(){
+    const { data: users } = await axios.get(api.users.getAll())
+
     document.getElementById("pageTitle").innerHTML = "USUARIOS";
 
     const newButton = document.getElementById("newButton");
@@ -32,20 +31,13 @@ export function loadUsers(){
         <tr data-id="${u.id}"
         class="row bg-gray-50/50 hover:bg-gray-100 transition-colors">
             <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${u.id}</td>
-            <td
                 class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${u.nombre}</td>
             <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${u.apellidoP} ${u.apellidoM}</td>
-            <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${u.correo}</td>
+                class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">${u.email}</td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                    class=" ${u.vistaCliente == 1 ? "bg-yellow-100 text-yellow-800": "bg-blue-100 text-blue-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${u.vistaCliente == 1 ? "Cliente" : "Personal"}</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                    class=" ${u.estado == 1 ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${u.estado == 1 ? "Activo" : "Inactivo"}</span>
+                <span class="${u.role === "customer" ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                    ${u.role === "customer" ? "Cliente" : "Personal"}
+                </span>
             </td>
         </tr>
     `).join("");

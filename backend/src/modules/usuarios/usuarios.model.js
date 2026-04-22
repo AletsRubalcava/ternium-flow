@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../../config/database.js';
 
-const Usuario = sequelize.define('Usuario', {
+const users = sequelize.define('users', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -21,9 +21,12 @@ const Usuario = sequelize.define('Usuario', {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('Administrador', 'Cliente', 'Ejecutivo', 'Operador'),
+    type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'Cliente',
+    defaultValue: 'administrador',
+    validate: {
+      isIn: [['administrador', 'gestion_clientes', 'operador_logistico', 'customer']]
+    }
   },
   id_cliente: {
     type: DataTypes.UUID,
@@ -33,4 +36,4 @@ const Usuario = sequelize.define('Usuario', {
   timestamps: true,
 });
 
-export default Usuario;
+export default users;

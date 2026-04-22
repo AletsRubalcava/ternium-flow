@@ -2,6 +2,7 @@ import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
 import { navIds } from "../../../shared/navigation.js";
+import { api } from "../shared/api/api_routes.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -21,7 +22,7 @@ const params     = new URLSearchParams(window.location.search);
 let id         = params.get("id");
 let createMode = params.get("create") === "true";
 
-const { data: products } = await axios.get("http://localhost:3000/api/products")
+const { data: products } = await axios.get(api.products.getAll())
 let product  = createMode ? {} : products.find(p => p.id == id);
 let editMode = false;
 
@@ -184,14 +185,14 @@ async function saveProduct() {
 
     if (createMode) {
         try {
-            const res = await axios.post(`http://localhost:3000/api/products`, newProduct);
+            const res = await axios.post(api.products.create(), newProduct);
             return res.data;
         } catch (err) {
             console.error(err.response?.data || err.message);
         }
     } else {
         try {
-            const res = await axios.put(`http://localhost:3000/api/products/${id}`, newProduct);
+            const res = await axios.put(api.products.update(id), newProduct);
             return res.data;
         } catch (err) {
             console.error(err.response?.data || err.message);
@@ -202,7 +203,7 @@ async function saveProduct() {
 
 // --- Eliminar ---
 async function deleteProduct() {
-    await axios.delete(`http://localhost:3000/api/products/${id}`);
+    await axios.delete(api.products.delete(id));
 }
 
 // --- Event Listeners ---

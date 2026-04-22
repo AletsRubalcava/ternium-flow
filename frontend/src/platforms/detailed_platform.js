@@ -2,6 +2,7 @@ import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
 import { navIds } from "../../../shared/navigation.js";
+import { api } from "../shared/api/api_routes.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -28,9 +29,9 @@ const isCommercial = type === navIds.commercial;
 
 let platform = createMode
     ? { name: "", description: "", type: "Custom", status: false, width: "", height: "", length: "", id_dispatch_packaging: null }
-    : (await axios.get(`http://localhost:3000/api/platforms/${id}`)).data;
+    : (await axios.get(api.platforms.getByID(id))).data;
 
-const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
 const hasActiveRequests = isPresetSection && !createMode
     ? resPlatformRequests.data.some(
@@ -42,12 +43,12 @@ const platformRequest = requestId
     ? resPlatformRequests.data.find(pr => pr.id == requestId)
     : resPlatformRequests.data.find(pr => pr.id_platform == id);
     
-const { data: dispatchPackaging } = await axios.get("http://localhost:3000/api/dispatch");
-const { data: products }          = await axios.get("http://localhost:3000/api/products"); 
-const { data: productLoad }       = await axios.get("http://localhost:3000/api/items");
-const { data: allCustomers }      = await axios.get("http://localhost:3000/api/customers");
-const { data: allConsignees }     = await axios.get("http://localhost:3000/api/consignees");
-const { data: allPlatforms }      = await axios.get("http://localhost:3000/api/platforms");
+const { data: dispatchPackaging } = await axios.get(api.dispatch.getAll());
+const { data: products }          = await axios.get(api.products.getAll()); 
+const { data: productLoad }       = await axios.get(api.platform_items.getAll());
+const { data: allCustomers }      = await axios.get(api.customers.getAll());
+const { data: allConsignees }     = await axios.get(api.consignees.getAll());
+const { data: allPlatforms }      = await axios.get(api.platforms.getAll());
 
 const presetPlatforms = allPlatforms.filter(p => p.type === "Preset");
 
@@ -57,7 +58,7 @@ let piecesNumber = platform.number_of_pieces ?? 0;
 let weight       = platform.weight ?? 0;
 
 if (!createMode && !isPresetSection) {
-    consignee = (await axios.get(`http://localhost:3000/api/consignees/${platformRequest.id_consignee}`)).data;
+    consignee = (await axios.get(api.consignees.getByID(platformRequest.id_consignee))).data;
     customer  = allCustomers.find(c => c.id == consignee.id_customer);
 }
 
@@ -878,10 +879,10 @@ async function savePlatform() {
         const data = { platform: newPlatform, items: currentProductLoad, request: null };
 
         if (isCreateMode) {
-            const res = await axios.post(`http://localhost:3000/api/platforms`, data);
+            const res = await axios.post(api.platforms.create(), data);
             return res.data;
         } else {
-            const res = await axios.put(`http://localhost:3000/api/platforms/${id}`, data);
+            const res = await axios.put(api.platforms.update(id), data);
             return res.data;
         }
     }
@@ -897,7 +898,7 @@ async function savePlatform() {
         };
 
         try {
-            await axios.post(`http://localhost:3000/api/platform_request`, requestData);
+            await axios.post(api.platform_request.create(), requestData);
         } catch (err) {
             if (err.response?.status === 409) {
                 $("productTableError").textContent = "⚠ Ya existe una solicitud pendiente para este preset y consignatario.";
@@ -934,10 +935,10 @@ async function savePlatform() {
     const data = { platform: newPlatform, items: currentProductLoad, request: newRequest };
 
     if (isCreateMode) {
-        const res = await axios.post(`http://localhost:3000/api/platforms`, data);
+        const res = await axios.post(api.platforms.create(), data);
         return res.data;
     } else {
-        const res = await axios.put(`http://localhost:3000/api/platforms/${id}`, data);
+        const res = await axios.put(api.platforms.update(id), data);
         return res.data;
     }
 }
@@ -945,7 +946,7 @@ async function savePlatform() {
 // ── Aceptar (commercial) ─────────────────────────────────────────────────────
 async function acceptPlatform() {
     try {
-        await axios.patch(`http://localhost:3000/api/platform_request/${platformRequest.id}/accept`);
+        await axios.patch(api.platform_request.approve(platformRequest.id));
         window.location.href = `/frontend/src/shared/list_view.html?type=commercial`;
     } catch (error) {
         console.error("Error al aceptar:", error);
@@ -956,7 +957,7 @@ async function acceptPlatform() {
 async function rejectPlatform(comments) {
     try {
         await axios.patch(
-            `http://localhost:3000/api/platform_request/${platformRequest.id}/reject`,
+            api.platform_request.reject(platformRequest.id),
             { comments }
         );
     } catch (error) {
@@ -966,7 +967,7 @@ async function rejectPlatform(comments) {
 
 // ── Delete ───────────────────────────────────────────────────────────────────
 async function deletePlatform() {
-    await axios.delete(`http://localhost:3000/api/platforms/${platform.id}`);
+    await axios.delete(api.platforms.delete(platform.id));
 }
 
 // ── Event listeners ──────────────────────────────────────────────────────────
@@ -1108,7 +1109,7 @@ async function requestPrediction() {
 
     setPredictionLoading(true);
     try {
-        const { data } = await axios.post("http://localhost:3000/api/prediction/recommendation", payload);
+        const { data } = await axios.post(api.prediction(), payload);
         renderPredictionResults(data);
 
         if (data.explicacion_riesgo) {

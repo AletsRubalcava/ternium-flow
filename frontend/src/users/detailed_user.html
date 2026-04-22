@@ -34,18 +34,18 @@
             .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-200 rounded-full; }
         }
         @layer components {
-            .card         { @apply bg-surface-light rounded-xl shadow-soft p-6 border border-border-light; }
-            .card-header  { @apply flex items-center gap-2 mb-6 border-b border-border-light pb-4; }
-            .card-title   { @apply text-lg font-bold text-text-primary-light uppercase; }
-            .field-label  { @apply block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1; }
-            .field-value  { @apply text-text-primary-light font-bold text-sm; }
-            .field-input  { @apply border border-border-light rounded-lg px-2 py-1 text-sm w-full; }
-            .btn-primary  { @apply bg-primary hover:bg-primary-hover text-white font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all; }
-            .btn-outline  { @apply bg-white border border-primary text-primary hover:bg-orange-50 font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all; }
-            .role-btn     { @apply flex items-center gap-4 p-4 rounded-xl border border-border-light bg-white text-left transition-all cursor-default; }
+            .card           { @apply bg-surface-light rounded-xl shadow-soft p-6 border border-border-light; }
+            .card-header    { @apply flex items-center gap-2 mb-6 border-b border-border-light pb-4; }
+            .card-title     { @apply text-lg font-bold text-text-primary-light uppercase; }
+            .field-label    { @apply block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1; }
+            .field-value    { @apply text-text-primary-light font-bold text-sm; }
+            .field-input    { @apply border border-border-light rounded-lg px-2 py-1 text-sm w-full; }
+            .btn-primary    { @apply bg-primary hover:bg-primary-hover text-white font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all; }
+            .btn-outline    { @apply bg-white border border-primary text-primary hover:bg-orange-50 font-bold uppercase text-xs px-6 py-2.5 rounded shadow-sm transition-all; }
+            /* p-6 para más padding, items-center para centrar verticalmente el contenido */
+            .role-btn       { @apply flex items-center gap-4 p-6 rounded-xl border border-border-light bg-white text-left transition-all cursor-default; }
             .role-btn-title { @apply font-bold text-text-primary-light text-sm uppercase; }
             .role-btn-desc  { @apply text-[10px] text-text-secondary-light uppercase; }
-            .perm-checkbox { @apply w-4 h-4 rounded border-2 border-slate-400 text-primary focus:ring-2 focus:ring-primary/40 cursor-pointer; }
         }
     </style>
 </head>
@@ -54,7 +54,7 @@
 
     <header id="headerWidget" class="bg-white w-full px-5 z-20 flex justify-between items-center shadow-lg shrink-0"></header>
 
-    <main class="flex-grow overflow-y-auto custom-scrollbar max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <main class="flex-1 overflow-y-auto custom-scrollbar max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col">
 
         <!-- Breadcrumb + Título + Acciones -->
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -76,37 +76,23 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 flex-1 min-h-0">
 
             <!-- Columna izquierda -->
-            <div class="xl:col-span-6 space-y-6">
+            <div class="xl:col-span-6 flex flex-col gap-6 min-h-0">
 
                 <!-- Información General -->
-                <section class="card">
+                <section class="card shrink-0">
                     <div class="card-header">
                         <span class="material-symbols-outlined text-primary">info</span>
                         <h3 class="card-title">Información General</h3>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                        <div>
-                            <label class="field-label">Clave</label>
-                            <div id="idUser" class="field-value"></div>
-                        </div>
-
                         <div class="editable">
-                            <label class="field-label">Nombre Completo</label>
+                            <label class="field-label">Nombre / Usuario</label>
                             <div id="userName" class="view field-value"></div>
                             <input id="userName-edit" class="edit hidden field-input" autocomplete="off"/>
-                        </div>
-
-                        <div>
-                            <label class="field-label">Tipo</label>
-                            <div id="userType" class="field-value"></div>
-                            <select id="userType-edit" class="hidden field-input">
-                                <option value="1">Cliente</option>
-                                <option value="0">Personal</option>
-                            </select>
                         </div>
 
                         <div class="editable">
@@ -115,65 +101,67 @@
                             <input id="userMail-edit" class="edit hidden field-input" autocomplete="off" name="none"/>
                         </div>
 
-                        <div class="editable">
+                        <!-- Contraseña — view mode -->
+                        <div id="passwordViewWrap">
                             <label class="field-label">Contraseña</label>
-                            <div id="userPassword" class="view field-value"></div>
-                            <input id="userPassword-edit" class="edit hidden field-input" autocomplete="off"/>
+                            <div id="userPassword" class="field-value">••••••••</div>
                         </div>
 
-                        <div>
-                            <label class="field-label">Estado</label>
-                            <div id="userStatus" class="field-value"></div>
-                            <select id="userStatus-edit" class="hidden field-input">
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
-                            </select>
+                        <!-- Contraseña — edit mode -->
+                        <div id="passwordEditWrap" class="hidden">
+                            <label id="passwordEditLabel" class="field-label">Contraseña</label>
+                            <input id="userPassword-edit" class="field-input" type="password" autocomplete="new-password"/>
+                        </div>
+
+                        <!-- Confirmar Contraseña — edit mode -->
+                        <div id="confirmPasswordEditWrap" class="hidden">
+                            <label class="field-label">Confirmar Contraseña</label>
+                            <input id="userPasswordConfirm-edit" class="field-input" type="password" autocomplete="new-password"/>
+                            <p id="passwordMismatch" class="hidden text-[10px] text-red-500 mt-1">Las contraseñas no coinciden.</p>
                         </div>
 
                     </div>
                 </section>
 
                 <!-- Asignación de Roles -->
-                <section class="card">
-                    <div class="mb-4">
+                <section class="card flex flex-col flex-1 min-h-0">
+                    <div class="mb-4 shrink-0">
                         <h2 class="card-title">Asignación de Roles</h2>
                         <p class="field-label">Seleccione el perfil operativo para el nuevo usuario.</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4" id="rolesGrid">
+                    <!-- auto-rows-fr: cada fila ocupa la misma altura y llenan el espacio disponible -->
+                    <div class="grid grid-cols-2 gap-4 flex-1 auto-rows-fr" id="rolesGrid">
                         <button id="adminRoleButton" class="roleButton role-btn">
-                            <span class="material-symbols-outlined text-gray-400 text-3xl">admin_panel_settings</span>
+                            <span class="material-symbols-outlined text-gray-400 text-3xl shrink-0">admin_panel_settings</span>
                             <div>
                                 <p class="role-btn-title">Administrador</p>
                                 <p class="role-btn-desc">Acceso total al sistema</p>
                             </div>
                         </button>
                         <button id="logisticsRoleButton" class="roleButton role-btn">
-                            <span class="material-symbols-outlined text-gray-400 text-3xl">local_shipping</span>
+                            <span class="material-symbols-outlined text-gray-400 text-3xl shrink-0">local_shipping</span>
                             <div>
                                 <p class="role-btn-title">Operador Logístico</p>
                                 <p class="role-btn-desc">Productos, envíos y paquetes</p>
                             </div>
                         </button>
-                        <button id="customRoleButton" class="roleButton role-btn col-span-2 sm:col-span-1">
-                            <span class="material-symbols-outlined text-gray-400 text-3xl">instant_mix</span>
-                            
-                            <div class="flex-1">
-                                <p class="role-btn-title">Personalizado</p>
-                                <p class="role-btn-desc">Permisos personalizables</p>
-
-                                <!-- 👇 AQUÍ METES EL "botón" como texto -->
-                                <span id="openPermissionsBtn"
-                                    class="hidden mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline cursor-pointer"
-                                    onclick="event.stopPropagation(); openPermissionsModal()">
-                                    Configurar permisos
-                                </span>
-                            </div>
-                        </button>
-                        <button id="customerRoleButton" class="roleButton role-btn">
-                            <span class="material-symbols-outlined text-gray-400 text-3xl">support_agent</span>
+                        <button id="customerMgmtRoleButton" class="roleButton role-btn">
+                            <span class="material-symbols-outlined text-gray-400 text-3xl shrink-0">support_agent</span>
                             <div>
                                 <p class="role-btn-title">Gestión de Cliente</p>
                                 <p class="role-btn-desc">Clientes, comercial y seguimientos</p>
+                            </div>
+                        </button>
+                        <button id="clientRoleButton" class="roleButton role-btn">
+                            <span class="material-symbols-outlined text-gray-400 text-3xl shrink-0">person</span>
+                            <div class="flex-1">
+                                <p class="role-btn-title">Cliente</p>
+                                <p class="role-btn-desc">Cuenta de acceso para cliente</p>
+                                <span id="openCustomerBtn"
+                                    class="hidden mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                                    onclick="event.stopPropagation(); openCustomerModal()">
+                                    Seleccionar cuenta de cliente
+                                </span>
                             </div>
                         </button>
                     </div>
@@ -182,15 +170,15 @@
             </div>
 
             <!-- Columna derecha — Historial -->
-            <div class="xl:col-span-6 flex flex-col">
-                <div class="card flex flex-col flex-1 overflow-hidden p-0">
-                    <div class="p-4 border-b border-border-light flex items-center gap-2">
+            <div class="xl:col-span-6 flex flex-col min-h-0">
+                <div class="card flex flex-col flex-1 min-h-0 overflow-hidden p-0">
+                    <div class="p-4 border-b border-border-light flex items-center gap-2 shrink-0">
                         <span class="material-symbols-outlined text-primary">history</span>
                         <h3 class="card-title">Historial de Actividad</h3>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="flex-1 overflow-y-auto custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead class="bg-gray-50 text-[10px] uppercase font-bold text-text-secondary-light">
+                            <thead class="bg-gray-50 text-[10px] uppercase font-bold text-text-secondary-light sticky top-0">
                                 <tr>
                                     <th class="px-4 py-3">Entidad</th>
                                     <th class="px-4 py-3">Clave</th>
@@ -223,59 +211,43 @@
         </div>
     </div>
 
-    <!-- MODAL: Permisos personalizados -->
-    <div id="permissionsModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
-
-            <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
+    <!-- MODAL: Seleccionar cuenta de cliente -->
+    <div id="customerModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-border-light">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">tune</span>
-                    <h2 class="text-lg font-bold text-text-primary-light uppercase">Permisos Personalizados</h2>
+                    <span class="material-symbols-outlined text-primary">person_search</span>
+                    <h2 class="text-lg font-bold text-text-primary-light uppercase">Cuenta de Cliente</h2>
                 </div>
-                <button onclick="closePermissionsModal()" class="text-text-secondary-light hover:text-red-500 transition-colors">
+                <button onclick="closeCustomerModal()" class="text-text-secondary-light hover:text-red-500 transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-
-            <!-- Tabla de permisos -->
-            <div class="overflow-y-auto custom-scrollbar flex-1 px-6 py-4">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-border-light">
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider w-1/3">Módulo</th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center">Agregar</th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center">Ver Detalle</th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center">Editar</th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center">Eliminar</th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center" id="extraColHead1"></th>
-                            <th class="pb-3 text-[10px] font-bold text-text-secondary-light uppercase tracking-wider text-center" id="extraColHead2"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="permissionsTableBody" class="divide-y divide-border-light"></tbody>
-                </table>
+            <div class="px-6 py-6">
+                <label class="field-label">Seleccionar cliente</label>
+                <select id="customerSelect" class="field-input mt-1">
+                    <option value="">— Seleccione un cliente —</option>
+                </select>
+                <p id="customerSelectError" class="hidden text-[10px] text-red-500 mt-1">Debes seleccionar un cliente.</p>
             </div>
-
-            <!-- Footer -->
-            <div class="px-6 py-4 border-t border-border-light flex justify-between items-center shrink-0">
-                <button onclick="toggleAllPermissions(true)"
-                    class="text-xs font-bold text-text-secondary-light hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">select_all</span> Seleccionar todo
+            <div class="px-6 py-4 border-t border-border-light flex justify-end gap-3">
+                <button onclick="closeCustomerModal()" class="btn-outline">Cancelar</button>
+                <button onclick="saveCustomer()" class="btn-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">save</span> Guardar
                 </button>
-                <div class="flex gap-3">
-                    <button onclick="toggleAllPermissions(false)"
-                        class="text-xs font-bold text-text-secondary-light hover:text-red-500 transition-colors uppercase tracking-wider flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">deselect</span> Limpiar
-                    </button>
-                    <button onclick="savePermissions()"
-                        class="btn-primary flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">save</span> Guardar
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast de error -->
+    <div id="apiErrorToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] transition-opacity duration-300 opacity-0">
+        <div class="flex items-center gap-3 bg-red-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-xl">
+            <span class="material-symbols-outlined text-base">error</span>
+            <span id="apiErrorMsg"></span>
+        </div>
+    </div>
+
 </body>
-    <script type="module" src="./detailed_user.js"></script>
+<script type="module" src="./detailed_user.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </html>

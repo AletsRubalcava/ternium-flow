@@ -1,3 +1,5 @@
+import { api } from "../shared/api/api_routes.js";
+
 const attributes = [
     "ID",
     "Razón Social",
@@ -29,7 +31,7 @@ export async function loadClientes(){
 
     newButton.classList.remove("hidden");
 
-    const response = await axios.get("http://localhost:3000/api/customers");
+    const response = await axios.get(api.customers.getAll());
     const customers = response.data;
 
     newButton.onclick = () => window.location.href = `/frontend/src/customers/detailed_customer.html?create=true`;

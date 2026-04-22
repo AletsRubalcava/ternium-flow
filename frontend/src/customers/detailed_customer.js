@@ -3,6 +3,7 @@ import { renderHeader } from "../shared/components/header.js";
 import { getAppContext } from "../shared/app_context.js";
 import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
+import { api } from "../shared/api/api_routes.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -29,18 +30,18 @@ let customer;
 let consignees;
 
 if (id) {
-    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${id}`);
+    const resCustomers = await axios.get(api.customers.getByID(id));
     customer = resCustomers.data;
 
-    const resConsignees = await axios.get("http://localhost:3000/api/consignees");
+    const resConsignees = await axios.get(api.consignees.getAll());
     consignees = resConsignees.data.filter(c => c.id_customer == id);
 } else {
     customer  = { status: false };
     consignees = [];
 }
 
-const resPlatforms        = await axios.get("http://localhost:3000/api/platforms");
-const resPlatformRequests = await axios.get("http://localhost:3000/api/platform_request");
+const resPlatforms        = await axios.get(api.platforms.getAll());
+const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
 const platformRequests = resPlatformRequests.data.filter(pr =>
     consignees.some(c => c.id === pr.id_consignee)
@@ -84,7 +85,7 @@ function emptyWidget(mensaje) {
 
 // --- Fetch contacts ---
 async function fetchContacts() {
-    const { data } = await axios.get("http://localhost:3000/api/contacts");
+    const { data } = await axios.get(api.contacts.getAll());
     return data.filter(c => c.id_customer == customer.id);
 }
 
@@ -123,26 +124,26 @@ function validarCampos() {
 
 // --- Sync contacts to API ---
 async function syncContacts() {
-    const { data } = await axios.get("http://localhost:3000/api/contacts");
+    const { data } = await axios.get(api.contacts.getAll());
     const remoteContacts = data.filter(c => c.id_customer == customer.id);
 
     // Borrar los que ya no están en localContacts
     const toDelete = remoteContacts.filter(r => !localContacts.some(l => l.id === r.id && !l._new));
-    await Promise.all(toDelete.map(c => axios.delete(`http://localhost:3000/api/contacts/${c.id}`)));
+    await Promise.all(toDelete.map(c => axios.delete(api.contacts.delete(c.id))));
 
     // Crear los nuevos
     const toCreate = localContacts.filter(c => c._new);
     await Promise.all(toCreate.map(c => {
         const { _new, id, ...payload } = c;
         console.log(payload)
-        return axios.post("http://localhost:3000/api/contacts", payload);
+        return axios.post(api.contacts.getAll(), payload);
     }));
 
     // Actualizar los editados
     const toUpdate = localContacts.filter(c => !c._new && c._edited);
     await Promise.all(toUpdate.map(c => {
         const { _edited, ...payload } = c;
-        return axios.put(`http://localhost:3000/api/contacts/${c.id}`, payload);
+        return axios.put(api.contacts.update(c.id), payload);
     }));
 
     // Recargar localContacts limpio
@@ -222,8 +223,7 @@ async function saveNewCustomer() {
         status:      $("customerStatus-edit").value === "1",
     };
     try {
-        const res = await axios.post("http://localhost:3000/api/customers", newCustomer);
-        return res.data;
+        const res = await axios.post(api.customers.create(), newCustomer);
     } catch (err) {
         console.error(err.response?.data || err.message);
     }
@@ -239,8 +239,7 @@ async function saveEditedCustomer() {
         status:      $("customerStatus-edit").value === "1",
     };
     try {
-        const res = await axios.put(`http://localhost:3000/api/customers/${id}`, updatedCustomer);
-        return res.data;
+        const res = await axios.put(api.customers.update(id), updatedCustomer);
     } catch (err) {
         console.error(err.response?.data || err.message);
     }
@@ -360,7 +359,7 @@ function renderFollowUps() {
 
     document.querySelectorAll(".followUpTuple").forEach(f => {
         f.addEventListener("click", () => {
-            // window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${f.dataset.id}`;
+            window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${f.dataset.id}`;
         });
     });
 }
@@ -420,7 +419,7 @@ function renderContacts() {
 // --- Eliminar Customer ---
 async function eliminarCustomer() {
     try {
-        await axios.delete(`http://localhost:3000/api/customers/${id}`);
+        await axios.delete(api.customers.delete(id));
     } catch (err) {
         console.error(err.response?.data || err.message);
     }
@@ -533,7 +532,7 @@ async function renderSpecs() {
             <div class="field-value">${value ?? "—"}</div>
         </div>`;
 
-    const { data: dispatches } = await axios.get("http://localhost:3000/api/dispatch");
+    const { data: dispatches } = await axios.get(api.dispatch.getAll());
 
     if (type === "consignee") {
         subtitle.textContent = "Configuración de Consignatario";

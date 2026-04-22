@@ -26,7 +26,7 @@ export function verifyToken(req, res, next) {
 
 // Permissions map per role and module
 export const permissions = {
-  'Administrador': {
+  'administrador': {
     'commercial': ['create', 'read', 'update', 'delete', 'manage', 'approve'],
     'consignatarios': ['create', 'read', 'update', 'delete', 'manage'],
     'clientes': ['create', 'read', 'update', 'delete', 'manage'],

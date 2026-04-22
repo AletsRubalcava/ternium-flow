@@ -3,14 +3,14 @@ const form = document.getElementById("form");
 form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value; // o cambia el id a "email"
     const password = document.getElementById("password").value;
 
     try {
-        const res = await fetch("http://localhost:3000/api/login", {
+        const res = await fetch("http://localhost:3000/api/usuarios/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ email, password })
         });
 
         const data = await res.json();
@@ -21,12 +21,13 @@ form.addEventListener("submit", async function (e) {
         } else {
             const mensajes = data.detalles
                 ? data.detalles.join('\n')
-                : data.error;
+                : data.message;
 
             alert(mensajes);
         }
 
     } catch (err) {
         console.error("Error de red:", err);
+        alert("No se pudo conectar al servidor.");
     }
 });

@@ -14,18 +14,16 @@ import platformItemRoutes from "./modules/platform_items/platform_items.routes.j
 import followUpsRoutes from "./modules/followups/followUp.routes.js"
 import configRoutes from "./modules/consignatarios/config.routes.js";
 import predictionRoutes from "./modules/prediction/prediction.routes.js";
+import usuariosRoutes from "./modules/usuarios/usuarios.routes.js"
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Auth and Users endpoints (public login/register)
-app.use('/api/usuarios', usuariosRoutes);
-
 // Protected module endpoints
-app.use('/api/consignatarios', consignatariosRoutes);
-app.use('/api/clientes', clientesRoutes);
+app.use('/api/consignees', consignatariosRoutes);
+app.use('/api/customers', clientesRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/platforms', platformRoutes);
@@ -35,5 +33,6 @@ app.use('/api/dispatch', dispatchRoutes);
 app.use('/api/follow_ups', followUpsRoutes);
 app.use("/api", configRoutes);
 app.use("/api/prediction", predictionRoutes);
+app.use('/api/users', usuariosRoutes);
 
 export default app;

@@ -2,6 +2,7 @@ import { setActiveNav } from "../shared/utils/nav.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { renderHeader } from "../shared/components/header.js";
 import { navIds } from "../../../shared/navigation.js";
+import { api } from "../shared/api/api_routes.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -15,7 +16,7 @@ const cancelBtn  = $("cancelDelete");
 const confirmBtn = $("confirmDelete");
 
 const params     = new URLSearchParams(window.location.search);
-const id         = params.get("id");
+let id           = params.get("id");
 const idCus      = params.get("idCus");
 const createMode = params.get("create") === "true";
 
@@ -23,17 +24,17 @@ let consignee;
 let customer;
 
 if (id) {
-    const resConsignee = await axios.get(`http://localhost:3000/api/consignees/${id}`);
+    const resConsignee = await axios.get(api.consignees.getByID(id));
     consignee = resConsignee.data;
 } else {
     consignee =  {}
 }
 
 if (idCus) {
-    const resCustomers = await axios.get(`http://localhost:3000/api/customers/${idCus}`);
+    const resCustomers = await axios.get(api.customers.getByID(idCus));
     customer = resCustomers.data;
 } else {
-    const resCustomer = await axios.get("http://localhost:3000/api/customers");
+    const resCustomer = await axios.get(api.customers.getAll());
     customer = resCustomer.data.find(c => c.id == consignee.id_customer);
 }
 
@@ -80,8 +81,8 @@ function renderCampos() {
 
 // --- Fill Dispatch Options
 
-const dispatches = await axios.get("http://localhost:3000/api/dispatch");
-const { data: platformRequests } = await axios.get("http://localhost:3000/api/platform_request");
+const dispatches = await axios.get(api.dispatch.getAll());
+const { data: platformRequests } = await axios.get(api.platform_request.getAll());
 const hasActiveRequests = platformRequests.some(
     pr => pr.id_consignee == consignee?.id && pr.status !== "Rechazada"
 );
@@ -179,6 +180,26 @@ function validarCampos() {
             }
         });
 
+        // Peso (min vs max)
+    const minLoad = Number($("minLoad-edit")?.value);
+    const maxLoad = Number($("maxLoad-edit")?.value);
+
+    if (!isNaN(minLoad) && !isNaN(maxLoad) && minLoad >= maxLoad) {
+        $("minLoad-edit").classList.add("border-red-400");
+        $("maxLoad-edit").classList.add("border-red-400");
+        valido = false;
+    }
+
+    // Diámetros (interno vs externo)
+    const intD = Number($("intDiameter-edit")?.value);
+    const extD = Number($("extDiameter-edit")?.value);
+
+    if (!isNaN(intD) && !isNaN(extD) && intD >= extD) {
+        $("intDiameter-edit").classList.add("border-red-400");
+        $("extDiameter-edit").classList.add("border-red-400");
+        valido = false;
+    }
+
     return valido;
 }
 
@@ -189,7 +210,7 @@ document.querySelectorAll(".edit, .spec-edit").forEach(el =>
 async function renderMap() {
     if (consignee?.address) {
         const encoded = encodeURIComponent(consignee.address);
-        const { data } = await axios.get("http://localhost:3000/api/config");
+        const { data } = await axios.get(api.config.get());
         $("consigneeMap").src = `https://www.google.com/maps/embed/v1/place?key=${data.googleApiKey}&q=${encoded}`;
     }
 }
@@ -272,6 +293,7 @@ async function toggleEdit(active) {
             const nuevo = await saveNewConsignee();
 
             consignee    = nuevo;
+            id = consignee.id;
             isCreateMode = false;
 
             $("upperConsigneeId").textContent = nuevo.name;
@@ -305,11 +327,12 @@ async function saveNewConsignee() {
     }
 
     try {
-        const res = await axios.post('http://localhost:3000/api/consignees', newConsignee);
+        const res = await axios.post(api.consignees.create(), newConsignee);
+        return res.data;
     } catch (err) {
         console.error(err.response?.data || err.message);
+        return null;
     }
-    return newConsignee;
 }
 
 async function saveEditedConsignee(){
@@ -330,16 +353,17 @@ async function saveEditedConsignee(){
     }
 
     try {
-        const res = await axios.put(`http://localhost:3000/api/consignees/${id}`, newConsignee);
+        const res = await axios.put(api.consignees.update(id), newConsignee);
+        return res.data;
     } catch (err) {
         console.error(err.response?.data || err.message);
+        return null;
     }
-    return newConsignee;
 }
 
 // --- Eliminar Consignee ---
 async function deleteConsignee() {
-    await axios.delete(`http://localhost:3000/api/consignees/${id}`);
+    await axios.delete(api.consignees.delete(id));
 }
 
 // --- Event Listeners ---
