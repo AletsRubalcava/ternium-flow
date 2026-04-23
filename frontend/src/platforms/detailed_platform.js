@@ -837,6 +837,7 @@ async function toggleEdit(active) {
                 window.history.replaceState({}, "", `?id=${newPlatform.id}&section=${type}`);
 
                 // ── Mostrar aviso de aprobación pendiente para clientes ──────────────
+                // ── Mostrar aviso de aprobación pendiente para clientes ──────────────
                 if (context.role === roles.customer) {
                     const pendingModal = $("pendingApprovalModal");
                     pendingModal.classList.remove("hidden");
@@ -847,7 +848,6 @@ async function toggleEdit(active) {
                         editButton.classList.add("opacity-50", "cursor-not-allowed");
                         editButton.title = "La solicitud está pendiente de aprobación";
 
-                        actionBtn2.innerHTML = `<span class="material-symbols-outlined text-sm">cancel</span> Cancelar Solicitud`;
                         actionBtn2.disabled = false;
                         actionBtn2.classList.remove("opacity-50", "cursor-not-allowed");
                         actionBtn2.classList.remove("hidden");
@@ -1048,37 +1048,31 @@ actionBtn2.addEventListener("click", () => {
     if (isCommercial) {
         rejectModal.classList.remove("hidden");
         $("rejectComments").value = "";
-    } 
-    else if (context.role === roles.customer && platformRequest?.status === platformRequestStatus.pending) {
-        cancelRequestModal.classList.remove("hidden");
-    } 
-    else {
-        modal.classList.remove("hidden"); // eliminar tarima
+    } else if (context.role === roles.customer && platformRequest?.status === platformRequestStatus.pending) {
+        // Reusar el modal de delete con texto diferente
+        $("deleteModalTitle").textContent  = "¿Cancelar esta solicitud?";
+        $("deleteModalBody").textContent   = "La solicitud será eliminada y la tarima quedará sin actividad.";
+        $("confirmDelete").textContent     = "Cancelar Solicitud";
+        modal.classList.remove("hidden");
+    } else {
+        modal.classList.remove("hidden");
     }
 });
 
-const cancelRequestModal = $("cancelRequestModal");
-const confirmCancelRequestBtn = $("confirmCancelRequest");
-const cancelCancelRequestBtn = $("cancelCancelRequest");
-
-confirmCancelRequestBtn.addEventListener("click", async () => {
-    await axios.delete(api.platform_request.delete(platformRequest.id));
-
-    window.location.href = isPresetSection
-        ? `/frontend/src/shared/list_view.html?type=presets`
-        : `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
-});
-
-cancelCancelRequestBtn.addEventListener("click", () => {
-    cancelRequestModal.classList.add("hidden");
-});
-
 confirmBtn.addEventListener("click", async () => {
-    await deletePlatform();
+    const shouldDeleteRequest = !isPresetSection && platformRequest?.id;
 
-    window.location.href = isPresetSection
-        ? `/frontend/src/shared/list_view.html?type=presets`
-        : `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
+    if (shouldDeleteRequest) {
+        await axios.delete(api.platform_request.delete(platformRequest.id));
+    } else {
+        await deletePlatform();
+    }
+
+    if (isPresetSection) {
+        window.location.href = `/frontend/src/shared/list_view.html?type=presets`;
+    } else {
+        window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
+    }
 });
 
 cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
@@ -1359,13 +1353,15 @@ if (createMode) {
         showToast(["Este paquete tiene solicitudes de tarima activas o pendientes y no puede editarse."], "warning");
     }
 
-    // Bloquear edición si la request está pendiente
+    // Bloquear edición y eliminación si la request está pendiente
     const isPending = platformRequest?.status === platformRequestStatus.pending;
     if (isPending && !isPresetSection && !isCommercial) {
         editButton.disabled = true;
         editButton.classList.add("opacity-50", "cursor-not-allowed");
         editButton.title = "No se puede editar: la solicitud está pendiente de aprobación";
 
+        actionBtn2.disabled = true;
+        actionBtn2.classList.add("opacity-50", "cursor-not-allowed");
         actionBtn2.title = "No se puede eliminar: la solicitud está pendiente de aprobación";
 
         showToast(["Esta tarima tiene una solicitud pendiente y no puede modificarse."], "warning");
