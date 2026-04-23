@@ -70,7 +70,7 @@ export const permissions = {
     'tarimas': ['create', 'read', 'update', 'delete', 'manage'],
     'requests': ['create', 'read', 'delete', 'update'],
     'productos': ['read'],
-    'followUps': ['create', 'read', 'manage'],
+    'followUps': ['read', 'manage'],
     'shared': ['access']
   }
 };

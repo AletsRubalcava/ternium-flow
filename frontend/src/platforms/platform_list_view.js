@@ -6,7 +6,8 @@ import { navIds } from "../../../shared/navigation.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
 import { platformRequestStatus } from "../shared/api/api_platform_request_constants.js";
 
-const attributes = ["Nombre", "Cliente", "Consignatario", "Estado"];
+const attributes         = ["Nombre", "Cliente", "Consignatario", "Estado"];
+const attributesRejected = ["Nombre", "Cliente", "Consignatario", "Motivo de Rechazo"];
 
 const context = getAppContext();
 renderHeader(context);
@@ -26,68 +27,104 @@ export async function loadPlatforms() {
     const resPlatforms = await axios.get(api.platforms.getAll());
     const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
-    const platformRequests = resPlatformRequests.data.filter(pr =>
+    // ── Filtrar requests según modo y rol ────────────────────────────────────
+    const activeRequests = resPlatformRequests.data.filter(pr =>
         consignees.some(c => c.id === pr.id_consignee) &&
         (pr.status === platformRequestStatus.approved || pr.status === platformRequestStatus.pending)
     );
 
-    const title = document.getElementById("pageTitle");
-    const search = document.getElementById("search");
-    const newButton = document.getElementById("newButton");
-    const thead = document.getElementById("listViewThead");
-    const tbody = document.getElementById("listViewBody");
+    const rejectedRequests = resPlatformRequests.data.filter(pr =>
+        consignees.some(c => c.id === pr.id_consignee) &&
+        pr.status === platformRequestStatus.rejected
+    );
 
-    title.textContent = "TARIMAS";
-    search.placeholder = "Buscar Tarimas";
+    const title     = document.getElementById("pageTitle");
+    const search    = document.getElementById("search");
+    const newButton = document.getElementById("newButton");
+    const thead     = document.getElementById("listViewThead");
+    const tbody     = document.getElementById("listViewBody");
+
+    title.textContent    = "TARIMAS";
+    search.placeholder   = "Buscar Tarimas";
 
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-            Nueva Tarima`;
-
+        Nueva Tarima`;
     newButton.classList.remove("hidden");
+    newButton.onclick = () => window.location.href =
+        `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}&section=${navIds.customers}`;
 
-    newButton.onclick = () => window.location.href = `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}&section=${navIds.customers}`;
+    // ── Toggle rechazadas ────────────────────────────────────────────────────
+    let showRejected = false;
 
-    thead.innerHTML = attributes.map(a => `
-        <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
-    `).join("");
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors";
+    toggleBtn.innerHTML = `<span class="material-symbols-outlined text-sm">cancel</span> Ver Rechazadas`;
+    newButton.insertAdjacentElement("beforebegin", toggleBtn);
 
-    if (platformRequests.length === 0){
-        tableContainer.innerHTML = emptyWidget("Sin tarimas")
-        return;
+    // ── Render ───────────────────────────────────────────────────────────────
+    function renderTable() {
+        const requests = showRejected ? rejectedRequests : activeRequests;
+
+        thead.innerHTML = (showRejected ? attributesRejected : attributes).map(a => `
+            <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
+        `).join("");
+
+        if (requests.length === 0) {
+            tableContainer.innerHTML = emptyWidget(showRejected ? "Sin tarimas rechazadas" : "Sin tarimas");
+            return;
+        }
+
+        tbody.innerHTML = requests.map(pr => {
+            const platform  = resPlatforms.data.find(p => p.id === pr.id_platform);
+            const consignee = consignees.find(c => c.id === pr.id_consignee);
+            if (!platform) return "";
+
+            const lastCol = showRejected
+                ? `<td class="px-6 py-4 text-sm text-red-600 dark:text-red-400 max-w-xs break-words whitespace-normal">
+                    ${pr.comments ?? "—"}
+                </td>`
+                    : `<td class="px-6 py-4 whitespace-nowrap">
+                        <span class="${
+                            pr.status === platformRequestStatus.pending
+                                ? "bg-yellow-100 text-yellow-800"
+                                : platform.status
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                        } px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                            ${pr.status === platformRequestStatus.pending ? "Pendiente" : platform.status ? "Activo" : "Inactivo"}
+                        </span>
+                    </td>`;
+
+            return `
+                <tr data-platform-id="${platform.id}" data-request-id="${pr.id}"
+                    class="customer-row bg-gray-50/50 hover:bg-gray-100 dark:hover:bg-gray-800/30 transition-colors ${showRejected ? "opacity-75" : ""}">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light dark:text-text-primary-dark">${platform.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light dark:text-text-primary-dark">${customer.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${consignee?.name ?? "—"}</td>
+                    ${lastCol}
+                </tr>`;
+        }).join("");
+
+        document.querySelectorAll(".customer-row").forEach(row => {
+            row.addEventListener("click", () => {
+                const platformId = row.dataset.platformId;
+                const requestId  = row.dataset.requestId;
+                window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platformId}&requestId=${requestId}&section=${navIds.customers}`;
+            });
+        });
     }
 
-    tbody.innerHTML = platformRequests.map(pr => {
-        const platform  = resPlatforms.data.find(p => p.id === pr.id_platform);
-        const consignee = consignees.find(c => c.id === pr.id_consignee);
-        if (!platform) return "";
-
-        return `
-            <tr data-platform-id="${platform.id}" data-request-id="${pr.id}" class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${platform.name}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary-light">${customer.name}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light">
-                    ${consignee?.name ?? "—"}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="${
-                        pr.status === platformRequestStatus.pending
-                            ? "bg-yellow-100 text-yellow-800"
-                            : platform.status
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                    } px-2 inline-flex text-xs leading-5 font-semibold rounded-full px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                    ${pr.status === platformRequestStatus.pending ? "Pendiente" : platform.status ? "Activo" : "Inactivo"}
-                    </span>
-                </td>
-            </tr>`;
-    }).join("");
-
-    document.querySelectorAll(".customer-row").forEach(row => {
-        row.addEventListener("click", () => {
-            const platformId = row.dataset.platformId;
-            const requestId  = row.dataset.requestId;
-            window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platformId}&requestId=${requestId}&section=${navIds.customers}`;
-        });
+    toggleBtn.addEventListener("click", () => {
+        showRejected = !showRejected;
+        toggleBtn.innerHTML = showRejected
+            ? `<span class="material-symbols-outlined text-sm">check_circle</span> Ver Activas`
+            : `<span class="material-symbols-outlined text-sm">cancel</span> Ver Rechazadas`;
+        toggleBtn.classList.toggle("bg-red-50",        showRejected);
+        toggleBtn.classList.toggle("text-red-700",     showRejected);
+        toggleBtn.classList.toggle("border-red-200",   showRejected);
+        renderTable();
     });
+
+    renderTable();
 }

@@ -230,21 +230,27 @@ function toggleEdit(active) {
 
 // ── Guardar usuario nuevo (POST) ──────────────────────────────────────────────
 async function guardarUsuario() {
+    const password = $("userPassword-edit").value;
+
     const role = getSelectedRole();
     const payload = {
         nombre:     $("userName-edit").value.trim(),
         email:      $("userMail-edit").value.trim(),
-        password:   $("userPassword-edit").value,
+        password,
         role,
         id_cliente: role === roles.customer ? selectedCustomerId : null,
     };
 
     try {
         const { data: nuevo } = await axios.post(api.users.create(), payload);
+
         user = nuevo;
         $("upperUserId").textContent = nuevo.nombre;
         window.history.replaceState({}, "", `?id=${nuevo.id}`);
         deleteBtn.classList.remove("hidden");
+
+        showPasswordSavedModal(password);
+
     } catch (err) {
         console.error("Error al crear usuario:", err);
         showApiError(err.response?.data?.message ?? "Error al crear usuario.");
@@ -367,6 +373,32 @@ confirmBtn.addEventListener("click", eliminarUsuario);
 
 $("customerModal").addEventListener("click", e => {
     if (e.target === $("customerModal")) closeCustomerModal();
+});
+
+const passwordSavedModal = $("passwordSavedModal");
+const savedPasswordField = $("savedPasswordField");
+const toggleSavedPassword = $("toggleSavedPassword");
+const confirmSavedPassword = $("confirmSavedPassword");
+
+function showPasswordSavedModal(password) {
+    savedPasswordField.value = password;
+    savedPasswordField.type = "password";
+    passwordSavedModal.classList.remove("hidden");
+}
+
+toggleSavedPassword.addEventListener("click", () => {
+    const isHidden = savedPasswordField.type === "password";
+    savedPasswordField.type = isHidden ? "text" : "password";
+
+    toggleSavedPassword.innerHTML = `
+        <span class="material-symbols-outlined">
+            ${isHidden ? "visibility_off" : "visibility"}
+        </span>
+    `;
+});
+
+confirmSavedPassword.addEventListener("click", () => {
+    passwordSavedModal.classList.add("hidden");
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
