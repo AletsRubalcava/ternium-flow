@@ -145,7 +145,7 @@
                             <span class="material-symbols-outlined text-lg">lan</span> Seguimientos Activos
                             <span class="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
                         </label>
-                        <label class="pb-3 px-2 text-sm font-display font-bold uppercase tracking-wider cursor-pointer border-b-2 border-transparent text-text-secondary-light hover:text-primary transition-all flex items-center gap-2 whitespace-nowrap" for="tab3">
+                        <label class="hidden pb-3 px-2 text-sm font-display font-bold uppercase tracking-wider cursor-pointer border-b-2 border-transparent text-text-secondary-light hover:text-primary transition-all flex items-center gap-2 whitespace-nowrap" for="tab3">
                             <span class="material-symbols-outlined text-lg">model_training</span> Predicción
                         </label>
                     </div>
@@ -296,14 +296,7 @@
                                         <h3
                                             class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
                                             Listado de Seguimientos</h3>
-                                        <p
-                                            class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                                            Control de órdenes de seguimiento vinculadas a este preestablecido.</p>
                                     </div>
-                                    <button
-                                        class="bg-primary text-white text-xs font-bold uppercase px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-hover transition-colors">
-                                        <span class="material-symbols-outlined text-sm">link</span> Vincular Nuevo
-                                    </button>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left">
@@ -317,44 +310,7 @@
                                                 <th class="px-6 py-3">Última Actualización</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-border-light dark:divide-border-dark">
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="material-symbols-outlined text-gray-400 text-lg">barcode_scanner</span>
-                                                        <span class="font-bold text-text-primary-light dark:text-text-primary-dark">SEG-2026-8812</span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">10 Mar, 2026 - 09:30 AM</td>
-                                                <td class="px-6 py-4"><span class="text-sm font-medium">Zona Industrial Escobedo, NL.</span></td>
-                                                <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 uppercase">En Tránsito</span></td>
-                                                <td class="px-6 py-4 text-right"><button class="text-text-secondary-light hover:text-red-600 p-1 transition-colors" title="Desvincular"><span class="material-symbols-outlined text-lg">link_off</span></button></td>
-                                            </tr>
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="material-symbols-outlined text-gray-400 text-lg">barcode_scanner</span>
-                                                        <span class="font-bold text-text-primary-light dark:text-text-primary-dark">SEG-2026-9045</span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">5 Mar, 2026 - 14:15 PM</td>
-                                                <td class="px-6 py-4"><span class="text-sm font-medium">Carretera Qro-Celaya Km 12.5, Gto.</span></td>
-                                                <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800 uppercase">Preparación</span></td>
-                                                <td class="px-6 py-4 text-right"><button class="text-text-secondary-light hover:text-red-600 p-1 transition-colors" title="Desvincular"><span class="material-symbols-outlined text-lg">link_off</span></button></td>
-                                            </tr>
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="material-symbols-outlined text-gray-400 text-lg">barcode_scanner</span>
-                                                        <span class="font-bold text-text-primary-light dark:text-text-primary-dark">SEG-2026-9120</span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">9 Mar, 2026 - 11:00 AM</td>
-                                                <td class="px-6 py-4"><span class="text-sm font-medium">Parque Industrial El Salto, Jal.</span></td>
-                                                <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-800 uppercase">Pendiente</span></td>
-                                                <td class="px-6 py-4 text-right"><button class="text-text-secondary-light hover:text-red-600 p-1 transition-colors" title="Desvincular"><span class="material-symbols-outlined text-lg">link_off</span></button></td>
-                                            </tr>
-                                        </tbody>
+                                        <tbody class="divide-y divide-border-light dark:divide-border-dark"></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -363,7 +319,7 @@
                         <div class="tab-content space-y-6" id="content3">
 
                             <!-- Información de la Tarima -->
-                            <div class="tab-content space-y-6" id="content3">
+                            <div class="tab-content space-y-6" id="content3 hidden">
 
                                 <!-- Predicción -->
                                 <div class="bg-surface-light rounded-xl shadow-soft p-6 border border-border-light">
@@ -729,6 +685,56 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL: Tarima pendiente de aprobación -->
+    <div id="pendingApprovalModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-primary text-3xl">pending_actions</span>
+                <h2 class="text-lg font-semibold">Tarima enviada a revisión</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">
+                Tu solicitud fue enviada correctamente. Un agente comercial deberá aprobarla antes de que pueda ser utilizada.
+            </p>
+            <div class="flex justify-end">
+                <button id="confirmPendingApproval" class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Cancelar solicitud -->
+<div id="cancelRequestModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-96 shadow-xl">
+        
+        <div class="flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined text-primary text-2xl">cancel</span>
+            <h2 class="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark">
+                ¿Cancelar esta solicitud?
+            </h2>
+        </div>
+
+        <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">
+            La solicitud será eliminada y la tarima quedará sin actividad. Esta acción no se puede deshacer.
+        </p>
+
+        <div class="flex justify-end gap-3">
+            <button id="cancelCancelRequest"
+                class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition text-sm font-medium">
+                Volver
+            </button>
+
+            <button id="confirmCancelRequest"
+                class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition text-sm font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">cancel</span>
+                Cancelar solicitud
+            </button>
+        </div>
+
+    </div>
+
+</div>
     <script type="module" src="./detailed_platform.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </body>

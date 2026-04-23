@@ -33,6 +33,7 @@ export async function loadClientes(){
 
     const response = await axios.get(api.customers.getAll());
     const customers = response.data;
+    const { data: contacts } = await axios.get(api.contacts.getAll());
 
     newButton.onclick = () => window.location.href = `/frontend/src/customers/detailed_customer.html?create=true`;
 
@@ -52,7 +53,7 @@ export async function loadClientes(){
         <td
             class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.rfc ?? "N/A"}</td>
         <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.contact ?? "N/A"}</td>
+            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${contacts.find(co => co.id_customer === c.id).name ?? "N/A"}</td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span
                 class=" ${c.status ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status ? "Activo" : "Inactivo"}</span>

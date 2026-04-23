@@ -8,6 +8,9 @@ import { loadComercial } from "../commercial/commercial_list_view.js";
 import { setActiveNav } from "./utils/nav.js";
 import { loadFolllowUps } from "../followUps/followUp_list_view.js";
 import { navIds } from "../../../shared/navigation.js";
+import { getAppContext } from "./app_context.js";
+
+const context = getAppContext();
 
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -34,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadPresets();
         setActiveNav("presets");
     } else if (type === navIds.followUps) {
-        loadFolllowUps();
+        loadFolllowUps(context);
         setActiveNav(navIds.followUps);  
     } else if (type === navIds.users) {
         loadUsers();

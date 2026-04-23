@@ -346,19 +346,18 @@ async function renderFollowUps() {
             .map(r => r.id)
     );
 
-    const followUpsEmpty = $("followUpsEmpty");
+    const followUpsFiltered = followUps.filter(f =>
+        clientRequestIds.has(f.id_request)
+    );
 
-    if (clientRequestIds.size === 0) {
+    const followUpsEmpty = $("followUpsEmpty");
+    if (followUpsFiltered.length === 0) {
         followUpsEmpty.classList.remove("hidden");
         followUpsEmpty.innerHTML = emptyWidget("Sin Seguimientos");
         return
     }
 
     followUpsEmpty.classList.add("hidden");
-
-    const followUpsFiltered = followUps.filter(f =>
-        clientRequestIds.has(f.id_request)
-    );
 
     const followUpsEnriched = followUpsFiltered.map(f => {
         const request   = requests.find(r => r.id === f.id_request);

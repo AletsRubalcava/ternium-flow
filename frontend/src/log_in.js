@@ -1,4 +1,5 @@
 import { api } from "./shared/api/api_routes.js";
+import { session } from "./shared/session.js"
 
 const form = document.getElementById("form");
 
@@ -18,8 +19,10 @@ form.addEventListener("submit", async function (e) {
         const data = await res.json();
 
         if (res.ok) {
-            localStorage.setItem("token", data.token);
-            window.location.href = '/frontend/src/home/home.html';
+            session.setSession({ token: data.token, user: data.user });
+            
+            const id = data.user.id_cliente || data.user.id;
+            window.location.href = `/frontend/src/home/home.html?id=${id}`;
         } else {
             const mensajes = data.detalles
                 ? data.detalles.join('\n')

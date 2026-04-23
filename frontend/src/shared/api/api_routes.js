@@ -3,9 +3,7 @@ import { navIds } from "../../../../shared/navigation.js"
 const BASE_URL = "http://localhost:3000/api";
 
 const token = localStorage.getItem('token');
-if (!token) {
-    window.location.href = '/frontend/src/login/login.html';
-} else {
+if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
@@ -44,6 +42,7 @@ export const api = {
         getByID:    (id) => `${BASE_URL}/platform_request/${id}`,
         approve:    (id) => `${BASE_URL}/platform_request/${id}/accept`,
         reject:     (id) => `${BASE_URL}/platform_request/${id}/reject`,
+        delete: (id) => `${BASE_URL}/platform_request/${id}`
     },
     products: {
         create: () => `${BASE_URL}/products`,

@@ -1,6 +1,6 @@
 import { setActiveNav } from '../shared/utils/nav.js';
 import { renderHeader } from '../shared/components/header.js';
-import { getAppContext } from '../shared/app_context.js';
+import { getAppContext, roles } from '../shared/app_context.js';
 import { navIds } from "../../../shared/navigation.js";
 import { api } from '../shared/api/api_routes.js';
 
@@ -146,7 +146,6 @@ function validatePasswords() {
             return false;
         }
     } else {
-        // Opcional al editar: solo valida si el usuario escribió algo en alguno de los dos campos
         if (pw || cpw) {
             if (!pw)  { $("userPassword-edit").classList.add("border-red-400"); return false; }
             if (!cpw) { $("userPasswordConfirm-edit").classList.add("border-red-400"); return false; }
@@ -156,7 +155,6 @@ function validatePasswords() {
                 return false;
             }
         }
-        // Si ambos están vacíos → válido, no se cambia la contraseña
     }
     return true;
 }
@@ -238,8 +236,7 @@ async function guardarUsuario() {
         email:      $("userMail-edit").value.trim(),
         password:   $("userPassword-edit").value,
         role,
-        estado:     $("userStatus-edit").value === "1",
-        id_cliente: role === "customer" ? selectedCustomerId : null,
+        id_cliente: role === roles.customer ? selectedCustomerId : null,
     };
 
     try {

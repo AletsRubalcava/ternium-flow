@@ -26,44 +26,51 @@ export function verifyToken(req, res, next) {
 
 // Permissions map per role and module
 export const permissions = {
-  'administrador': {
+  administrador: {
     'commercial': ['create', 'read', 'update', 'delete', 'manage', 'approve'],
     'consignatarios': ['create', 'read', 'update', 'delete', 'manage'],
     'clientes': ['create', 'read', 'update', 'delete', 'manage'],
     'followUps': ['create', 'read', 'update', 'delete', 'manage'],
     'tarimas': ['create', 'read', 'update', 'delete', 'manage'],
+    'requests': ['create', 'read', 'update', 'delete', 'manage'],
     'productos': ['create', 'read', 'update', 'delete', 'manage'],
     'usuarios': ['create', 'read', 'update', 'delete', 'manage'],
     'home': ['access'],
     'shared': ['access'],
     'config': ['read', 'manage']
   },
-  'Cliente': {
-    'consignatarios': ['read', 'update_own'],
-    'clientes': ['read_own'],
+  gestion_clientes: {
+    'consignatarios': ['create', 'read', 'update', 'delete', 'manage'],
+    'commercial': ['create', 'read', 'update', 'delete', 'manage', 'approve'],
+    'clientes': ['create', 'read', 'update', 'delete', 'manage'],
     'productos': ['read'],
-    'tarimas': ['read'],
-    'followUps': ['read'],
+    'config': ['read'],
+    'tarimas': ['create', 'read', 'update', 'delete', 'manage'],
+    'requests': ['create', 'read', 'update', 'delete', 'manage'],
+    'followUps': ['create', 'read', 'update', 'delete', 'manage'],
     'home': ['access'],
     'shared': ['access']
   },
-  'Ejecutivo': {
-    'commercial': ['read', 'approve', 'manage'],
+  operador_logistico: {
+    'commercial': ['read'],
     'clientes': ['read'],
     'consignatarios': ['read'],
-    'productos': ['read'],
-    'followUps': ['read'],
-    'tarimas': ['read'],
+    'productos': ['create', 'read', 'update', 'delete', 'manage'],
+    'followUps': ['create', 'read', 'update', 'delete', 'manage'],
+    'tarimas': ['create', 'read', 'update', 'delete', 'manage'],
+    'requests': ['read'],
     'home': ['access'],
     'shared': ['access']
   },
-  'Operador': {
-    'followUps': ['create', 'read', 'update', 'manage'],
-    'productos': ['read'],
-    'consignatarios': ['read'],
-    'clientes': ['read'],
-    'tarimas': ['read'],
+  customer: {
     'home': ['access'],
+    'clientes': ['read'],
+    'consignatarios': ['create', 'read', 'update', 'delete', 'manage'],
+    'config': ['read'],
+    'tarimas': ['create', 'read', 'update', 'delete', 'manage'],
+    'requests': ['create', 'read', 'delete', 'update'],
+    'productos': ['read'],
+    'followUps': ['create', 'read', 'manage'],
     'shared': ['access']
   }
 };
@@ -103,7 +110,7 @@ export function checkOwnership(idField = 'id') {
     const userId = req.user.id_cliente || req.user.id;
     
     // For Cliente role, can only access own resource
-    if (req.user.role === 'Cliente') {
+    if (req.user.role === 'customer') {
       if (resourceId !== userId && resourceId !== req.user.id_cliente) {
         return res.status(403).json({ message: 'Can only access own resources' });
       }

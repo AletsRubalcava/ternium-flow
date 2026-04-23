@@ -1,5 +1,8 @@
 import { api } from "../shared/api/api_index.js";
+import { getAppContext, roles } from "../shared/app_context.js";
 import { timeAgo } from "../shared/utils/time_ago.js";
+
+const context = getAppContext();
 
 const attributes = [
     "Clave Seguimiento",
@@ -9,7 +12,7 @@ const attributes = [
     "Última Actualización",
 ];
 
-export async function loadFolllowUps() {
+export async function loadFolllowUps(context) {
     const $ = id => document.getElementById(id);
 
     const title = $("pageTitle");
@@ -22,14 +25,16 @@ export async function loadFolllowUps() {
     title.innerHTML = "SEGUIMIENTOS";
     search.placeholder = "Buscar Seguimiento...";
 
-    newButton.innerHTML = `
-        <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
-        Nuevo Seguimiento`;
-    newButton.classList.remove("hidden");
+    if (context.role !== roles.customer) {
+        newButton.innerHTML = `
+            <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
+            Nuevo Seguimiento`;
+        newButton.classList.remove("hidden");
 
-    newButton.onclick = () => {
-        window.location.href = `/frontend/src/followUps/detailed_followUp.html?create=true`;
-    };
+        newButton.onclick = () => {
+            window.location.href = `/frontend/src/followUps/detailed_followUp.html?create=true`;
+        };
+    }
 
     try {
         const { data: followUps } = await axios.get(api.followUps.getAll());
@@ -45,9 +50,15 @@ export async function loadFolllowUps() {
             return {
                 ...f,
                 consigneeAddress: consignee?.address ?? "N/A",
-                platformName: platform?.name ?? "N/A"
+                platformName: platform?.name ?? "N/A",
+                id_cliente: request?.id_customer ?? consignee?.id_customer ?? null  // ← asegúrate que exista este campo
             };
         });
+
+        const filtered = context?.role === roles.customer
+        ? followUpsEnriched.filter(f => f.id_cliente === context.customerId)
+        : followUpsEnriched;
+
 
         const requestMap = new Map(requests.map(r => [r.id, r]));
 
@@ -71,7 +82,7 @@ export async function loadFolllowUps() {
             return `<span class="${s.cls} px-2 inline-flex text-xs font-semibold rounded-full">${s.label}</span>`;
         }
 
-        tbody.innerHTML = followUpsEnriched.map(f => `
+        tbody.innerHTML = filtered.map(f => `
             <tr data-id="${f.id}"
                 class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
 

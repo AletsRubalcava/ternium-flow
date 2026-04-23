@@ -8,6 +8,9 @@ const context = getAppContext();
 renderHeader(context);
 setActiveNav(navIds.followUps);
 
+const isCustomer = context.role === "customer";
+
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
@@ -18,10 +21,12 @@ const createMode = params.get("create") === "true";
 // ── Buttons ───────────────────────────────────────────────────────────────────
 const editButton       = $("editButton");
 const saveButton       = $("saveButton");
-const actionBtn2       = $("actionButton2");
-const deleteModal      = $("deleteModal");
-const cancelDelete     = $("cancelDelete");
-const confirmDeleteBtn = $("confirmDelete");
+
+// ── Permisos por rol ──────────────────────────────────────────────────────────
+if (isCustomer) {
+    editButton.classList.add("hidden");
+    saveButton.classList.add("hidden");
+}
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 $("returnListView").href      = `/frontend/src/shared/list_view.html?type=followUps`;
@@ -95,90 +100,88 @@ function formatDate(dateStr) {
 // CREATE MODE
 // ─────────────────────────────────────────────────────────────────────────────
 function initCreateMode() {
-    // Mostrar botón Guardar, ocultar los de view
     saveButton.classList.remove("hidden");
     editButton.classList.add("hidden");
 
     $("upperId").textContent = "Nuevo";
-
-    // Estado inicial fijo: pending
     $("status").innerHTML = statusBadge("pending");
 
-    // Mostrar selects, ocultar spans
-    $("platformCustomer").classList.add("hidden");
-    $("customer-select").classList.remove("hidden");
-    $("platformConsignee").classList.add("hidden");
-    $("consignee-select").classList.remove("hidden");
     $("platformName").classList.add("hidden");
     $("platform-select").classList.remove("hidden");
 
-    // Poblar clientes
-    $("customer-select").innerHTML =
-        `<option value="">Selecciona un cliente</option>` +
-        allCustomers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    // ── Si es customer, ocultar select de cliente y mostrar el suyo fijo ──
+    if (context.role === "customer") {
+        $("platformCustomer").classList.remove("hidden");
+        $("customer-select").classList.add("hidden");
 
-    // Cliente seleccionado → filtrar consignatarios
-    $("customer-select").addEventListener("change", () => {
-        const cid = $("customer-select").value;
-        resetFrom("consignee");
+        const myCustomer = allCustomers.find(c => c.id == context.customerId);
+        $("platformCustomer").textContent = myCustomer?.name ?? "—";
 
-        if (!cid) return;
+        // Cargar directamente sus consignatarios
+        $("platformConsignee").classList.add("hidden");
+        $("consignee-select").classList.remove("hidden");
 
-        const filtered = allConsignees.filter(c => c.id_customer == cid && c.status);
-        const sel = $("consignee-select");
-
-        sel.innerHTML =
+        const filtered = allConsignees.filter(c => c.id_customer == context.customerId && c.status);
+        $("consignee-select").innerHTML =
             `<option value="">Selecciona un consignatario</option>` +
             filtered.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
-
         enableSelect("consignee-select");
-    });
 
-    // Consignatario seleccionado → filtrar tarimas aprobadas
+    } else {
+        // Flujo normal: mostrar selects de cliente
+        $("platformCustomer").classList.add("hidden");
+        $("customer-select").classList.remove("hidden");
+        $("platformConsignee").classList.add("hidden");
+        $("consignee-select").classList.remove("hidden");
+
+        $("customer-select").innerHTML =
+            `<option value="">Selecciona un cliente</option>` +
+            allCustomers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+
+        $("customer-select").addEventListener("change", () => {
+            const cid = $("customer-select").value;
+            resetFrom("consignee");
+            if (!cid) return;
+
+            const filtered = allConsignees.filter(c => c.id_customer == cid && c.status);
+            $("consignee-select").innerHTML =
+                `<option value="">Selecciona un consignatario</option>` +
+                filtered.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+            enableSelect("consignee-select");
+        });
+    }
+
+    // Este listener es compartido para ambos roles
     $("consignee-select").addEventListener("change", () => {
         const cnid = $("consignee-select").value;
         resetFrom("platform");
-
         if (!cnid) return;
 
-        // Tarimas aprobadas = requests con status "Aceptada" para ese consignatario
         const approvedPlatformIds = allRequests
             .filter(r => r.id_consignee == cnid && r.status === "Aceptada")
             .map(r => r.id_platform);
 
         const filtered = allPlatforms.filter(p => approvedPlatformIds.includes(p.id));
-        const sel = $("platform-select");
-
-        sel.innerHTML =
+        $("platform-select").innerHTML =
             `<option value="">Selecciona una tarima</option>` +
             filtered.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
-
         enableSelect("platform-select");
     });
 
-    // Tarima seleccionada → cargar toda la info
     $("platform-select").addEventListener("change", () => {
         const pid = $("platform-select").value;
-
-        // Resetear info cargada previamente
-        $("address").textContent  = "—";
-        $("comment").textContent  = "";
+        $("address").textContent = "—";
+        $("comment").textContent = "";
         $("createdAt").textContent = "—";
         renderProductTable([]);
-
         if (!pid) return;
 
         const selConsignee = allConsignees.find(c => c.id == $("consignee-select").value) ?? null;
-        const selPlatform  = allPlatforms.find(p => p.id == pid) ?? null;
-
-        // Dirección viene del consignatario
         $("address").textContent = selConsignee?.address ?? "—";
 
-        // Cargar productos de la tarima
         const items = productLoad.filter(pl => pl.id_platform == pid);
         renderProductTable(items);
 
-        // Mostrar enlace a la tarima
         $("redirectPlatformBtn").classList.remove("hidden");
         $("redirectPlatformBtn").classList.add("flex");
     });
@@ -398,12 +401,13 @@ redirectPlatformBtn.addEventListener("click", () => {
     window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${platform.id}&requestId=${platformRequest.id}&section=${navIds.customers}`;
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────────────────
-if (createMode) {
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if (createMode && !isCustomer) {
     initCreateMode();
     renderProductTable([]);
+} else if (createMode && isCustomer) {
+    // No debería llegar aquí, redirigir a lista
+    window.location.href = `/frontend/src/shared/list_view.html?type=followUps`;
 } else {
     renderCampos();
     renderProductTable(currentProductLoad);

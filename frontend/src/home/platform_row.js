@@ -1,5 +1,6 @@
+import { roles } from "../../../shared/roles.js";
 import { plaftformType } from "../shared/api/api_platform_constants.js"
-import { getAppContext, roles } from "../shared/app_context.js"
+import { getAppContext } from "../shared/app_context.js"
 
 export function platformTableRow(platform){
     const context = getAppContext();

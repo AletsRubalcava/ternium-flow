@@ -4,6 +4,7 @@ import { renderHeader } from "../shared/components/header.js";
 import { navIds } from "../../../shared/navigation.js";
 import { api } from "../shared/api/api_routes.js";
 import { timeAgo } from "../shared/utils/time_ago.js";
+import { platformRequestStatus } from "../shared/api/api_platform_request_constants.js";
 
 const context = getAppContext();
 renderHeader(context);
@@ -103,7 +104,10 @@ if (type == navIds.presets) {
     $("returnListView").href = `/frontend/src/shared/list_view.html?type=commercial`;
 } else if (type == navIds.customers) {
     $("returnListView").innerText = "TARIMAS";
-    $("returnListView").href = `/frontend/src/shared/list_view.html?type=platforms&id=${context.entityId}`;
+    const idCus = params.get("idCus")           // viene en createMode
+        ?? consignee?.id_customer         // viene en editMode
+        ?? context.customerId; 
+    $("returnListView").href = `/frontend/src/shared/list_view.html?type=platforms&id=${context.role === roles.customer ? `${context.customerId}` : `${idCus}`}`;
 }
 
 // ── Populate selects ─────────────────────────────────────────────────────────
@@ -163,11 +167,33 @@ function initCustomerConsigneeSelects() {
     const customerSelect  = $("platformCustomer-edit");
     const consigneeSelect = $("platformConsignee-edit");
 
-    customerSelect.innerHTML = `<option value="">Selecciona un cliente</option>` +
-        allCustomers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    if (context.role === roles.customer) {
+        // Bloquear al cliente propio
+        const ownCustomer = allCustomers.find(c => c.id == context.customerId);
+        customerSelect.innerHTML = ownCustomer
+            ? `<option value="${ownCustomer.id}" selected>${ownCustomer.name}</option>`
+            : `<option value="">Sin cliente asignado</option>`;
+        customerSelect.disabled = true;
 
-    consigneeSelect.innerHTML = `<option value="">Primero selecciona un cliente</option>`;
-    consigneeSelect.disabled  = true;
+        // Disparar el filtrado de consignatarios automáticamente
+        customer = ownCustomer ?? null;
+        if (ownCustomer) {
+            const filtered = allConsignees.filter(cn => cn.id_customer == ownCustomer.id);
+            consigneeSelect.innerHTML = `<option value="">Selecciona un consignatario</option>` +
+                filtered.map(cn => `<option value="${cn.id}">${cn.name}</option>`).join("");
+            consigneeSelect.disabled = false;
+            $("platformCustomer").textContent = ownCustomer.name;
+        }
+    } else {
+        customerSelect.innerHTML = `<option value="">Selecciona un cliente</option>` +
+            allCustomers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    }
+
+    // Solo resetear el consignee si NO es customer (para customer ya se pobló arriba)
+    if (context.role !== roles.customer) {
+        consigneeSelect.innerHTML = `<option value="">Primero selecciona un cliente</option>`;
+        consigneeSelect.disabled  = true;
+    }
 
     customerSelect.addEventListener("change", () => {
         const selectedCustomerId = customerSelect.value;
@@ -202,7 +228,6 @@ function initCustomerConsigneeSelects() {
 
 // ── Type select handler ──────────────────────────────────────────────────────
 function handleTypeChange(value) {
-    console.log(value)
     const nameView  = $("platformName");
     const nameInput = $("platformName-edit");
     const presetSel = $("platformPreset-edit");
@@ -737,6 +762,14 @@ async function toggleEdit(active) {
         } else {
             typeSelect.disabled = false;
             typeSelect.onchange = () => handleTypeChange(typeSelect.value);
+
+            // Si el tipo actual es Preset, bloquear campos hasta que cambie a Custom
+            if (platform.type !== "Custom") {
+                isPresetMode = true;
+                setNonTypeFieldsDisabled(true);
+                $("platformName-edit").classList.add("hidden");
+                $("platformPreset-edit").classList.remove("hidden");
+            }
         }
     } else {
         typeView.innerHTML  = badges.type(platform.type);
@@ -750,6 +783,14 @@ async function toggleEdit(active) {
     const statusSelect = $("platformStatus-edit");
     if (active) {
         statusSelect.value = platform.status ? "1" : "0";
+        // Bloquear status en createMode siempre como inactivo
+        if (isCreateMode) {
+            statusSelect.value    = "0";
+            statusSelect.disabled = true;
+            platform.status       = false;
+        } else {
+            statusSelect.disabled = false;
+        }
     } else {
         statusView.innerHTML = badges.status(platform.status);
     }
@@ -794,6 +835,24 @@ async function toggleEdit(active) {
                 }
 
                 window.history.replaceState({}, "", `?id=${newPlatform.id}&section=${type}`);
+
+                // ── Mostrar aviso de aprobación pendiente para clientes ──────────────
+                if (context.role === roles.customer) {
+                    const pendingModal = $("pendingApprovalModal");
+                    pendingModal.classList.remove("hidden");
+                    $("confirmPendingApproval").onclick = () => {
+                        pendingModal.classList.add("hidden");
+
+                        editButton.disabled = true;
+                        editButton.classList.add("opacity-50", "cursor-not-allowed");
+                        editButton.title = "La solicitud está pendiente de aprobación";
+
+                        actionBtn2.innerHTML = `<span class="material-symbols-outlined text-sm">cancel</span> Cancelar Solicitud`;
+                        actionBtn2.disabled = false;
+                        actionBtn2.classList.remove("opacity-50", "cursor-not-allowed");
+                        actionBtn2.classList.remove("hidden");
+                    };
+                }
             } else {
                 Object.assign(platform, newPlatform);
             }
@@ -986,23 +1045,40 @@ editButton.addEventListener("click", () => {
 });
 
 actionBtn2.addEventListener("click", () => {
-    console.log(isCommercial)
     if (isCommercial) {
         rejectModal.classList.remove("hidden");
         $("rejectComments").value = "";
-    } else {
-        modal.classList.remove("hidden");
+    } 
+    else if (context.role === roles.customer && platformRequest?.status === platformRequestStatus.pending) {
+        cancelRequestModal.classList.remove("hidden");
+    } 
+    else {
+        modal.classList.remove("hidden"); // eliminar tarima
     }
+});
+
+const cancelRequestModal = $("cancelRequestModal");
+const confirmCancelRequestBtn = $("confirmCancelRequest");
+const cancelCancelRequestBtn = $("cancelCancelRequest");
+
+confirmCancelRequestBtn.addEventListener("click", async () => {
+    await axios.delete(api.platform_request.delete(platformRequest.id));
+
+    window.location.href = isPresetSection
+        ? `/frontend/src/shared/list_view.html?type=presets`
+        : `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
+});
+
+cancelCancelRequestBtn.addEventListener("click", () => {
+    cancelRequestModal.classList.add("hidden");
 });
 
 confirmBtn.addEventListener("click", async () => {
     await deletePlatform();
 
-    if (isPresetSection) {
-        window.location.href = `/frontend/src/shared/list_view.html?type=presets`;
-    } else {
-        window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id}`;
-    }
+    window.location.href = isPresetSection
+        ? `/frontend/src/shared/list_view.html?type=presets`
+        : `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
 });
 
 cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
@@ -1155,13 +1231,41 @@ async function renderFollowUps() {
 
     const { data: followUps } = await axios.get(api.followUps.getAll());
 
-    const platformRequestIds = new Set(
-        resPlatformRequests.data
-            .filter(pr => pr.id_platform == platform.id)
-            .map(pr => pr.id)
-    );
+    // Usar solo el request específico de esta tarima+consignatario
+    // En vez de todos los requests de la tarima
+    let relevantRequestIds;
 
-    const filtered = followUps.filter(f => platformRequestIds.has(f.id_request));
+    if (context.role === roles.customer) {
+        if (requestId) {
+            // Si viene requestId en URL, usar solo ese
+            relevantRequestIds = new Set([String(requestId)]);
+        } else {
+            // Fallback: todos los requests de los consignatarios del customer para esta tarima
+            const clientConsigneeIds = new Set(
+                allConsignees
+                    .filter(c => c.id_customer == context.customerId)
+                    .map(c => c.id)
+            );
+            relevantRequestIds = new Set(
+                resPlatformRequests.data
+                    .filter(pr => pr.id_platform == platform.id && clientConsigneeIds.has(pr.id_consignee))
+                    .map(pr => String(pr.id))
+            );
+        }
+    } else {
+        // Admin/operador: solo el request específico de esta vista (tarima + consignatario asignado)
+        relevantRequestIds = platformRequest
+            ? new Set([platformRequest.id])
+            : new Set(
+                resPlatformRequests.data
+                    .filter(pr => pr.id_platform == platform.id)
+                    .map(pr => pr.id)
+            );
+    }
+
+    const filtered = followUps
+        .filter(f => relevantRequestIds.has(f.id_request))
+        .filter(f => f.status !== "delivered" && f.status !== "dismantled");
 
     if (tabBadge) tabBadge.textContent = filtered.length;
 
@@ -1234,6 +1338,13 @@ renderProductTable();
 renderSpecs();
 renderFollowUps();
 
+// ── Ocultar tab de predicción para rol customer ──────────────────────────────
+if (context.role === roles.customer) {
+    document.querySelector("label[for='tab3']")?.classList.add("hidden");
+    $("content3")?.classList.add("hidden");
+    $("tab3")?.setAttribute("disabled", "true");
+}
+
 if (createMode) {
     editMode = true;
     toggleEdit(true);
@@ -1246,5 +1357,17 @@ if (createMode) {
         editButton.classList.add("opacity-50", "cursor-not-allowed");
         editButton.title = "No se puede editar: este preset tiene solicitudes activas o pendientes";
         showToast(["Este paquete tiene solicitudes de tarima activas o pendientes y no puede editarse."], "warning");
+    }
+
+    // Bloquear edición si la request está pendiente
+    const isPending = platformRequest?.status === platformRequestStatus.pending;
+    if (isPending && !isPresetSection && !isCommercial) {
+        editButton.disabled = true;
+        editButton.classList.add("opacity-50", "cursor-not-allowed");
+        editButton.title = "No se puede editar: la solicitud está pendiente de aprobación";
+
+        actionBtn2.title = "No se puede eliminar: la solicitud está pendiente de aprobación";
+
+        showToast(["Esta tarima tiene una solicitud pendiente y no puede modificarse."], "warning");
     }
 }

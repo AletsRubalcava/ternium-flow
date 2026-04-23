@@ -1,16 +1,14 @@
 import {Router} from 'express';
-import { getAllPlatformsRequestsHandler, acceptPlatformRequestHandler, rejectPlatformRequestHandler, createPlatformRequestHandler, getPlatformRequestByIDHandler } from './platform_request.controller.js';
+import { getAllPlatformsRequestsHandler, acceptPlatformRequestHandler, rejectPlatformRequestHandler, createPlatformRequestHandler, getPlatformRequestByIDHandler, deletePlatformRequestHandler} from './platform_request.controller.js';
 import { verifyToken, authorize } from '../../middlewares/auth.js';
 
 const router = Router();
 
-// Create: Operador and Administrador can create followUps
-router.post('/', verifyToken, authorize('followUps', 'create'), createPlatformRequestHandler);
-// Get all: all authorized roles can view
-router.get('/', verifyToken, authorize('followUps', 'read'), getAllPlatformsRequestsHandler);
-router.get("/:id", verifyToken, authorize('followUps', 'read'), getPlatformRequestByIDHandler);
-// Accept/reject: Operador and Administrador can manage
-router.patch("/:id/accept", verifyToken, authorize('followUps', 'manage'), acceptPlatformRequestHandler);
-router.patch("/:id/reject", verifyToken, authorize('followUps', 'manage'), rejectPlatformRequestHandler);
+router.post('/', verifyToken, authorize('requests', 'create'), createPlatformRequestHandler);
+router.get('/', verifyToken, authorize('requests', 'read'), getAllPlatformsRequestsHandler);
+router.get("/:id", verifyToken, authorize('requests', 'read'), getPlatformRequestByIDHandler);
+router.patch("/:id/accept", verifyToken, authorize('requests', 'manage'), acceptPlatformRequestHandler);
+router.patch("/:id/reject", verifyToken, authorize('requests', 'manage'), rejectPlatformRequestHandler);
+router.delete('/:id', verifyToken, authorize('requests', 'delete'), deletePlatformRequestHandler);
 
 export default router;

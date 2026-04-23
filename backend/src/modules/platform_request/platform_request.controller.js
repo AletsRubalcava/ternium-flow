@@ -8,6 +8,7 @@ import { sequelize } from "../../config/database.js";
 import platforms from "../plaftforms/platforms.model.js";
 import platform_items from "../platform_items/platform_items.model.js"
 import {validateAgainstConsignee} from "../plaftforms/platforms.controller.js"
+import platform_request from "./platform_request.model.js";
 
 const status = {
     Approved: "Aceptada",
@@ -130,5 +131,37 @@ export async function createPlatformRequestHandler(req, res) {
         }
         console.error(error);
         res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+    }
+}
+
+export async function deletePlatformRequestHandler (req, res) {
+    const { id } = req.params;
+    
+    if (!id) {
+        return res.status(400).json({ error: "MISSING_ID" });
+    }
+
+    try {
+        const request = await platform_request.findByPk(id);
+
+        if (!request) {
+            error.code = "REQUEST_NOT_FOUND";
+            throw error;
+        }
+
+    await request.destroy();
+
+        return res.sendStatus(204);
+
+    } catch (error) {
+        if (error.code === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({ error: "REQUEST_NOT_FOUND" });
+        }
+
+        console.error(error);
+
+        return res.status(500).json({ 
+            error: "INTERNAL_SERVER_ERROR" 
+        });
     }
 }

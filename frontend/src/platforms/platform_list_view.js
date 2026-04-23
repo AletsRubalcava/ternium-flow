@@ -3,6 +3,8 @@ import { getAppContext, roles } from "../shared/app_context.js";
 import { api } from "../shared/api/api_routes.js";
 import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
+import { platformRequestStatus } from "../shared/api/api_platform_request_constants.js";
 
 const attributes = ["Nombre", "Cliente", "Consignatario", "Estado"];
 
@@ -25,7 +27,8 @@ export async function loadPlatforms() {
     const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
     const platformRequests = resPlatformRequests.data.filter(pr =>
-        consignees.some(c => c.id === pr.id_consignee) && pr.status === "Aceptada"
+        consignees.some(c => c.id === pr.id_consignee) &&
+        (pr.status === platformRequestStatus.approved || pr.status === platformRequestStatus.pending)
     );
 
     const title = document.getElementById("pageTitle");
@@ -49,6 +52,11 @@ export async function loadPlatforms() {
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
 
+    if (platformRequests.length === 0){
+        tableContainer.innerHTML = emptyWidget("Sin tarimas")
+        return;
+    }
+
     tbody.innerHTML = platformRequests.map(pr => {
         const platform  = resPlatforms.data.find(p => p.id === pr.id_platform);
         const consignee = consignees.find(c => c.id === pr.id_consignee);
@@ -62,8 +70,14 @@ export async function loadPlatforms() {
                     ${consignee?.name ?? "—"}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="${platform.status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                        ${platform.status ? "Activo" : "Inactivo"}
+                    <span class="${
+                        pr.status === platformRequestStatus.pending
+                            ? "bg-yellow-100 text-yellow-800"
+                            : platform.status
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                    } px-2 inline-flex text-xs leading-5 font-semibold rounded-full px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                    ${pr.status === platformRequestStatus.pending ? "Pendiente" : platform.status ? "Activo" : "Inactivo"}
                     </span>
                 </td>
             </tr>`;
