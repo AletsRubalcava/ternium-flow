@@ -145,7 +145,7 @@
                             <span class="material-symbols-outlined text-lg">lan</span> Seguimientos Activos
                             <span class="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
                         </label>
-                        <label class="hidden pb-3 px-2 text-sm font-display font-bold uppercase tracking-wider cursor-pointer border-b-2 border-transparent text-text-secondary-light hover:text-primary transition-all flex items-center gap-2 whitespace-nowrap" for="tab3">
+                        <label class="pb-3 px-2 text-sm font-display font-bold uppercase tracking-wider cursor-pointer border-b-2 border-transparent text-text-secondary-light hover:text-primary transition-all flex items-center gap-2 whitespace-nowrap" for="tab3">
                             <span class="material-symbols-outlined text-lg">model_training</span> Predicción
                         </label>
                     </div>
@@ -267,6 +267,7 @@
                                                 <th class="px-6 py-3 text-center">Cantidad</th>
                                                 <th class="px-6 py-3 text-center">D. Interno</th>
                                                 <th class="px-6 py-3 text-center">D. Externo</th>
+                                                <th class="px-6 py-3 text-center">Ancho</th>
                                                 <th class="px-6 py-3 text-right">Peso Unit.</th>
                                             </tr>
                                         </thead>
@@ -539,7 +540,7 @@
                                 </div>
                                 <div>
                                     <label
-                                        class="block text-[9px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Largo (cm)</label>
+                                        class="block text-[9px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Largo (m)</label>
                                     <div id="spec-length-view" class="spec-input">—</div>
                                     <input id="spec-length-edit" class="hidden edit edit-input" type="number"/>
                                 </div>
@@ -547,13 +548,13 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label
-                                        class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Anchura (cm)</label>
+                                        class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Anchura (m)</label>
                                     <div id="spec-width-view" class="spec-input">—</div>
                                     <input id="spec-width-edit" class="hidden edit edit-input" type="number"/>
                                 </div>
                                 <div>
                                     <label
-                                        class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Altura (cm)</label>
+                                        class="block text-[9px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Altura (m)</label>
                                     <div id="spec-height-view" class="spec-input">—</div>
                                     <input id="spec-height-edit" class="hidden edit edit-input" type="number"/>
                                 </div>
@@ -572,7 +573,7 @@
                     <div
                         class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark flex flex-col h-[320px] relative overflow-hidden group">
                         <div
-                            class="absolute top-3 left-3 z-10 bg-white/90 dark:bg-surface-dark/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-border-light dark:border-border-dark">
+                            class="absolute top-3 right-3 z-10 bg-white/90 dark:bg-surface-dark/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-border-light dark:border-border-dark">
                             <h3
                                 class="text-[10px] font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase flex items-center gap-1">
                                 <span class="material-symbols-outlined text-primary text-xs">3d_rotation</span>
@@ -580,28 +581,43 @@
                             </h3>
                         </div>
                         <div class="w-full h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center relative">
-                            <div class="absolute inset-0"
-                                style="background-image: linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px); background-size: 15px 15px; opacity: 0.5;">
-                            </div>
-                            <div class="relative w-32 h-40 transform rotate-x-6 rotate-z-6 transition-transform duration-500 group-hover:scale-105">
-                                <div class="absolute bottom-0 w-full h-3 bg-[#8B4513] rounded-sm shadow-lg"></div>
-                                <div class="absolute bottom-3 left-0 w-full h-8 bg-gray-400 border border-gray-500 rounded-sm"></div>
-                                <div class="absolute bottom-11 left-0 w-full h-8 bg-gray-400 border border-gray-500 rounded-sm"></div>
-                                <div class="absolute bottom-20 left-0 w-full h-8 bg-gray-300 border border-gray-400 rounded-sm scale-[0.9]"></div>
-                                <div class="absolute bottom-29 left-0 w-full h-8 bg-gray-300 border border-gray-400 rounded-sm scale-[0.9]"></div>
-                                <div class="absolute inset-0 bg-primary/10 border-2 border-primary/30 rounded-lg pointer-events-none"></div>
-                            </div>
-                            <div class="absolute bottom-3 right-3 flex flex-col gap-1">
-                                <button class="p-1.5 bg-white dark:bg-surface-dark rounded shadow hover:text-primary transition-colors border border-border-light dark:border-border-dark">
-                                    <span class="material-symbols-outlined text-xs">zoom_in</span>
-                                </button>
-                                <button class="p-1.5 bg-white dark:bg-surface-dark rounded shadow hover:text-primary transition-colors border border-border-light dark:border-border-dark">
-                                    <span class="material-symbols-outlined text-xs">zoom_out</span>
-                                </button>
-                                <button class="p-1.5 bg-white dark:bg-surface-dark rounded shadow hover:text-primary transition-colors border border-border-light dark:border-border-dark">
-                                    <span class="material-symbols-outlined text-xs">fullscreen</span>
-                                </button>
-                            </div>
+                            <canvas id="unity-container" style="width: 100%; height: 100%;" tabindex="1"></canvas>
+
+                                <script src="/frontend/unity/Build/unity.loader.js"></script>
+
+                                <script>
+                                    createUnityInstance(document.querySelector("#unity-container"), {
+                                    dataUrl: "/frontend/unity/Build/unity.data",
+                                    frameworkUrl: "/frontend/unity/Build/unity.framework.js",
+                                    codeUrl: "/frontend/unity/Build/unity.wasm",
+                                    }).then((unityInstance) => {
+                                        window.unityInstance = unityInstance;
+                                        unityInstance.Module.keyboardListeningElement = document.getElementById("unity-container");
+                                        unityInstance.SendMessage("SceneManager", "LoadPlatformScene");
+                                        window.onUnityReady = function () {
+                                            const params = new URLSearchParams(window.location.search);
+                                            const id = params.get("id");
+
+                                            const fullUrl = `http://localhost:3000/api/platforms/${id}/visualization`;
+
+                                            unityInstance.SendMessage("PalletRoot", "SetApiUrl", fullUrl);
+                                        };
+                                    });
+
+                                    const canvas = document.getElementById("unity-container");
+
+                                    canvas.addEventListener("click", () => {
+                                        canvas.focus();
+                                    });
+                                </script>
+                        </div>
+                        <div
+                            class="absolute bottom-3 z-10 bg-white/90 backdrop-blur-sm mx-2 px-2 py-1 rounded shadow-sm border border-border-light">
+                            <h3
+                                class="text-[10px] font-display font-bold text-text-primary-light uppercase flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary text-xs">control_camera</span>
+                                Click izquierdo: Seleccionar | Click derecho: rotar cámara | Rueda raton: zoom
+                            </h3>
                         </div>
                     </div>
 

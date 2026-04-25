@@ -378,10 +378,13 @@ function renderProductTable() {
                         : row.quantity}
                 </td>
                 <td class="px-6 py-4 text-sm text-text-primary-light dark:text-text-primary-dark">
-                    <div class="font-medium">${product?.internal_diameter + " cm"  ?? "Desconocido"}</div>
+                    <div class="font-medium">${product?.internal_diameter + " m"  ?? "Desconocido"}</div>
                 </td>
                 <td class="px-6 py-4 text-sm text-text-primary-light dark:text-text-primary-dark">
-                    <div class="font-medium">${product?.external_diameter + " cm"  ?? "Desconocido"}</div>
+                    <div class="font-medium">${product?.external_diameter + " m"  ?? "Desconocido"}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-text-primary-light dark:text-text-primary-dark">
+                    <div class="font-medium">${product?.width + " m"  ?? "Desconocido"}</div>
                 </td>
                 <td class="px-6 py-4 text-sm text-right font-medium">
                     ${product?.unit_weight != null ? product.unit_weight + " kg" : "—"}
@@ -442,11 +445,13 @@ window.confirmAddProduct = function () {
     closeAddProduct();
     renderProductTable();
     $("productTableError").classList.add("hidden");
+    notificarUnity();
 };
 
 window.removeProduct = function (idx) {
     currentProductLoad.splice(idx, 1);
     renderProductTable();
+    notificarUnity();
 };
 
 window.updateQuantity = function (idx, val) {
@@ -454,8 +459,9 @@ window.updateQuantity = function (idx, val) {
     currentProductLoad[idx].quantity = n;
     const input = document.querySelector(`tr[data-idx="${idx}"] input[type="number"]`);
     if (input) input.style.borderColor = n <= 0 ? "#f87171" : "";
-    calcSpecs();   // ← agregar esto
+    calcSpecs();
     renderSpecs();
+    notificarUnity();
 };
 
 // ── Validación ───────────────────────────────────────────────────────────────
@@ -505,6 +511,53 @@ function validarCampos() {
             valid = false;
         } else {
             $("productTableError").classList.add("hidden");
+        }
+    }
+
+    // ── Validaciones geométricas ───────────────────
+    const anchoCamion = Number($("spec-width-edit").value);
+    const largoCamion = Number($("spec-length-edit").value);
+
+    if (anchoCamion > 0 && largoCamion > 0 && currentProductLoad.length > 0) {
+        // Contar piezas totales
+        const totalPiezas = currentProductLoad.reduce((sum, row) => sum + (row.quantity ?? 0), 0);
+        const segmento = largoCamion / totalPiezas;
+
+        let sumaDiametros = 0;
+        let errorGeom = null;
+
+        for (const row of currentProductLoad) {
+            const product = products.find(p => p.id == row.id_product);
+            if (!product) continue;
+
+            const qty          = row.quantity ?? 0;
+            const anchoRollo   = Number(product.width);
+            const diamExterno  = Number(product.external_diameter);
+
+            // Ancho del rollo excede el ancho del camión
+            if (anchoRollo > anchoCamion) {
+                errorGeom = `⚠ "${product.name}" tiene un ancho (${anchoRollo} m) mayor al ancho de la tarima (${anchoCamion} m).`;
+                break;
+            }
+
+            // Diámetro externo excede el segmento asignado a cada pieza
+            if (diamExterno > segmento) {
+                errorGeom = `⚠ "${product.name}" tiene un diámetro externo (${diamExterno} m) que excede el segmento disponible (${segmento.toFixed(3)} m).`;
+                break;
+            }
+
+            sumaDiametros += diamExterno * qty;
+        }
+
+        // Suma total de diámetros excede el largo del camión
+        if (!errorGeom && sumaDiametros > largoCamion) {
+            errorGeom = `⚠ La suma de diámetros externos (${sumaDiametros.toFixed(2)} m) excede el largo de la tarima (${largoCamion} m).`;
+        }
+
+        if (errorGeom) {
+            $("productTableError").textContent = errorGeom;
+            $("productTableError").classList.remove("hidden");
+            valid = false;
         }
     }
 
@@ -940,9 +993,11 @@ async function savePlatform() {
 
         if (isCreateMode) {
             const res = await axios.post(api.platforms.create(), data);
+            unityInstance.SendMessage("DynamicCoilSystem", "SetApiUrl", api.unity.platform(res.data.platform.id))
             return res.data;
         } else {
             const res = await axios.put(api.platforms.update(id), data);
+            unityInstance.SendMessage("DynamicCoilSystem", "SetApiUrl", api.unity.platform(id))
             return res.data;
         }
     }
@@ -996,9 +1051,11 @@ async function savePlatform() {
 
     if (isCreateMode) {
         const res = await axios.post(api.platforms.create(), data);
+        unityInstance.SendMessage("DynamicCoilSystem", "SetApiUrl", api.unity.platform(res.data.platform.id))
         return res.data;
     } else {
         const res = await axios.put(api.platforms.update(id), data);
+        unityInstance.SendMessage("DynamicCoilSystem", "SetApiUrl", api.unity.platform(id))
         return res.data;
     }
 }
@@ -1060,10 +1117,14 @@ actionBtn2.addEventListener("click", () => {
 });
 
 confirmBtn.addEventListener("click", async () => {
-    const shouldDeleteRequest = !isPresetSection && platformRequest?.id;
+    const isPreset = platform.type === platformType.preset;
 
-    if (shouldDeleteRequest) {
-        await axios.delete(api.platform_request.delete(platformRequest.id));
+    if (isPreset) {
+        if (isPresetSection) {
+            await deletePlatform();
+        } else {
+            await axios.delete(api.platform_request.delete(platformRequest.id));
+        }
     } else {
         await deletePlatform();
     }
@@ -1086,6 +1147,48 @@ confirmRejectBtn.addEventListener("click", async () => {
     rejectModal.classList.add("hidden");
     await rejectPlatform(comments);
     window.location.href = `/frontend/src/shared/list_view.html?type=commercial`;
+});
+
+// ── Notificar Unity en tiempo real ───────────────────────────────────────────
+function notificarUnity() {
+    if (typeof unityInstance === "undefined") return;
+
+    const anchoCamion = Number($("spec-width-edit")?.value  || platform.width  || 0);
+    const largoCamion = Number($("spec-length-edit")?.value || platform.length || 0);
+
+    if (!anchoCamion || !largoCamion) return;
+
+    // Agrupar productos iguales para el formato de Unity
+    const gruposMap = new Map();
+    currentProductLoad.forEach(row => {
+        const product = products.find(p => p.id == row.id_product);
+        if (!product || !row.quantity || row.quantity <= 0) return;
+
+        const key = row.id_product;
+        if (gruposMap.has(key)) {
+            gruposMap.get(key).numeroPiezas += row.quantity;
+        } else {
+            gruposMap.set(key, {
+                numeroPiezas:    row.quantity,
+                diametroInterno: Number(product.internal_diameter),
+                diametroExterno: Number(product.external_diameter),
+                anchoRollo:      Number(product.width),
+                _partNumber:     product.part_number ?? "",
+            });
+        }
+    });
+
+    const payload = JSON.stringify({
+        anchoCamion,
+        largoCamion,
+        grupos: [...gruposMap.values()],
+    });
+
+    unityInstance.SendMessage("PalletRoot", "LoadJson", payload);
+}
+
+["spec-width-edit", "spec-length-edit"].forEach(fid => {
+    $(fid)?.addEventListener("input", notificarUnity);
 });
 
 // ── Predicción ───────────────────────────────────────────────────────────────
@@ -1331,6 +1434,7 @@ renderCampos();
 renderProductTable();
 renderSpecs();
 renderFollowUps();
+notificarUnity();
 
 // ── Ocultar tab de predicción para rol customer ──────────────────────────────
 if (context.role === roles.customer) {

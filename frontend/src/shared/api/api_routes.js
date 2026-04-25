@@ -78,5 +78,9 @@ export const api = {
     config: {
         get: () => `${BASE_URL}/config`
     },
-    prediction: () => `${BASE_URL}/prediction/recommendation`
+    prediction: () => `${BASE_URL}/prediction/recommendation`,
+    unity: {
+        platform: (id) => `${BASE_URL}/platforms/${id}/visualization`,
+        product: (id) => `${BASE_URL}/products/${id}/visualization`,
+    }
 }

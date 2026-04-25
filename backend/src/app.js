@@ -15,6 +15,7 @@ import followUpsRoutes from "./modules/followups/followUp.routes.js"
 import configRoutes from "./modules/consignatarios/config.routes.js";
 import predictionRoutes from "./modules/prediction/prediction.routes.js";
 import usuariosRoutes from "./modules/usuarios/usuarios.routes.js"
+import visualizarionRoutes from "./modules/plaftforms/unity.platform.api.js"
 
 const app = express();
 
@@ -34,5 +35,6 @@ app.use('/api/follow_ups', followUpsRoutes);
 app.use("/api", configRoutes);
 app.use("/api/prediction", predictionRoutes);
 app.use('/api/users', usuariosRoutes);
+app.use('/api', visualizarionRoutes);
 
 export default app;

@@ -183,9 +183,13 @@ async function saveProduct() {
         external_diameter: Number($("productDiametroExt-edit").value),
     };
 
+    const fullUrl = api.unity.product(id);
+
     if (createMode) {
         try {
             const res = await axios.post(api.products.create(), newProduct);
+            const fullUrl = api.unity.product(res.data.id);
+            unityInstance.SendMessage("ProductRoot", "SetApiUrl", fullUrl);
             return res.data;
         } catch (err) {
             console.error(err.response?.data || err.message);
@@ -193,12 +197,12 @@ async function saveProduct() {
     } else {
         try {
             const res = await axios.put(api.products.update(id), newProduct);
+            unityInstance.SendMessage("ProductRoot", "SetApiUrl", fullUrl);
             return res.data;
         } catch (err) {
             console.error(err.response?.data || err.message);
         }
     }
-    return newProduct;
 }
 
 // --- Eliminar ---

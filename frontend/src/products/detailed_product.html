@@ -101,10 +101,10 @@
                     </div>
 
                     <!-- Grid principal -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
 
                         <!-- Columna izquierda: info general + specs -->
-                        <div class="lg:col-span-2 flex flex-col gap-6">
+                        <div class="flex flex-col gap-6">
 
                             <!-- Info General -->
                             <div
@@ -240,7 +240,7 @@
                                         <div class="editable space-y-2 col-span-2">
                                             <label
                                                 class="text-xs font-bold text-slate-500 uppercase tracking-tight">Diámetro
-                                                Interno *</label>
+                                                Int. *</label>
                                             <div class="relative">
                                                 <span id="productDiametroInt"
                                                     class="view w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm block"></span>
@@ -248,7 +248,7 @@
                                                     class="edit hidden w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm focus:ring-primary focus:border-primary"
                                                     type="number" step="0.01" />
                                                 <span
-                                                    class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">CM</span>
+                                                    class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">M</span>
                                             </div>
                                         </div>
 
@@ -256,7 +256,7 @@
                                         <div class="editable space-y-2">
                                             <label
                                                 class="text-xs font-bold text-slate-500 uppercase tracking-tight">Diámetro
-                                                Externo *</label>
+                                                Ext. *</label>
                                             <div class="relative">
                                                 <span id="productDiametroExt"
                                                     class="view w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm block"></span>
@@ -264,7 +264,7 @@
                                                     class="edit hidden w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm focus:ring-primary focus:border-primary"
                                                     type="number" step="0.01" />
                                                 <span
-                                                    class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">CM</span>
+                                                    class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">M</span>
                                             </div>
                                         </div>
 
@@ -286,45 +286,46 @@
                                 </h3>
                             </div>
                             <div class="w-full h-full bg-gray-100 flex items-center justify-center relative">
-                                <div class="absolute inset-0"
-                                    style="background-image: linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px); background-size: 15px 15px; opacity: 0.5;">
-                                </div>
-                                <div
-                                    class="relative w-32 h-40 transform rotate-x-6 rotate-z-6 transition-transform duration-500 group-hover:scale-105">
-                                    <div class="absolute bottom-0 w-full h-3 bg-[#8B4513] rounded-sm shadow-lg"></div>
-                                    <div
-                                        class="absolute bottom-3 left-0 w-full h-8 bg-gray-400 border border-gray-500 rounded-sm">
-                                    </div>
-                                    <div
-                                        class="absolute bottom-11 left-0 w-full h-8 bg-gray-400 border border-gray-500 rounded-sm">
-                                    </div>
-                                    <div
-                                        class="absolute bottom-20 left-0 w-full h-8 bg-gray-300 border border-gray-400 rounded-sm scale-[0.9]">
-                                    </div>
-                                    <div
-                                        class="absolute bottom-29 left-0 w-full h-8 bg-gray-300 border border-gray-400 rounded-sm scale-[0.9]">
-                                    </div>
-                                    <div
-                                        class="absolute inset-0 bg-primary/10 border-2 border-primary/30 rounded-lg pointer-events-none">
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-3 right-3 flex flex-col gap-1">
-                                    <button
-                                        class="p-1.5 bg-white rounded shadow hover:text-primary transition-colors border border-border-light">
-                                        <span class="material-symbols-outlined text-xs">zoom_in</span>
-                                    </button>
-                                    <button
-                                        class="p-1.5 bg-white rounded shadow hover:text-primary transition-colors border border-border-light">
-                                        <span class="material-symbols-outlined text-xs">zoom_out</span>
-                                    </button>
-                                    <button
-                                        class="p-1.5 bg-white rounded shadow hover:text-primary transition-colors border border-border-light">
-                                        <span class="material-symbols-outlined text-xs">fullscreen</span>
-                                    </button>
-                                </div>
+                                <canvas id="unity-container" style="width: 100%; height: 100%;" tabindex="1"></canvas>
+
+                                <script src="/frontend/unity/Build/unity.loader.js"></script>
+
+                                <script>
+                                    createUnityInstance(document.querySelector("#unity-container"), {
+                                    dataUrl: "/frontend/unity/Build/unity.data",
+                                    frameworkUrl: "/frontend/unity/Build/unity.framework.js",
+                                    codeUrl: "/frontend/unity/Build/unity.wasm",
+                                    }).then((unityInstance) => {
+                                        window.unityInstance = unityInstance;
+                                        unityInstance.Module.keyboardListeningElement = document.getElementById("unity-container");
+                                        unityInstance.SendMessage("SceneManager", "LoadProductScene");
+                                        window.onUnityReady = function () {
+                                            const params = new URLSearchParams(window.location.search);
+                                            const id = params.get("id");
+
+                                            const fullUrl = `http://localhost:3000/api/products/${id}/visualization`;
+
+                                            unityInstance.SendMessage("ProductRoot", "SetApiUrl", fullUrl);
+                                        };
+                                    });
+
+                                    const canvas = document.getElementById("unity-container");
+
+                                    canvas.addEventListener("click", () => {
+                                        canvas.focus();
+                                    });
+                                </script>
+                                
+                            </div>
+                            <div
+                                class="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-border-light">
+                                <h3
+                                    class="text-[10px] font-display font-bold text-text-primary-light uppercase flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-primary text-xs">control_camera</span>
+                                    Click izquierdo: Seleccionar | Click derecho: rotar cámara | Rueda raton: zoom
+                                </h3>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </main>
