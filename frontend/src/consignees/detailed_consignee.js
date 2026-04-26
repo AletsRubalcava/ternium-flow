@@ -249,6 +249,8 @@ async function toggleEdit(active) {
     statusView.classList.toggle("hidden", active);
     statusSelect.classList.toggle("hidden", !active);
 
+    $("dispatchActions").classList.toggle("hidden", !active);
+
     // Campos de especificaciones
     specFields.forEach(({ view, edit, key }) => {
         const viewEl = $(view);
@@ -380,10 +382,87 @@ confirmBtn.addEventListener("click", async () => {
     window.location.href = `/frontend/src/shared/list_view.html?type=consignees&id=${customer.id}`;
 });
 
+// --- Dispatch CRUD ---
+function refreshPackagingSelect() {
+    const currentVal = $("packaging-edit").value;
+    $("packaging-edit").innerHTML = dispatches.data.map(d =>
+        `<option value="${d.id}">${d.name}</option>`
+    ).join("");
+    // Restaurar selección si sigue existiendo
+    if ([...$("packaging-edit").options].some(o => o.value == currentVal)) {
+        $("packaging-edit").value = currentVal;
+    }
+}
+
+function populateDeleteDispatchSelect() {
+    $("deleteDispatchSelect").innerHTML = dispatches.data.map(d =>
+        `<option value="${d.id}">${d.name}</option>`
+    ).join("");
+}
+
+// Mostrar/ocultar botones de dispatch según modo edición
+const origToggleEdit = toggleEdit;
+
+// Botones de apertura de modales
+$("openAddDispatch").addEventListener("click", () => {
+    $("newDispatchName").value = "";
+    $("newDispatchError").classList.add("hidden");
+    $("addDispatchModal").classList.remove("hidden");
+});
+
+$("openDeleteDispatch").addEventListener("click", () => {
+    populateDeleteDispatchSelect();
+    $("deleteDispatchModal").classList.remove("hidden");
+});
+
+// Modal Agregar
+$("cancelAddDispatch").addEventListener("click", () => $("addDispatchModal").classList.add("hidden"));
+
+$("confirmAddDispatch").addEventListener("click", async () => {
+    const name = $("newDispatchName").value.trim();
+    if (!name) {
+        $("newDispatchError").classList.remove("hidden");
+        return;
+    }
+    try {
+        const res = await axios.post(api.dispatch.create(), { name });
+        dispatches.data.push(res.data);
+        refreshPackagingSelect();
+        $("packaging-edit").value = res.data.id;
+        $("addDispatchModal").classList.add("hidden");
+    } catch (err) {
+        console.error(err);
+        showToast(["Error al agregar el embalaje."], "error");
+    }
+});
+
+// Modal Eliminar
+$("cancelDeleteDispatch").addEventListener("click", () => $("deleteDispatchModal").classList.add("hidden"));
+
+$("confirmDeleteDispatch").addEventListener("click", async () => {
+    const id = $("deleteDispatchSelect").value;
+    if (!id) return;
+    try {
+        await axios.delete(api.dispatch.delete(id));
+        dispatches.data = dispatches.data.filter(d => d.id != id);
+        refreshPackagingSelect();
+        $("deleteDispatchModal").classList.add("hidden");
+    } catch (err) {
+        console.error(err);
+        showToast(["Error al eliminar el embalaje."], "error");
+    }
+});
+
 // --- Init ---
 renderCampos();
 renderSpecs();
 renderMap();
+
+// Ocultar gestión de embalajes para clientes
+if (context.role === roles.customer) {
+    $("openAddDispatch")?.classList.add("hidden");
+    $("openDeleteDispatch")?.classList.add("hidden");
+}
 
 if (createMode) {
     editMode = true;

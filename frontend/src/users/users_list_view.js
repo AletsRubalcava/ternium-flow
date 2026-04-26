@@ -1,4 +1,5 @@
 import { api } from "../shared/api/api_routes.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const attributes = [
     "Nombre / Usuario",
@@ -26,6 +27,11 @@ export async function loadUsers(){
     document.getElementById("listViewThead").innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
+
+    if (users.length === 0) {
+        tableContainer.innerHTML = emptyWidget("No hay clientes");
+        return;
+    }
 
     document.getElementById("listViewBody").innerHTML = users.map(u => `
         <tr data-id="${u.id}"

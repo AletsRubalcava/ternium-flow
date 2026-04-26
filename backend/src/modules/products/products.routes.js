@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { createProductHandler, getAllProductsHandler, getProductByIdHandler, updateProductHandler, deleteProductHandler } from './products.controller.js';
+import { createProductHandler, getAllProductsHandler, getProductByIdHandler, updateProductHandler, deleteProductHandler, productIsInUseHandler } from './products.controller.js';
 import { verifyToken, authorize } from '../../middlewares/auth.js';
 
 const router = Router();
@@ -14,5 +14,7 @@ router.get('/:id', verifyToken, authorize('productos', 'read'), getProductByIdHa
 router.put('/:id', verifyToken, authorize('productos', 'update'), updateProductHandler);
 // Delete: only Administrador
 router.delete('/:id', verifyToken, authorize('productos', 'delete'), deleteProductHandler);
+
+router.get("/:id/in-use", verifyToken, authorize("productos", "read"), productIsInUseHandler);
 
 export default router;

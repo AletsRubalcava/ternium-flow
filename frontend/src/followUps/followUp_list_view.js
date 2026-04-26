@@ -1,5 +1,6 @@
 import { api } from "../shared/api/api_index.js";
 import { getAppContext, roles } from "../shared/app_context.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 import { timeAgo } from "../shared/utils/time_ago.js";
 
 const context = getAppContext();
@@ -80,6 +81,11 @@ export async function loadFolllowUps(context) {
         function statusBadge(value) {
             const s = statusMap[value] ?? { label: value, cls: "bg-gray-100 text-gray-700" };
             return `<span class="${s.cls} px-2 inline-flex text-xs font-semibold rounded-full">${s.label}</span>`;
+        }
+
+        if (filtered.length === 0) {
+            tableContainer.innerHTML = emptyWidget("Sin seguimientos");
+            return;
         }
 
         tbody.innerHTML = filtered.map(f => `

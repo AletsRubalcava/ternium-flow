@@ -1,4 +1,5 @@
 import products from "./products.model.js";
+import platform_items from "../platform_items/platform_items.model.js";
 
 export async function createProduct(data) {
     const product = await products.create({
@@ -71,4 +72,9 @@ export async function deleteProduct(id) {
     }
 
     await product.destroy();
+}
+
+export async function productIsInUse(id) {
+    const count = await platform_items.count({ where: { id_product: id } });
+    return count > 0;
 }

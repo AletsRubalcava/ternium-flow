@@ -1,4 +1,5 @@
 import { api } from "../shared/api/api_routes.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const attributes = ["Nombre", "Descripción", "Usos", "Estado"];
 
@@ -38,6 +39,11 @@ export async function loadPresets() {
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
+    
+    if (platforms.length === 0) {
+        tableContainer.innerHTML = emptyWidget("Sin preestablecidos");
+        return;
+    }
 
     tbody.innerHTML = platforms.map(p => {
         const uses = usesMap[p.id] || 0;

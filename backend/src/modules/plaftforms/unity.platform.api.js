@@ -12,6 +12,12 @@ import platform_items from "../platform_items/platform_items.model.js";
 const router = Router();
 
 router.get("/platforms/:id/visualization", async (req, res) => {
+    const { id } = req.params;
+
+    if (!id || id === "null") {
+        return res.status(400).json({ error: "INVALID_ID" });
+    }
+
     try {
         const platform = await platforms.findByPk(req.params.id);
 

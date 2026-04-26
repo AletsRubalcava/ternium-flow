@@ -1,4 +1,5 @@
 import { api } from "../shared/api/api_routes.js";
+import { emptyWidget } from "../shared/components/empty_widget.js";
 
 const attributes = [
     "ID",
@@ -35,13 +36,17 @@ export async function loadClientes(){
     const customers = response.data;
     const { data: contacts } = await axios.get(api.contacts.getAll());
 
-
     newButton.onclick = () => window.location.href = `/frontend/src/customers/detailed_customer.html?create=true`;
 
     //Writes the attributes (thead) into the table
     thead.innerHTML = attributes.map(a => `
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
+
+    if (customers.length === 0) {
+        tableContainer.innerHTML = emptyWidget("Sin clientes");
+        return;
+    }
 
     // Writes the custome data into the table
     tbody.innerHTML = customers.map(c => 
@@ -55,7 +60,7 @@ export async function loadClientes(){
         <td
             class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${c.rfc ?? "N/A"}</td>
         <td
-            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${contacts.find(co => co.id_customer === c.id) ? contacts.find(co => co.id_customer === c.id).name : "N/A"}</td>
+            class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary-light dark:text-text-secondary-dark">${contacts.find(co => co.id_customer === c.id) ? contacts.find(co => co.id_customer === c.id)?.name : "N/A"}</td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span
                 class=" ${c.status ? "bg-green-100 text-green-800": "bg-red-100 text-red-800"} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${c.status ? "Activo" : "Inactivo"}</span>

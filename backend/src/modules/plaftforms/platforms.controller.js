@@ -196,7 +196,7 @@ export async function createPlatformHandler(req, res) {
         return platformCreated;
     });
 
-        return res.status(201).json(createdPlatform);
+        return res.status(201).json({ platform: createdPlatform, items });
 
     } catch (error) {
         console.error(error);
@@ -218,6 +218,11 @@ export async function createPlatformHandler(req, res) {
 
 export async function updatePlatformHandler(req, res) {
     const { id } = req.params;
+
+    if (!id || id === "null" || id === "undefined") {
+        return res.status(400).json({ error: "INVALID_PLATFORM_ID" });
+    }
+
     const data = req.body;
     const { platform, items } = data;
 

@@ -482,6 +482,16 @@ function validateContact() {
         return false;
     }
 
+    // ── Validación de formato de email ──────────────────────────────────────
+    if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            contactErrorMsg.innerText = "El correo electrónico no tiene un formato válido.";
+            contactErrorMsg.classList.remove("hidden");
+            return false;
+        }
+    }
+
     return true;
 }
 

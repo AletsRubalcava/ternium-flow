@@ -27,7 +27,6 @@ export async function loadPlatforms() {
     const resPlatforms = await axios.get(api.platforms.getAll());
     const resPlatformRequests = await axios.get(api.platform_request.getAll());
 
-    // ── Filtrar requests según modo y rol ────────────────────────────────────
     const activeRequests = resPlatformRequests.data.filter(pr =>
         consignees.some(c => c.id === pr.id_consignee) &&
         (pr.status === platformRequestStatus.approved || pr.status === platformRequestStatus.pending)
@@ -41,11 +40,11 @@ export async function loadPlatforms() {
     const title     = document.getElementById("pageTitle");
     const search    = document.getElementById("search");
     const newButton = document.getElementById("newButton");
-    const thead     = document.getElementById("listViewThead");
-    const tbody     = document.getElementById("listViewBody");
+    let thead = document.getElementById("listViewThead");
+    let tbody = document.getElementById("listViewBody");
 
-    title.textContent    = "TARIMAS";
-    search.placeholder   = "Buscar Tarimas";
+    title.textContent  = "TARIMAS";
+    search.placeholder = "Buscar Tarimas";
 
     newButton.innerHTML = `
         <span class="material-icons text-lg group-hover:scale-110 transition-transform">add</span>
@@ -54,7 +53,6 @@ export async function loadPlatforms() {
     newButton.onclick = () => window.location.href =
         `/frontend/src/platforms/detailed_platform.html?create=true&idCus=${customer.id}&section=${navIds.customers}`;
 
-    // ── Toggle rechazadas ────────────────────────────────────────────────────
     let showRejected = false;
 
     const toggleBtn = document.createElement("button");
@@ -62,18 +60,38 @@ export async function loadPlatforms() {
     toggleBtn.innerHTML = `<span class="material-symbols-outlined text-sm">cancel</span> Ver Rechazadas`;
     newButton.insertAdjacentElement("beforebegin", toggleBtn);
 
-    // ── Render ───────────────────────────────────────────────────────────────
+    function restoreTable() {
+        const tableContainer = document.getElementById("tableContainer");
+        if (!tableContainer.querySelector("table")) {
+            tableContainer.innerHTML = `
+                <div class="w-full bg-white rounded-lg border">
+                    <table class="table-auto w-full">
+                        <thead class="bg-gray-100 top-0 z-10">
+                            <tr id="listViewThead"></tr>
+                        </thead>
+                        <tbody id="listViewBody" class="bg-white divide-y divide-border-light"></tbody>
+                    </table>
+                </div>`;
+            thead = document.getElementById("listViewThead");
+            tbody = document.getElementById("listViewBody");
+        }
+    }
+
     function renderTable() {
         const requests = showRejected ? rejectedRequests : activeRequests;
+
+        if (requests.length === 0) {
+            document.getElementById("tableContainer").innerHTML = emptyWidget(
+                showRejected ? "Sin tarimas rechazadas" : "Sin tarimas"
+            );
+            return;
+        }
+
+        restoreTable();
 
         thead.innerHTML = (showRejected ? attributesRejected : attributes).map(a => `
             <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
         `).join("");
-
-        if (requests.length === 0) {
-            tableContainer.innerHTML = emptyWidget(showRejected ? "Sin tarimas rechazadas" : "Sin tarimas");
-            return;
-        }
 
         tbody.innerHTML = requests.map(pr => {
             const platform  = resPlatforms.data.find(p => p.id === pr.id_platform);
@@ -83,18 +101,18 @@ export async function loadPlatforms() {
             const lastCol = showRejected
                 ? `<td class="px-6 py-4 text-sm text-red-600 dark:text-red-400 max-w-xs break-words whitespace-normal">
                     ${pr.comments ?? "—"}
-                </td>`
-                    : `<td class="px-6 py-4 whitespace-nowrap">
-                        <span class="${
-                            pr.status === platformRequestStatus.pending
-                                ? "bg-yellow-100 text-yellow-800"
-                                : platform.status
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                        } px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                            ${pr.status === platformRequestStatus.pending ? "Pendiente" : platform.status ? "Activo" : "Inactivo"}
-                        </span>
-                    </td>`;
+                   </td>`
+                : `<td class="px-6 py-4 whitespace-nowrap">
+                    <span class="${
+                        pr.status === platformRequestStatus.pending
+                            ? "bg-yellow-100 text-yellow-800"
+                            : platform.status
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                    } px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                        ${pr.status === platformRequestStatus.pending ? "Pendiente" : platform.status ? "Activo" : "Inactivo"}
+                    </span>
+                   </td>`;
 
             return `
                 <tr data-platform-id="${platform.id}" data-request-id="${pr.id}"
@@ -120,9 +138,9 @@ export async function loadPlatforms() {
         toggleBtn.innerHTML = showRejected
             ? `<span class="material-symbols-outlined text-sm">check_circle</span> Ver Activas`
             : `<span class="material-symbols-outlined text-sm">cancel</span> Ver Rechazadas`;
-        toggleBtn.classList.toggle("bg-red-50",        showRejected);
-        toggleBtn.classList.toggle("text-red-700",     showRejected);
-        toggleBtn.classList.toggle("border-red-200",   showRejected);
+        toggleBtn.classList.toggle("bg-red-50",      showRejected);
+        toggleBtn.classList.toggle("text-red-700",   showRejected);
+        toggleBtn.classList.toggle("border-red-200", showRejected);
         renderTable();
     });
 

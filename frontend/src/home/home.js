@@ -207,13 +207,15 @@ function renderPlatforms() {
             r.status === platformRequestStatus.approved &&
             clientConsigneeIds.has(r.id_consignee)
         );
-        const approvedPlatforms = platforms
-            .filter(p => approvedRequests.some(r => r.id_platform === p.id))
-            .map(p => {
-                const request = approvedRequests.find(r => r.id_platform === p.id);
-                const consignee = consignees.find(c => c.id === request?.id_consignee);
-                return { ...p, consigneeName: consignee?.name ?? "N/A" };
-            });
+        const approvedPlatforms = approvedRequests.map(r => {
+            const platform  = platforms.find(p => p.id === r.id_platform);
+            const consignee = consignees.find(c => c.id === r.id_consignee);
+            return {
+                ...platform,
+                requestId:     r.id,
+                consigneeName: consignee?.name ?? "N/A",
+            };
+        }).filter(p => p.id);
 
         tableDataContent.innerHTML = approvedPlatforms.map(p => platformTableRow(p)).join("");
 

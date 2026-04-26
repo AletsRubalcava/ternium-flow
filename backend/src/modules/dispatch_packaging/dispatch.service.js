@@ -6,6 +6,18 @@ export async function getAllDispatches() {
 }
 
 export async function getDispatchById(id) {
-    const customer = await dispatch_packaging.findByPk(id);
-    return customer;
+    const dispatch = await dispatch_packaging.findByPk(id);
+    return dispatch;
+}
+
+export async function createDispatch(name) {
+    const dispatch = await dispatch_packaging.create({ name });
+    return dispatch;
+}
+
+export async function deleteDispatch(id) {
+    const dispatch = await dispatch_packaging.findByPk(id);
+    if (!dispatch) return null;
+    await dispatch.destroy();
+    return dispatch;
 }

@@ -20,7 +20,7 @@ const cancelRejectBtn  = $("cancelReject");
 const confirmRejectBtn = $("confirmReject");
 
 const params       = new URLSearchParams(window.location.search);
-const id           = params.get("id");
+let id           = params.get("id");
 const requestId    = params.get("requestId");
 const createMode   = params.get("create") === "true";
 const type         = params.get("section");
@@ -354,7 +354,7 @@ function renderProductTable() {
     if (currentProductLoad.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="${editMode && !isPresetMode ? 5 : 4}" class="px-6 py-8 text-center text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="${editMode && !isPresetMode ? 8 : 7}" class="px-6 py-8 text-center text-sm text-text-secondary-light dark:text-text-secondary-dark">
                     Sin productos cargados.
                 </td>
             </tr>`;
@@ -401,10 +401,10 @@ function renderProductTable() {
 
     footer.innerHTML = `
         <tr>
-            <td colspan="${editMode && !isPresetMode ? 5 : 4}" class="px-6 py-3">
+            <td colspan="${editMode && !isPresetMode ? 8 : 7}" class="px-6 py-3">
                 ${editMode && !isPresetMode ? `
                 <button onclick="openAddProduct()"
-                    class="w-full py-2 border border-dashed border-border-light dark:border-border-dark rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
+                    class="w-full py-2 border border-dashed border-border-light rounded text-xs font-bold text-text-secondary-light hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-sm">add</span> AGREGAR PRODUCTO
                 </button>` : ""}
             </td>
@@ -475,7 +475,7 @@ function validarCampos() {
             valid = false;
         }
     } else {
-        ["platformName-edit", "platformDescription-edit"].forEach(fid => {
+        ["platformName-edit"].forEach(fid => {
             const el = $(fid);
             if (!el.value.trim()) { el.style.borderColor = "#f87171"; valid = false; }
         });
@@ -868,7 +868,8 @@ async function toggleEdit(active) {
             selectedPresetName = "";
 
             if (isCreateMode) {
-                platform     = newPlatform;
+                platform     = newPlatform.platform;
+                id = platform.id;
                 isCreateMode = false;
 
                 if (!isPresetSection) {
@@ -887,9 +888,8 @@ async function toggleEdit(active) {
                     actionBtn2.classList.remove("hidden");
                 }
 
-                window.history.replaceState({}, "", `?id=${newPlatform.id}&section=${type}`);
+                window.history.replaceState({}, "", `?id=${platform.id}&section=${type}`);
 
-                // ── Mostrar aviso de aprobación pendiente para clientes ──────────────
                 // ── Mostrar aviso de aprobación pendiente para clientes ──────────────
                 if (context.role === roles.customer) {
                     const pendingModal = $("pendingApprovalModal");
@@ -1028,7 +1028,9 @@ async function savePlatform() {
             throw err;
         }
 
-        return presetPlatforms.find(p => p.id == selectedPresetId);
+        // Retornar con estructura { platform } para que toggleEdit pueda hacer platform = newPlatform.platform
+        const preset = presetPlatforms.find(p => p.id == selectedPresetId);
+        return { platform: preset };
     }
 
     // ── Flujo normal (Custom create o edit) ──────────────────────────────────
@@ -1117,15 +1119,16 @@ actionBtn2.addEventListener("click", () => {
 });
 
 confirmBtn.addEventListener("click", async () => {
-    const isPreset = platform.type === platformType.preset;
+    // Usar string comparison ya que platform.type es string
+    const isPresetType = platform.type === "Preset";
 
-    if (isPreset) {
-        if (isPresetSection) {
-            await deletePlatform();
-        } else {
+    if (isPresetType && !isPresetSection) {
+        // En sección customer: solo borrar el request, NO la tarima preset
+        if (platformRequest?.id) {
             await axios.delete(api.platform_request.delete(platformRequest.id));
         }
     } else {
+        // En sección presets o tarimas Custom: borrar la tarima completa
         await deletePlatform();
     }
 
@@ -1135,7 +1138,6 @@ confirmBtn.addEventListener("click", async () => {
         window.location.href = `/frontend/src/shared/list_view.html?type=platforms&id=${customer?.id ?? context.customerId}`;
     }
 });
-
 cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
 cancelRejectBtn.addEventListener("click", () => {rejectModal.classList.add("hidden")});
 confirmRejectBtn.addEventListener("click", async () => {
@@ -1349,14 +1351,21 @@ async function renderFollowUps() {
                     .map(pr => String(pr.id))
             );
         }
+    } else if (isPresetSection) {
+        // Preset: todos los requests de esta tarima, sin importar consignatario
+        relevantRequestIds = new Set(
+            resPlatformRequests.data
+                .filter(pr => pr.id_platform == platform.id)
+                .map(pr => String(pr.id))
+        );
     } else {
         // Admin/operador: solo el request específico de esta vista (tarima + consignatario asignado)
         relevantRequestIds = platformRequest
-            ? new Set([platformRequest.id])
+            ? new Set([String(platformRequest.id)])
             : new Set(
                 resPlatformRequests.data
                     .filter(pr => pr.id_platform == platform.id)
-                    .map(pr => pr.id)
+                    .map(pr => String(pr.id))
             );
     }
 
@@ -1436,11 +1445,13 @@ renderSpecs();
 renderFollowUps();
 notificarUnity();
 
-// ── Ocultar tab de predicción para rol customer ──────────────────────────────
+// Mostrar tab de predicción solo para roles que NO son customer
 if (context.role === roles.customer) {
     document.querySelector("label[for='tab3']")?.classList.add("hidden");
     $("content3")?.classList.add("hidden");
     $("tab3")?.setAttribute("disabled", "true");
+} else {
+    document.querySelector("label[for='tab3']")?.classList.remove("hidden");
 }
 
 if (createMode) {
@@ -1469,5 +1480,15 @@ if (createMode) {
         actionBtn2.title = "No se puede eliminar: la solicitud está pendiente de aprobación";
 
         showToast(["Esta tarima tiene una solicitud pendiente y no puede modificarse."], "warning");
+    }
+
+    if (platformRequest.status === platformRequestStatus.rejected) {
+        editButton.disabled = true;
+        editButton.classList.add("opacity-50", "cursor-not-allowed");
+        editButton.title = "No se puede editar: la solicitud está pendiente de aprobación";
+
+        actionBtn2.disabled = true;
+        actionBtn2.classList.add("opacity-50", "cursor-not-allowed");
+        actionBtn2.title = "No se puede eliminar: la solicitud está pendiente de aprobación";
     }
 }

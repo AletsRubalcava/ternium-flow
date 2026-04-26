@@ -49,7 +49,8 @@ export const api = {
         getAll: () => `${BASE_URL}/products`,
         getByID: (id) => `${BASE_URL}/products/${id}`,
         update: (id) => `${BASE_URL}/products/${id}`,
-        delete: (id) => `${BASE_URL}/products/${id}`
+        delete: (id) => `${BASE_URL}/products/${id}`,
+        inUse: (id) => `${BASE_URL}/products/${id}/in-use`,
     },
     followUps: {
         create: () => `${BASE_URL}/follow_ups`,
@@ -73,7 +74,9 @@ export const api = {
         delete: (id) => `${BASE_URL}/contacts/${id}`,
     },
     dispatch: {
-        getAll: () => `${BASE_URL}/dispatch`
+        getAll: () => `${BASE_URL}/dispatch`,
+        create: () => `${BASE_URL}/dispatch`,
+        delete: (id) => `${BASE_URL}/dispatch/${id}`,
     },
     config: {
         get: () => `${BASE_URL}/config`

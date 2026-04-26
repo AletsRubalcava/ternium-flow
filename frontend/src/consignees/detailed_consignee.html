@@ -200,8 +200,22 @@
                                     <!-- Field 4 -->
                                     <div class="space-y-2">
                                         <label class="text-xs font-bold text-slate-500 uppercase tracking-tight">Embalaje Preferido *</label>
-                                        <div id="packaging-view" class="spec-view w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm"></div>
-                                        <select id="packaging-edit" class="spec-edit hidden w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 focus:ring-primary"></select>
+                                        <div class="flex gap-2 items-start">
+                                            <div class="flex-1">
+                                                <div id="packaging-view" class="spec-view w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 text-sm"></div>
+                                                <select id="packaging-edit" class="spec-edit hidden w-full bg-slate-50 border border-slate-200 rounded-lg py-3 px-4 font-bold text-slate-900 focus:ring-primary"></select>
+                                            </div>
+                                            <div id="dispatchActions" class="hidden flex-col gap-1.5 pt-0.5">
+                                                <button id="openAddDispatch" title="Agregar embalaje"
+                                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 border border-green-200 text-green-600 hover:bg-green-100 transition">
+                                                    <span class="material-symbols-outlined text-base">add</span>
+                                                </button>
+                                                <button id="openDeleteDispatch" title="Eliminar embalaje"
+                                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 border border-red-200 text-red-500 hover:bg-red-100 transition">
+                                                    <span class="material-symbols-outlined text-base">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- Field 5 -->
                                     <div class="space-y-2">
@@ -287,6 +301,38 @@
 
         </div>
     </div>
+
+    <!-- Modal: Agregar Embalaje -->
+    <div id="addDispatchModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+            <h2 class="text-lg font-semibold mb-1">Agregar Embalaje</h2>
+            <p class="text-sm text-gray-500 mb-4">Ingresa el nombre del nuevo tipo de embalaje.</p>
+            <input id="newDispatchName" type="text" placeholder="Nombre del embalaje" autocomplete="off"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-primary" />
+            <p id="newDispatchError" class="text-xs text-red-500 mb-4 hidden">El nombre no puede estar vacío.</p>
+            <div class="flex justify-end gap-3">
+                <button id="cancelAddDispatch" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-sm">Cancelar</button>
+                <button id="confirmAddDispatch" class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition text-sm font-bold">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Eliminar Embalaje -->
+    <div id="deleteDispatchModal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-xl">
+            <h2 class="text-lg font-semibold mb-1">Eliminar Embalaje</h2>
+            <p class="text-sm text-gray-500 mb-4">Selecciona el embalaje que deseas eliminar.</p>
+            <p class="text-sm text-gray-500 mb-4">Para eliminar un embalaje ningún consignatario ni tarima debe tenerlo activo</p>
+            <select id="deleteDispatchSelect"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-primary">
+            </select>
+            <div class="flex justify-end gap-3">
+                <button id="cancelDeleteDispatch" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-sm">Cancelar</button>
+                <button id="confirmDeleteDispatch" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition text-sm font-bold">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 <script type="module" src="./detailed_consignee.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

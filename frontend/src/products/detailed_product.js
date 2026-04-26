@@ -110,6 +110,16 @@ document.querySelectorAll(".edit").forEach(el =>
 
 // --- Toggle Edit ---
 async function toggleEdit(active) {
+
+    if (active && productInUse) {
+        showToast([
+            "Este producto está asignado a una o más tarimas activas.",
+            "No es posible modificarlo mientras esté en uso."
+        ], "warning");
+        editMode = false;
+        return;
+    }
+
     if (!active) {
         if (!validarCampos()) {
             editMode = true;
@@ -216,14 +226,64 @@ editButton.addEventListener("click", () => {
     toggleEdit(editMode);
 });
 
-deleteBtn.addEventListener("click",  () => modal.classList.remove("hidden"));
+deleteBtn.addEventListener("click", () => {
+    if (productInUse) {
+        showToast([
+            "Este producto está asignado a una o más tarimas activas.",
+            "No es posible eliminarlo mientras esté en uso."
+        ], "warning");
+        return;
+    }
+    modal.classList.remove("hidden");
+});
+
 cancelBtn.addEventListener("click",  () => modal.classList.add("hidden"));
 confirmBtn.addEventListener("click", () => {
     deleteProduct();
     window.location.href = `/frontend/src/shared/list_view.html?type=products`;
 });
 
+// --- Toast ---
+function showToast(items, type = "error") {
+    const existing = document.getElementById("specToast");
+    if (existing) existing.remove();
+
+    const isError = type === "error";
+    const color   = isError ? "red" : "yellow";
+    const icon    = isError ? "error" : "warning";
+    const title   = isError ? "Edición bloqueada" : "Advertencia";
+
+    const toast = document.createElement("div");
+    toast.id = "specToast";
+    toast.className = `fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white border border-${color}-200 rounded-xl shadow-lg p-4 flex gap-3 items-start`;
+    toast.innerHTML = `
+        <span class="material-symbols-outlined text-${color}-500 mt-0.5 shrink-0">${icon}</span>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-${color}-700 mb-1">${title}</p>
+            <ul class="space-y-0.5">
+                ${items.map(msg => `
+                    <li class="text-xs text-${color}-600 flex items-start gap-1">
+                        <span class="mt-0.5 shrink-0">•</span>${msg}
+                    </li>`).join("")}
+            </ul>
+        </div>
+        <button onclick="document.getElementById('specToast').remove()"
+            class="text-gray-400 hover:text-gray-600 shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-sm">close</span>
+        </button>`;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast?.remove(), 8000);
+}
+
 // --- Init ---
+// Verificar si el producto está en uso en alguna tarima
+let productInUse = false;
+if (!createMode && id) {
+    const { data } = await axios.get(api.products.inUse(id));
+    productInUse = data.inUse;
+}
+
 renderCampos();
 
 if (createMode) {

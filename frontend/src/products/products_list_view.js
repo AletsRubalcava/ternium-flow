@@ -61,6 +61,7 @@ export async function loadProductos() {
         `).join("");
     } else {
         tableContainer.innerHTML = emptyWidget("No hay productos")
+        return;
     }
 
     // 🔹 Click en fila (igual que consignee)

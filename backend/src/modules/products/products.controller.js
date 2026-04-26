@@ -1,4 +1,4 @@
-import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from "./products.service.js";
+import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, productIsInUse } from "./products.service.js";
 
 export async function createProductHandler(req, res) {
     const data = req.body;
@@ -243,5 +243,16 @@ export async function deleteProductHandler(req, res) {
         return res.status(500).json({ 
             error: "INTERNAL_SERVER_ERROR" 
         });
+    }
+}
+
+export async function productIsInUseHandler(req, res) {
+    const { id } = req.params;
+    try {
+        const inUse = await productIsInUse(id);
+        res.status(200).json({ inUse });
+    } catch (error) {
+        res.status(500).json({ message: "Error al verificar uso del producto" });
+        console.error(error);
     }
 }
