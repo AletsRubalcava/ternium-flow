@@ -83,13 +83,13 @@
         <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <div
-                    class="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark text-xs font-bold uppercase tracking-widest">
+                    class="flex items-center gap-2 text-text-secondary-light text-xs font-bold uppercase tracking-widest">
                     <a class="hover:text-primary" href="/frontend/src/shared/list_view.html?type=customers">Clientes</a>
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                     <span id="upperClientId"></span>
                 </div>
                 <h1
-                    class="text-4xl font-display font-bold text-text-primary-light dark:text-text-primary-dark tracking-tight uppercase">
+                    class="text-4xl font-display font-bold text-text-primary-light tracking-tight uppercase">
                     Panel de Cliente</h1>
             </div>
             <div class="flex space-x-3">
@@ -109,18 +109,18 @@
 
                 <!-- Información General -->
                 <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft p-6 border border-border-light dark:border-border-dark">
+                    class="bg-surface-light rounded-xl shadow-soft p-6 border border-border-light">
                     <div class="flex items-center gap-2 mb-6 border-b border-border-light pb-4">
                         <span class="material-symbols-outlined text-primary">info</span>
                         <h3
-                            class="text-lg font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                            class="text-lg font-display font-bold text-text-primary-light uppercase">
                             Información General</h3>
                     </div>
                     
                     <div class="editable grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <label
-                                class="block text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider mb-1">Clave
+                                class="block text-[10px] font-bold text-text-secondary-light uppercase tracking-wider mb-1">Clave
                                 de Cliente *</label>
                             <div id="idCustomer" class="view text-text-primary-light font-bold text-lg"></div>
                             <input id="idCustomer-edit" class="edit hidden field-input" autocomplete="o" name="none" />
@@ -158,13 +158,13 @@
 
                     <!-- Consignatarios -->
                     <div
-                        class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft flex flex-col border border-border-light dark:border-border-dark overflow-hidden">
+                        class="bg-surface-light rounded-xl shadow-soft flex flex-col border border-border-light overflow-hidden">
                         <div
-                            class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
+                            class="p-4 border-b border-border-light flex justify-between items-center bg-gray-50/50">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-xl">location_on</span>
                                 <h3
-                                    class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                                    class="text-md font-display font-bold text-text-primary-light uppercase">
                                     Consignatarios <span id="activeConsignees"
                                         class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
@@ -182,11 +182,11 @@
                     <div
                         class="bg-surface-light rounded-xl shadow-soft flex flex-col border border-border-light overflow-hidden">
                         <div
-                            class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-gray-50/50">
+                            class="p-4 border-b border-border-light flex justify-between items-center bg-gray-50/50">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-xl">inventory_2</span>
                                 <h3
-                                    class="text-md font-display font-bold text-text-primary-light dark:text-text-primary-dark uppercase">
+                                    class="text-md font-display font-bold text-text-primary-light uppercase">
                                     Tarimas Autorizadas <span id="activePlatforms"
                                         class="ml-2 text-xs font-normal text-text-secondary-light"></span></h3>
                             </div>
@@ -221,7 +221,7 @@
                     <div class="overflow-auto flex-1 custom-scrollbar">
                         <table class="w-full text-left">
                             <thead id="followUpsThead"
-                                class="bg-gray-50 dark:bg-gray-800/50 text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
+                                class="bg-gray-50 text-[10px] uppercase font-bold text-text-secondary-light">
                                 <tr>
                                     <th class="px-6 py-3">Referencia</th>
                                     <th class="px-6 py-3">Fecha</th>

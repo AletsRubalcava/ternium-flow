@@ -1,5 +1,6 @@
 import { api } from "../shared/api/api_routes.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = ["Nombre", "No. Parte", "Familia", "Peso Unitario", "Estado"];
 
@@ -64,11 +65,15 @@ export async function loadProductos() {
         return;
     }
 
-    // 🔹 Click en fila (igual que consignee)
+    // Click en fila (igual que consignee)
     document.querySelectorAll(".product-row").forEach(row => {
         row.addEventListener("click", () => {
             const id = row.dataset.id;
             window.location.href = `/frontend/src/products/detailed_product.html?id=${id}`;
         });
+    });
+
+    initSearch("search", ".product-row", {
+        noResultsMsg: "Sin productos encontrados",
     });
 }

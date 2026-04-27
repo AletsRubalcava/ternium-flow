@@ -1,5 +1,6 @@
 import { api } from "../shared/api/api_routes.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = [
     "ID",
@@ -74,5 +75,9 @@ export async function loadClientes(){
             const id = row.dataset.id;
             window.location.href = `/frontend/src/customers/detailed_customer.html?id=${id}`;
         });
+    });
+
+    initSearch("search", ".customer-row", {
+        noResultsMsg: "Sin clientes encontrados",
     });
 }

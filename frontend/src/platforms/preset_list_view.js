@@ -1,5 +1,6 @@
 import { api } from "../shared/api/api_routes.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = ["Nombre", "Descripción", "Usos", "Estado"];
 
@@ -13,7 +14,7 @@ export async function loadPresets() {
 
     const platforms = resPlatforms.data.filter(p => p.type === "Preset");
 
-    // 🧠 Mapa de usos (eficiente)
+    // Mapa de usos (eficiente)
     const usesMap = {};
     allRequests.forEach(r => {
         if (r.status === "Aceptada") {
@@ -71,5 +72,9 @@ export async function loadPresets() {
         row.addEventListener("click", () => {
             window.location.href = `/frontend/src/platforms/detailed_platform.html?id=${row.dataset.id}&section=presets`;
         });
+    });
+
+    initSearch("search", ".customer-row", {
+        noResultsMsg: "Sin paquetes encontrados",
     });
 }

@@ -1,6 +1,7 @@
 import { api } from "../shared/api/api_index.js";
 import { getAppContext, roles } from "../shared/app_context.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { initSearch } from "../shared/utils/search.js";
 import { timeAgo } from "../shared/utils/time_ago.js";
 
 const context = getAppContext();
@@ -121,6 +122,10 @@ export async function loadFolllowUps(context) {
                 const id = row.dataset.id;
                 window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${id}`;
             });
+        });
+        
+        initSearch("search", ".customer-row", {
+            noResultsMsg: "Sin seguimientos encontrados",
         });
 
     } catch (error) {

@@ -2,7 +2,8 @@ import {
     getAllPlatformRequests,
     updatePlatformRequest,
     createPlatformRequest,
-    getPlatformRequestByID
+    getPlatformRequestByID,
+    changePlatformRequestPreset
 } from "./platform_request.service.js";
 import { sequelize } from "../../config/database.js";
 import platforms from "../plaftforms/platforms.model.js";
@@ -163,5 +164,51 @@ export async function deletePlatformRequestHandler (req, res) {
         return res.status(500).json({ 
             error: "INTERNAL_SERVER_ERROR" 
         });
+    }
+}
+
+export async function changePlatformRequestPresetHandler(req, res) {
+    const { id } = req.params;
+    const { id_platform, id_consignee } = req.body;
+
+    if (!id_platform) {
+        return res.status(400).json({ error: "id_platform is required" });
+    }
+
+    try {
+        await sequelize.transaction(async (t) => {
+            const platform = await platforms.findByPk(id_platform);
+            if (!platform) throw new Error("PLATFORM_NOT_FOUND");
+
+            const platformItems = await platform_items.findAll({ where: { id_platform } });
+            const itemsForValidation = platformItems.map(i => ({
+                id_product: i.id_product,
+                quantity:   i.quantity,
+            }));
+
+            const violations = await validateAgainstConsignee(platform, itemsForValidation, id_consignee);
+            if (violations.length > 0) {
+                const err = new Error("CONSIGNEE_SPEC_VIOLATION");
+                err.violations = violations;
+                throw err;
+            }
+
+            await changePlatformRequestPreset(id, id_platform, t);
+        });
+
+        res.status(200).json({ message: "PLATFORM_REQUEST_UPDATED" });
+
+    } catch (error) {
+        if (error.message === "PLATFORM_REQUEST_NOT_FOUND") {
+            return res.status(404).json({ error: "PLATFORM_REQUEST_NOT_FOUND" });
+        }
+        if (error.message === "PLATFORM_NOT_FOUND") {
+            return res.status(404).json({ error: "PLATFORM_NOT_FOUND" });
+        }
+        if (error.message === "CONSIGNEE_SPEC_VIOLATION") {
+            return res.status(422).json({ error: "CONSIGNEE_SPEC_VIOLATION", violations: error.violations });
+        }
+        console.error(error);
+        res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }

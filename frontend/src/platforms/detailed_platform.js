@@ -467,6 +467,7 @@ window.updateQuantity = function (idx, val) {
 // ── Validación ───────────────────────────────────────────────────────────────
 function validarCampos() {
     let valid = true;
+    console.log("validarCampos", { isPresetMode, presetValue: $("platformPreset-edit").value, productLoadLength: currentProductLoad.length });
 
     if (isPresetMode) {
         const presetSel = $("platformPreset-edit");
@@ -702,6 +703,7 @@ function limpiarMarcasConsignatario() {
 
 // ── Toggle edit mode ─────────────────────────────────────────────────────────
 async function toggleEdit(active) {
+    console.log("toggleEdit called", { active, editMode, isPresetMode, isCreateMode, isPresetSection, selectedPresetName });
     if (!active) {
         if (!validarCampos()) {
             editMode = true;
@@ -819,9 +821,11 @@ async function toggleEdit(active) {
             // Si el tipo actual es Preset, bloquear campos hasta que cambie a Custom
             if (platform.type !== "Custom") {
                 isPresetMode = true;
+                selectedPresetName = platform.name;
                 setNonTypeFieldsDisabled(true);
                 $("platformName-edit").classList.add("hidden");
                 $("platformPreset-edit").classList.remove("hidden");
+                $("platformPreset-edit").value = platform.id;
             }
         }
     } else {
@@ -863,7 +867,6 @@ async function toggleEdit(active) {
     if (!active) {
         try {
             const newPlatform = await savePlatform();
-
             isPresetMode       = false;
             selectedPresetName = "";
 
@@ -907,12 +910,23 @@ async function toggleEdit(active) {
                     };
                 }
             } else {
-                Object.assign(platform, newPlatform);
+                const updated = newPlatform?.platform ?? newPlatform;
+                Object.assign(platform, updated);
+                id = platform.id;
+
+                currentProductLoad = productLoad
+                    .filter(pl => pl.id_platform == platform.id)
+                    .map(pl => ({ ...pl }));
+                calcSpecs();
+
+                renderCampos();
+                renderSpecs();
             }
 
             $("upperId").textContent = platform.name;
 
         } catch (err) {
+            console.error("Error caught in toggleEdit", err);
             revertToEditMode();
             return;
         }
@@ -971,6 +985,8 @@ async function savePlatform() {
         ? selectedPresetName
         : $("platformName-edit").value.trim();
 
+        console.log("savePlatform", { isPresetMode, isCreateMode, isPresetSection, name, selectedPresetName, presetSelectValue: $("platformPreset-edit").value });
+
     // Preset section: crear tarima directamente, sin request ni consignatario
     if (isPresetSection) {
         const name = $("platformName-edit").value.trim(); // siempre del input, ignorar isPresetMode
@@ -1002,7 +1018,6 @@ async function savePlatform() {
         }
     }
 
-
     // ── Si es createMode + preset, solo crear el request directamente ────────
     if (isCreateMode && isPresetMode) {
         const selectedPresetId = $("platformPreset-edit").value;
@@ -1029,6 +1044,42 @@ async function savePlatform() {
         }
 
         // Retornar con estructura { platform } para que toggleEdit pueda hacer platform = newPlatform.platform
+        const preset = presetPlatforms.find(p => p.id == selectedPresetId);
+        return { platform: preset };
+    }
+
+    // ── Si es editMode + preset, solo actualizar el request para apuntar al nuevo preset ──
+    if (!isCreateMode && isPresetMode && !isPresetSection) {
+        const selectedPresetId = $("platformPreset-edit").value;
+        if (!selectedPresetId) return;
+
+        const requestData = {
+            id_platform:  selectedPresetId,
+            id_consignee: consignee?.id ?? platformRequest?.id_consignee ?? null,
+            comments:     null,
+        };
+
+        try {
+            await axios.put(api.platform_request.update(platformRequest.id), requestData);
+            const preset = presetPlatforms.find(p => p.id == selectedPresetId);
+            return { platform: preset };
+        } catch (err) {
+            console.error("Error en editMode+preset PUT", err);
+            console.error("Response data:", err.response?.data);
+            console.error("Status:", err.response?.status);
+            if (err.response?.status === 409) {
+                $("productTableError").textContent = "⚠ Ya existe una solicitud pendiente para este preset y consignatario.";
+                $("productTableError").classList.remove("hidden");
+                revertToEditMode();
+            }
+            if (err.response?.status === 422) {
+                const violations = err.response.data.violations ?? [];
+                showToast(violations, "error");
+                revertToEditMode();
+            }
+            throw err;
+        }
+
         const preset = presetPlatforms.find(p => p.id == selectedPresetId);
         return { platform: preset };
     }
@@ -1482,7 +1533,7 @@ if (createMode) {
         showToast(["Esta tarima tiene una solicitud pendiente y no puede modificarse."], "warning");
     }
 
-    if (platformRequest.status === platformRequestStatus.rejected) {
+    if (!isPresetSection && platformRequest?.status === platformRequestStatus.rejected) {
         editButton.disabled = true;
         editButton.classList.add("opacity-50", "cursor-not-allowed");
         editButton.title = "No se puede editar: la solicitud está pendiente de aprobación";

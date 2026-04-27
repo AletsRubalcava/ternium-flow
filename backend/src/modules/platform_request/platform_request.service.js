@@ -50,3 +50,13 @@ export async function updatePlatformRequest(id, data, transaction) {
         updated_at: new Date(),
     }, { transaction });
 }
+
+export async function changePlatformRequestPreset(id, id_platform, transaction) {
+    const request = await platform_request.findByPk(id);
+    if (!request) throw new Error("PLATFORM_REQUEST_NOT_FOUND");
+
+    return await request.update({
+        id_platform,
+        updated_at: new Date(),
+    }, { transaction });
+}

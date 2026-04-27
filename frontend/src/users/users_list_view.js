@@ -1,5 +1,6 @@
 import { api } from "../shared/api/api_routes.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = [
     "Nombre / Usuario",
@@ -53,5 +54,9 @@ export async function loadUsers(){
             const id = row.dataset.id;
             window.location.href = `/frontend/src/users/detailed_user.html?id=${id}`;
         });
+    });
+
+    initSearch("search", ".row", {
+        noResultsMsg: "Sin usuarios encontrados",
     });
 }

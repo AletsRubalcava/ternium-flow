@@ -42,7 +42,8 @@ export const api = {
         getByID:    (id) => `${BASE_URL}/platform_request/${id}`,
         approve:    (id) => `${BASE_URL}/platform_request/${id}/accept`,
         reject:     (id) => `${BASE_URL}/platform_request/${id}/reject`,
-        delete: (id) => `${BASE_URL}/platform_request/${id}`
+        delete: (id) => `${BASE_URL}/platform_request/${id}`,
+        update: (id) => `${BASE_URL}/platform_request/${id}/preset`,
     },
     products: {
         create: () => `${BASE_URL}/products`,

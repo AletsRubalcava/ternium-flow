@@ -4,6 +4,7 @@ import { api } from "../shared/api/api_routes.js";
 import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
 import { emptyWidget } from "../shared/components/empty_widget.js"
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = ["Consignatario", "Cliente", "Dirección", "Estado"];
 
@@ -65,5 +66,9 @@ export async function loadConsignees() {
             const id = row.dataset.id;
             window.location.href = `/frontend/src/consignees/detailed_consignee.html?id=${id}`;
         });
+    });
+
+    initSearch("search", ".customer-row", {
+        noResultsMsg: "Sin consignatarios encontrados",
     });
 }

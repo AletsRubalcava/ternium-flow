@@ -124,8 +124,8 @@ async function syncContacts() {
     const toCreate = localContacts.filter(c => c._new);
     await Promise.all(toCreate.map(c => {
         const { _new, id, ...payload } = c;
-        console.log(payload)
-        return axios.post(api.contacts.getAll(), payload);
+        console.log("POST contact payload:", { ...payload, id_customer: customer.id }); // ← agrega esto
+        return axios.post(api.contacts.getAll(), { ...payload, id_customer: customer.id });
     }));
 
     // Actualizar los editados
@@ -188,6 +188,7 @@ async function toggleEdit(active) {
             const newCustomer = await saveNewCustomer();
             console.log(newCustomer);
             id = newCustomer.id;
+            customer = newCustomer;
             $("idCustomer").textContent = $("upperClientId").textContent = newCustomer.id_customer;
             deleteBtn.classList.remove("hidden");
             document.querySelectorAll(".viewAll").forEach(b => b.classList.remove("hidden"));

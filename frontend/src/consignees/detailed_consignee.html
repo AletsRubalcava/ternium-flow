@@ -77,7 +77,7 @@
     <title>Panel de Consignatario</title>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<body class="bg-background-light font-display text-slate-900 antialiased">
     <div class="relative flex h-screen w-full flex-col overflow-x-hidden">
         <div class="layout-container flex h-full grow flex-col">
             <!-- Top Navigation Bar -->
@@ -89,13 +89,13 @@
                     <div class="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
                         <div>
                             <div
-                                class="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark text-xs font-bold uppercase tracking-widest">
+                                class="flex items-center gap-2 text-text-secondary-light text-xs font-bold uppercase tracking-widest">
                                 <a id="returnListView" class="hover:text-primary">Consignatarios</a>
                                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                                 <span id="upperConsigneeId"></span>
                             </div>
                             <h1
-                                class="text-4xl font-display font-bold text-text-primary-light dark:text-text-primary-dark tracking-tight uppercase">
+                                class="text-4xl font-display font-bold text-text-primary-light tracking-tight uppercase">
                                 Panel de Consignatario</h1>
                         </div>
                         <div class="flex space-x-3">
@@ -115,18 +115,18 @@
                         <!-- Left Column: Client Info -->
                         <div class="lg:col-span-1 space-y-6 flex flex-col">
                             <div
-                                class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative">
+                                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
                                 <div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
                                 <h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Información
                                     del Consignatario</h3>
                                 <div class="space-y-5">
                                     <div class="flex flex-col">
                                         <label class="field-label">CLIENTE *</label>
-                                        <span id="consigneeCustomer" class="text-base font-bold text-slate-800 dark:text-slate-200"></span>
+                                        <span id="consigneeCustomer" class="text-base font-bold text-slate-800"></span>
                                     </div>
                                     <div class="editable flex flex-col">
                                         <label class="field-label">CONSIGNATARIO *</label>
-                                        <span id="consigneeName" class="view text-base font-bold text-slate-800 dark:text-slate-200"></span>
+                                        <span id="consigneeName" class="view text-base font-bold text-slate-800"></span>
                                         <input id="consigneeName-edit" class="edit hidden field-input" autocomplete="off" name="none"></input>
                                     </div>
                                     <div class="editable flex flex-col">

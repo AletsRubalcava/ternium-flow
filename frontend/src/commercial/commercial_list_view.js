@@ -1,5 +1,6 @@
 import { emptyWidget } from "../shared/components/empty_widget.js";
 import { api } from "../shared/api/api_routes.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes = ["Tarima", "Consignatario", "Fecha Solicitud", "Acción"];
 
@@ -31,14 +32,38 @@ export async function loadComercial() {
         <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
     `).join("");
 
-    // ── Render ───────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+
+    // ── Render ────────────────────────────────────────────────────────────────
     function renderRows(list) {
         if (list.length === 0) {
-            tableContainer.innerHTML = emptyWidget("Sin solicitudes pendientes")
+            tableContainer.innerHTML = emptyWidget(
+                platformRequests.length === 0
+                    ? "Sin solicitudes pendientes"
+                    : `Sin resultados para "${search.value}"`
+            );
             return;
         }
 
-        tbody.innerHTML = list.map(p => {
+        // Restaura la tabla si emptyWidget la reemplazó
+        if (!tableContainer.querySelector("table")) {
+            tableContainer.innerHTML = `
+                <div class="w-full bg-white rounded-lg border">
+                    <table class="table-auto w-full">
+                        <thead class="bg-gray-100 top-0 z-10">
+                            <tr id="listViewThead"></tr>
+                        </thead>
+                        <tbody id="listViewBody" class="bg-white divide-y divide-border-light"></tbody>
+                    </table>
+                </div>`;
+            // Re-render thead ya que el DOM fue reemplazado
+            document.getElementById("listViewThead").innerHTML = attributes.map(a => `
+                <th class="px-6 py-3 text-left text-xs font-bold text-text-secondary-light uppercase tracking-wider font-display" scope="col">${a}</th>
+            `).join("");
+        }
+
+        document.getElementById("listViewBody").innerHTML = list.map(p => {
             const platform  = platforms.find(pl => pl.id == p.id_platform);
             const consignee = consignees.find(c => c.id == p.id_consignee);
             const date      = new Date(p.created_at).toLocaleDateString("es-MX", {
@@ -81,9 +106,8 @@ export async function loadComercial() {
         bindEvents();
     }
 
-    // ── Bind eventos ─────────────────────────────────────────────────────────
+    // ── Bind eventos ──────────────────────────────────────────────────────────
     function bindEvents() {
-        // Click en fila → ir al detalle
         document.querySelectorAll(".customer-row").forEach(row => {
             row.addEventListener("click", () => {
                 const requestId  = row.dataset.id;
@@ -93,7 +117,6 @@ export async function loadComercial() {
             });
         });
 
-        // Aceptar
         document.querySelectorAll(".accept-btn").forEach(btn => {
             btn.addEventListener("click", async (e) => {
                 e.stopPropagation();
@@ -105,9 +128,8 @@ export async function loadComercial() {
 
                 try {
                     await axios.patch(api.platform_request.approve(requestId));
-                    row.remove();
-                    platformRequests = platformRequests.filter(pr => pr.id !== requestId);
-                    if (platformRequests.length === 0) renderRows([]);
+                    platformRequests = platformRequests.filter(pr => pr.id != requestId);
+                    renderRows(platformRequests);
                 } catch (err) {
                     console.error("Error al aceptar:", err);
                     btn.disabled    = false;
@@ -116,7 +138,6 @@ export async function loadComercial() {
             });
         });
 
-        // Rechazar → abrir modal
         document.querySelectorAll(".reject-btn").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -129,11 +150,9 @@ export async function loadComercial() {
         });
     }
 
-    // ── Modal de rechazo ─────────────────────────────────────────────────────
+    // ── Modal de rechazo ──────────────────────────────────────────────────────
     let pendingRejectId  = null;
     let pendingRejectRow = null;
-
-    const $ = id => document.getElementById(id);
 
     $("cancelReject").addEventListener("click", () => {
         $("rejectModal").classList.add("hidden");
@@ -157,9 +176,8 @@ export async function loadComercial() {
                 api.platform_request.reject(pendingRejectId),
                 { comments }
             );
-            pendingRejectRow?.remove();
-            platformRequests = platformRequests.filter(pr => pr.id !== pendingRejectId);
-            if (platformRequests.length === 0) renderRows([]);
+            platformRequests = platformRequests.filter(pr => pr.id != pendingRejectId);
+            renderRows(platformRequests);
         } catch (err) {
             console.error("Error al rechazar:", err);
         } finally {
@@ -171,20 +189,10 @@ export async function loadComercial() {
         }
     });
 
-    // ── Search ───────────────────────────────────────────────────────────────
-    search.addEventListener("input", () => {
-        const q = search.value.toLowerCase();
-        const filtered = platformRequests.filter(p => {
-            const platform  = platforms.find(pl => pl.id == p.id_platform);
-            const consignee = consignees.find(c => c.id == p.id_consignee);
-            return (
-                platform?.name?.toLowerCase().includes(q) ||
-                consignee?.name?.toLowerCase().includes(q)
-            );
-        });
-        renderRows(filtered);
+    initSearch("search", ".customer-row", {
+        noResultsMsg: "Sin solicitudes encontradas",
     });
 
-    // ── Init ─────────────────────────────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────────
     renderRows(platformRequests);
 }

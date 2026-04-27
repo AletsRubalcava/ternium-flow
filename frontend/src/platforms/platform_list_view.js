@@ -5,6 +5,7 @@ import { setActiveNav } from "../shared/utils/nav.js";
 import { navIds } from "../../../shared/navigation.js";
 import { emptyWidget } from "../shared/components/empty_widget.js";
 import { platformRequestStatus } from "../shared/api/api_platform_request_constants.js";
+import { initSearch } from "../shared/utils/search.js";
 
 const attributes         = ["Nombre", "Cliente", "Consignatario", "Estado"];
 const attributesRejected = ["Nombre", "Cliente", "Consignatario", "Motivo de Rechazo"];
@@ -132,6 +133,10 @@ export async function loadPlatforms() {
             });
         });
     }
+
+    initSearch("search", ".customer-row", {
+        noResultsMsg: "Sin tarimas encontradas",
+    });
 
     toggleBtn.addEventListener("click", () => {
         showRejected = !showRejected;
