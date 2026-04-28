@@ -4,9 +4,6 @@
 import { Router } from "express";
 import platforms      from "./platforms.model.js";
 import products       from "../products/products.model.js";
-// ↓ CRÍTICO: aunque no se use directamente, este import registra
-//   las asociaciones belongsToMany en ambos modelos.
-//   Sin él, platform.loaded_products no existe.
 import platform_items from "../platform_items/platform_items.model.js";
 
 const router = Router();

@@ -286,11 +286,6 @@ async function actualizarUsuario() {
     }
 }
 
-// ── Render Historial ──────────────────────────────────────────────────────────
-function renderHistorial() {
-    $("activityBody").innerHTML = "";
-}
-
 // ── Eliminar usuario (DELETE) ─────────────────────────────────────────────────
 async function eliminarUsuario() {
     try {
@@ -403,7 +398,6 @@ confirmSavedPassword.addEventListener("click", () => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderCampos();
-renderHistorial();
 
 if (createMode) {
     editMode = true;

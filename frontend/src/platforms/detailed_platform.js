@@ -157,6 +157,7 @@ $("platformPreset-edit").addEventListener("change", () => {
     calcSpecs();
     renderProductTable();
     renderSpecs();
+    notificarUnity();
 });
 
 // ── Customer / Consignee selects (solo createMode) ───────────────────────────
@@ -712,8 +713,17 @@ async function toggleEdit(active) {
             return;
         }
 
-        platform.name        = $("platformName-edit").value;
-        platform.description = $("platformDescription-edit").value;
+        if (isPresetMode && !isPresetSection) {
+            platform.name        = selectedPresetName;
+            const selectedPresetId = $("platformPreset-edit").value;
+            const preset = presetPlatforms.find(p => p.id == selectedPresetId);
+            platform.description = preset?.description ?? "";
+        } else {
+            platform.name        = $("platformName-edit").value;
+            platform.description = $("platformDescription-edit").value;
+        }
+
+        // Solo estas líneas después del if/else, sin repetir name ni description:
         platform.width       = Number($("spec-width-edit").value);
         platform.height      = Number($("spec-height-edit").value);
         platform.length      = Number($("spec-length-edit").value);
@@ -1386,16 +1396,28 @@ async function renderFollowUps() {
     let relevantRequestIds;
 
     if (context.role === roles.customer) {
+        const clientConsigneeIds = new Set(
+            allConsignees
+                .filter(c => c.id_customer == context.customerId)
+                .map(c => c.id)
+        );
+
         if (requestId) {
-            // Si viene requestId en URL, usar solo ese
-            relevantRequestIds = new Set([String(requestId)]);
-        } else {
-            // Fallback: todos los requests de los consignatarios del customer para esta tarima
-            const clientConsigneeIds = new Set(
-                allConsignees
-                    .filter(c => c.id_customer == context.customerId)
-                    .map(c => c.id)
+            // Usar el requestId para identificar el consignatario,
+            // luego traer todos los requests de esa tarima+consignatario
+            const targetRequest = resPlatformRequests.data.find(pr => pr.id == requestId);
+            const targetConsigneeId = targetRequest?.id_consignee;
+
+            relevantRequestIds = new Set(
+                resPlatformRequests.data
+                    .filter(pr =>
+                        pr.id_platform == platform.id &&
+                        pr.id_consignee == targetConsigneeId &&
+                        clientConsigneeIds.has(pr.id_consignee)
+                    )
+                    .map(pr => String(pr.id))
             );
+        } else {
             relevantRequestIds = new Set(
                 resPlatformRequests.data
                     .filter(pr => pr.id_platform == platform.id && clientConsigneeIds.has(pr.id_consignee))
@@ -1410,14 +1432,21 @@ async function renderFollowUps() {
                 .map(pr => String(pr.id))
         );
     } else {
-        // Admin/operador: solo el request específico de esta vista (tarima + consignatario asignado)
-        relevantRequestIds = platformRequest
-            ? new Set([String(platformRequest.id)])
-            : new Set(
+        // Admin en section customers: todos los requests de esta tarima para el consignatario actual
+        if (platformRequest) {
+            const targetConsigneeId = platformRequest.id_consignee;
+            relevantRequestIds = new Set(
+                resPlatformRequests.data
+                    .filter(pr => pr.id_platform == platform.id && pr.id_consignee == targetConsigneeId)
+                    .map(pr => String(pr.id))
+            );
+        } else {
+            relevantRequestIds = new Set(
                 resPlatformRequests.data
                     .filter(pr => pr.id_platform == platform.id)
                     .map(pr => String(pr.id))
             );
+        }
     }
 
     const filtered = followUps

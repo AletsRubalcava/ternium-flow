@@ -91,6 +91,7 @@ export async function loadFolllowUps(context) {
 
         tbody.innerHTML = filtered.map(f => `
             <tr data-id="${f.id}"
+                data-platform-id="${f.id_platform ?? requestMap.get(f.id_request)?.id_platform ?? ""}"
                 class="customer-row bg-gray-50/50 hover:bg-gray-100 transition-colors">
 
                 <td class="px-6 py-4 text-sm font-medium">
@@ -120,7 +121,8 @@ export async function loadFolllowUps(context) {
         document.querySelectorAll(".customer-row").forEach(row => {
             row.addEventListener("click", () => {
                 const id = row.dataset.id;
-                window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${id}`;
+                const idPlat = row.dataset.platformId;
+                window.location.href = `/frontend/src/followUps/detailed_followUp.html?id=${id}&idPlat=${idPlat}`;
             });
         });
         
